@@ -2,6 +2,7 @@ from django.conf import settings
 import asyncio
 import requests
 import json
+import asyncio
 
 BASE_URL = "https://open.api.nexon.com/maplestory/v1"
 NEXON_API_KEY = settings.NEXON_API_KEY
@@ -58,10 +59,16 @@ async def get_character_data(character_name, date=None):
     }
 
 
+
 # 템플릿에 넘겨주는 views 함수 작성
 
 async def chracter_info_view(request, character_name):
-    character_name = request.GET['name']
+    character_name = request.GET['name'] # 템플릿에서 캐릭터 이름 받아오기
+    context = await get_character_data(character_name)
+
+
+
+
 
 
 
