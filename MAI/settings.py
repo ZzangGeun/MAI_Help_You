@@ -3,6 +3,7 @@ from decouple import config
 import os
 
 NEXON_API_KEY = config('NEXON_API_KEY')  # .env 파일에서 API 키를 불러옴
+OPENAI_API_KEY = config('OPENAI_API_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
