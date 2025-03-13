@@ -5,6 +5,6 @@ app = FastAPI()
 
 app.include_router(router)
 
-@app.get("/")
-def root():
-    return {"message":'FastAPI 서버 실행 중'}
+@app.get("/api/fastapi/ask")
+async def ask_question(question: str):
+    return {"response": f"{question}에 대한 답변입니다."}
