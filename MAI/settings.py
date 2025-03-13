@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "main_page",
     "character_info",
+    "chatbot",
 ]
 
 MIDDLEWARE = [
