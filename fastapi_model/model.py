@@ -1,6 +1,6 @@
 from langchain_community.chat_models import ChatOllama
 import numpy as np
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 import os
 from langchain_core.prompts import ChatPromptTemplate
