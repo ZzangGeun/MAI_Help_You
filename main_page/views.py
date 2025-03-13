@@ -14,3 +14,6 @@ async def main_page(request):
     }
     
     return render(request, 'main_page/main_page.html', context)
+
+async def character_info_view(request):
+    return render(request, "character_info/character_info.html")
