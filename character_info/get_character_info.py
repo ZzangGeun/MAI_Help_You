@@ -42,8 +42,6 @@ async def get_character_data(character_name, date=None):
     vmatrix_info = await get_api_data("/character/vmatrix", params)
     hexamatrix_info = await get_api_data("/character/hexamatrix", params)
 
-    print(basic_info)
-
 
     return {
         "basic_info": basic_info,
@@ -58,123 +56,6 @@ async def get_character_data(character_name, date=None):
         "vmatrix_info": vmatrix_info,
     }
 
-
-
-# 템플릿에 넘겨주는 views 함수 작성
-
-async def chracter_info_view(request, character_name):
-    character_name = request.GET['name'] # 템플릿에서 캐릭터 이름 받아오기
-    context = await get_character_data(character_name)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 위에서 가져온 정보에서 필요한 정보만 추출하는 함수 작성
-
-
-
-
-
-
-
-
-
-#basic_info는 json 파일 형식
-async def extract_basic_info(basic_info):
-    """
-    {
-        "date": "2023-12-21T00:00+09:00",
-        "character_name": "string",
-        "world_name": "string",
-        "character_gender": "string",
-        "character_class": "string",
-        "character_class_level": "string",
-        "character_level": 0,
-        "character_exp": 0,
-        "character_exp_rate": "string",
-        "character_guild_name": "string",
-        "character_image": "string",
-        "character_date_create": "2023-12-21T00:00+09:00",
-        "access_flag": "string",
-        "liberation_quest_clear_flag": "string"
-    }
-    예시 문서 사용
-    """
-
-    #코루틴 실행하여 결과 저장
-
-    
-    # character_name = basic_info['character_name']
-    # character_class = basic_info['character_class']
-    # character_level = basic_info['character_level']
-    # character_guild_name = basic_info['character_guild_name']
-    # character_image = basic_info['character_image']  
-
-    #딕셔너리로 저장
-
-
-
-    basic_info = {
-        "character_name" : basic_info.get('character_name'),
-        "character_class" : basic_info.get('character_class'),
-        "character_level" : basic_info.get('character_level'),
-        "character_guild_name" : basic_info.get('character_guild_name',[]),
-        "character_image" : basic_info.get('character_image'),
-    }
-
-    print(basic_info)
-
-    return basic_info
-
-
-asyncio.run(extract_basic_info('무당햄스터'))
 
 
 
