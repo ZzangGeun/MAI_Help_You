@@ -1,14 +1,110 @@
-<!-- main_page.html -->
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>Character Info Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ character_name }}의 캐릭터 정보</title>
 </head>
 <body>
-    <form method ="get">
-        <input type="text" placeholder="Enter name" />
+    <h1>{{ character_name }}의 캐릭터 정보</h1>
 
-    </form>
+    {% if character_name %}
+    <section>
+        <h2>기본 정보</h2>
+        <ul>
+            <li><strong>캐릭터 이름:</strong> {{ basic_info.character_name }}</li>
+            <li><strong>레벨:</strong> {{ basic_info.character_level }}</li>
+            <li><strong>직업:</strong> {{ basic_info.class }}</li>
+            <li><strong>길드:</strong> {{ basic_info.guild }}</li>
+            <li><strong>서버:</strong> {{ basic_info.server }}</li>
+        </ul>
+    </section>
 
+    <section>
+        <h2>스탯 정보</h2>
+        <ul>
+            <li><strong>힘:</strong> {{ stat_info.strength }}</li>
+            <li><strong>민첩:</strong> {{ stat_info.dexterity }}</li>
+            <li><strong>지능:</strong> {{ stat_info.intelligence }}</li>
+            <li><strong>운:</strong> {{ stat_info.luck }}</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>아이템 정보</h2>
+        <ul>
+            {% for item in item_info %}
+                <li>{{ item.name }} - {{ item.type }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>능력 정보</h2>
+        <ul>
+            {% for ability in ability_info %}
+                <li>{{ ability.name }}: {{ ability.description }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>링크 스킬 정보</h2>
+        <ul>
+            {% for link_skill in link_skill_info %}
+                <li>{{ link_skill.name }} - 효과: {{ link_skill.effect }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>V 매트릭스</h2>
+        <ul>
+            {% for vmatrix in vmatrix_info %}
+                <li>{{ vmatrix.name }} - {{ vmatrix.effect }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>상징 정보</h2>
+        <ul>
+            {% for symbol in symbol_info %}
+                <li>{{ symbol.name }} - 효과: {{ symbol.effect }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>하이퍼 스탯</h2>
+        <ul>
+            <li><strong>힘:</strong> {{ hyper_stat_info.strength }}</li>
+            <li><strong>민첩:</strong> {{ hyper_stat_info.dexterity }}</li>
+            <li><strong>지능:</strong> {{ hyper_stat_info.intelligence }}</li>
+            <li><strong>운:</strong> {{ hyper_stat_info.luck }}</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>세트 효과</h2>
+        <ul>
+            {% for set_effect in set_effect_info %}
+                <li>{{ set_effect.name }} - 효과: {{ set_effect.effect }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>헥사 매트릭스</h2>
+        <ul>
+            {% for hexamatrix in hexamatrix_info %}
+                <li>{{ hexamatrix.name }} - 효과: {{ hexamatrix.effect }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    {% else %}
+    <p>캐릭터 정보가 없습니다.</p>
+    {% endif %}
 </body>
 </html>

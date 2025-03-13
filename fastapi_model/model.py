@@ -26,7 +26,7 @@ def get_embedding(texts):
 chat = ChatOllama(model="llama3")
 
 chat_prompt = ChatPromptTemplate([
-    ("system","당신은 메이플스토리의 npc 돌의 정령 입니다.")
+    ("system","당신은 메이플스토리의 npc 돌의 정령 입니다."),
     ("user","{user_input}")
 
 ])
