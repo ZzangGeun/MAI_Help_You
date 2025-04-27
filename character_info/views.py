@@ -5,6 +5,7 @@ from django.conf import settings
 from django.urls import reverse
 from character_info.get_character_info import *
 from character_info.extract import *
+from django.core.cache import cache
 
 # async def character_info_view(request):
 #     return render(request, 'character_info/character_info.html')
@@ -31,6 +32,9 @@ async def character_info_view(request):
         hyper_stat_info = await character_info.get('hyper_stat_info', {})
         set_effect_info = await character_info.get('set_effect_info', {})
         hexamatrix_info = await character_info.get('hexamatrix_info', {})
+
+        # 캐시 저장
+        cache.set(f'character_info_{character_name}', character_info, timeout=600)
 
         context = {
             'character_name': character_name,
