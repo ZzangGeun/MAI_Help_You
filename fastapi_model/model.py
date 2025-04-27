@@ -3,6 +3,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from langchain.agents import initialize_agent, load_tools, AgentType
+from peft import LoraConfig, PeftModel
+
 
 # FastAPI 앱 생성
 app = FastAPI()
@@ -11,7 +14,8 @@ app = FastAPI()
 MODEL_DIR = "c:/Users/ccg/Desktop/mai_project/넥슨/character_info/notebook/output"
 
 # 모델과 토크나이저 로드
-model = AutoModelForCausalLM.from_pretrained(MODEL_DIR)
+model = AutoModelForCausalLM.from_pretrained(MODEL_DIR, device_map="auto", load_in_8bit=True, torch_dtype="auto")
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
 
 # 요청 데이터 형식 정의
@@ -39,3 +43,6 @@ async def generate_text(request: TextRequest):
         return {"generated_text": response}
     except Exception as e:
         return {"error": str(e)}
+    
+    
+    
