@@ -1,5 +1,5 @@
 
-# 스탯 추출 함수수
+# 스탯 추출 함수
 async def extract_stat(stat_info):
     final_stat = {}
     for stat in stat_info.get('final_stat', []):
