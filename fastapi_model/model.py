@@ -1,40 +1,48 @@
-from langchain_community.chat_models import ChatOllama
-import numpy as np
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from dotenv import load_dotenv
-import os
-from langchain_core.prompts import ChatPromptTemplate
+# -*- coding: utf-8 -*-
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from langchain.agents import initialize_agent, load_tools, AgentType
+from peft import LoraConfig, PeftModel
 
 
-load_dotenv()
+# FastAPI 앱 생성
+app = FastAPI()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# 파인튜닝된 모델 디렉토리 경로
+MODEL_DIR = "c:/Users/ccg/Desktop/mai_project/넥슨/character_info/notebook/output"
 
+# 모델과 토크나이저 로드
+model = AutoModelForCausalLM.from_pretrained(MODEL_DIR, device_map="auto", load_in_8bit=True, torch_dtype="auto")
 
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
 
- # RAG 기법 사용 위해 사용자 메세지를 벡터 변환
-embeddings = HuggingFaceEmbeddings(model_name = "intfloat/multilingual-e5-large-instruct",model_kwargs={"device": "cuda"})
+# 요청 데이터 형식 정의
+class TextRequest(BaseModel):
+    text: str
 
-def get_embedding(texts):
+# 텍스트 생성 엔드포인트
+@app.post("/generate")
+async def generate_text(request: TextRequest):
     try:
-        embedding = embeddings.embed_documents(texts)
-        return embedding
+        # 입력 텍스트를 토큰화
+        inputs = tokenizer.encode(request.text, return_tensors="pt")
+
+        # 모델로 텍스트 생성
+        outputs = model.generate(
+            inputs,
+            max_length=256,  # 생성할 최대 토큰 길이
+            temperature=0.7,  # 생성 다양성을 조절
+            top_p=0.9,       # nucleus sampling
+            top_k=50         # top-k sampling
+        )
+
+        # 생성된 텍스트 디코딩
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return {"generated_text": response}
     except Exception as e:
-        return None
-
-
-chat = ChatOllama(model="llama3")
-
-chat_prompt = ChatPromptTemplate([
-    ("system","당신은 메이플스토리의 npc 돌의 정령 입니다."),
-    ("user","{user_input}")
-
-])
-
-chain = chat_prompt | chat
-
-
-
-def ask_question(question: str) -> str:
-    response = chat.invoke(question)
-    return response.content
+        return {"error": str(e)}
+    
+    
+    
