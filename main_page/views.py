@@ -3,6 +3,7 @@ from .get_nexon_api import get_notice_list
 import requests
 from django.http import JsonResponse
 import asyncio
+import aiohttp
 
 
 async def main_page(request):
