@@ -1,29 +1,160 @@
 <!-- main_page.html -->
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>Main Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메이플스토리 AI 어시스턴트</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}?v=maple-orange">
+    <link rel="stylesheet" href="{% static 'css/main_page.css' %}?v=maple-orange">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h2>이벤트 정보</h2>
-    <ul>
-      {% for event in event_info.event_notice %}
-        <li><a href="{{ event.url }}">{{ event.title }}</a> - {{ event.date_event_start }} ~ {{ event.date_event_end }}</li>
-      {% endfor %}
-    </ul>
-  
-    <h2>공지사항</h2>
-    <ul>
-      {% for notice in notice_info.notice %}
-        <li><a href="{{ notice.url }}">{{ notice.title }}</a> - {{ notice.date }}</li>
-      {% endfor %}
-    </ul>
-    <h2>캐릭터 정보 조회</h2>
-    <form action="{% url 'character_info' %}" method="GET">
-      <label for="character_name">캐릭터 이름:</label>
-      <input type="text" id="character_name" name="character_name">
-      <button type="submit">조회</button>
-  </form>
-  
+    <!-- 로그인 팝업 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>로그인</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">아이디</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">로그인</button>
+            </form>
+            <div class="form-footer">
+                <a href="#" class="forgot-password">비밀번호 찾기</a>
+                <a href="#" class="register-link">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-dragon"></i>
+                    <span>메이플스토리 AI</span>
+                </div>
+                <button class="nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="메뉴 토글">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="nav" id="primaryNav">
+                    <a href="{% url 'main_page' %}" class="nav-link active">
+                        <i class="fas fa-home"></i> 홈
+                    </a>
+                    <a href="{% url 'chatbot' %}" class="nav-link">
+                        <i class="fas fa-comments"></i> 챗봇
+                    </a>
+                    <a href="{% url 'character_info' %}" class="nav-link">
+                        <i class="fas fa-user"></i> 캐릭터 정보
+                    </a>
+                </nav>
+                <div class="user-actions">
+                    <button id="loginBtn" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 히어로 섹션 -->
+            <section class="hero-section">
+                <div class="hero-visual" aria-hidden="true"></div>
+                <div class="hero-content">
+                    <h1>메이플스토리 AI 어시스턴트</h1>
+                    <p>메이플스토리에 대한 모든 질문에 답변해드립니다</p>
+                    <div class="hero-buttons">
+                        <a href="{% url 'chatbot' %}" class="btn-primary">
+                            <i class="fas fa-comments"></i> 챗봇 시작하기
+                        </a>
+                        <a href="{% url 'character_info' %}" class="btn-secondary">
+                            <i class="fas fa-search"></i> 캐릭터 검색
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 캐릭터 검색 섹션 -->
+            <section class="search-section">
+                <div class="search-container">
+                    <h2>캐릭터 정보 검색</h2>
+                    <form action="{% url 'character_info' %}" method="GET" class="search-form">
+                        <div class="search-input-group">
+                            <input type="text" id="character_name" name="character_name" 
+                                   placeholder="캐릭터 이름을 입력하세요" required>
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 정보 섹션 -->
+            <div class="info-grid">
+                <!-- 이벤트 정보 -->
+                <section class="info-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-alt"></i> 이벤트 정보</h2>
+                    </div>
+                    <div class="content-list">
+                        {% for event in event_info.event_notice %}
+                            <div class="content-item">
+                                <a href="{{ event.url }}" target="_blank" class="item-link">
+                                    <div class="item-title">{{ event.title }}</div>
+                                    <div class="item-date">{{ event.date_event_start }} ~ {{ event.date_event_end }}</div>
+                                </a>
+                            </div>
+                        {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <p>현재 진행 중인 이벤트가 없습니다.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- 공지사항 -->
+                <section class="info-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bullhorn"></i> 공지사항</h2>
+                    </div>
+                    <div class="content-list">
+                        {% for notice in notice_info.notice %}
+                            <div class="content-item">
+                                <a href="{{ notice.url }}" target="_blank" class="item-link">
+                                    <div class="item-title">{{ notice.title }}</div>
+                                    <div class="item-date">{{ notice.date }}</div>
+                                </a>
+                            </div>
+                        {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-bullhorn"></i>
+                                <p>공지사항이 없습니다.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 메이플스토리 AI 어시스턴트. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/main_page.js' %}"></script>
 </body>
 </html>

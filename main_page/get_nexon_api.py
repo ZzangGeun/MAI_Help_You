@@ -15,7 +15,7 @@ CACHE_DURATION = timedelta(hours=1)  # 캐시 유효 기간 설정 (1시간)
 #메인 페이지는 공지, 이벤트 목록 가져오기
 
 
-async def get_api_data(endpoint, params=None):
+def get_api_data(endpoint, params=None):
     headers = {'x-nxopen-api-key': NEXON_API_KEY}
     url = f'{BASE_URL}{endpoint}'
 
@@ -25,16 +25,16 @@ async def get_api_data(endpoint, params=None):
         if response.status_code == 200:
             return response.json()
         else:
-            logger.error(f'API 요청 실패: {url}, 상태 코드: {response.status}')
+            logger.error(f'API 요청 실패: {url}, 상태 코드: {response.status_code}')
             return None
     
     except requests.RequestException as e:
         return None
 
-async def get_notice_list():
+def get_notice_list():
 
-    event_info = await get_api_data("/notice-event")
-    notice_info = await get_api_data("/notice")
+    event_info = get_api_data("/notice-event")
+    notice_info = get_api_data("/notice")
 
 
     return {
