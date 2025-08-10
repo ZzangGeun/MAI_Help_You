@@ -1,110 +1,376 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ character_name }}의 캐릭터 정보</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/character_info.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>{{ character_name }}의 캐릭터 정보</h1>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-dragon"></i>
+                    <span>메이플스토리 AI</span>
+                </div>
+                <nav class="nav">
+                    <a href="{% url 'main_page' %}" class="nav-link">
+                        <i class="fas fa-home"></i> 홈
+                    </a>
+                    <a href="{% url 'chatbot' %}" class="nav-link">
+                        <i class="fas fa-comments"></i> 챗봇
+                    </a>
+                    <a href="{% url 'character_info' %}" class="nav-link active">
+                        <i class="fas fa-user"></i> 캐릭터 정보
+                    </a>
+                </nav>
+                <div class="user-actions">
+                    <button id="loginBtn" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                </div>
+            </div>
+        </header>
 
-    {% if character_name %}
-    <section>
-        <h2>기본 정보</h2>
-        <ul>
-            <li><strong>캐릭터 이름:</strong> {{ basic_info.character_name }}</li>
-            <li><strong>레벨:</strong> {{ basic_info.character_level }}</li>
-            <li><strong>직업:</strong> {{ basic_info.class }}</li>
-            <li><strong>길드:</strong> {{ basic_info.guild }}</li>
-            <li><strong>서버:</strong> {{ basic_info.server }}</li>
-        </ul>
-    </section>
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            {% if character_name %}
+                <!-- 캐릭터 헤더 -->
+                <div class="character-header">
+                    <div class="character-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="character-info">
+                        <h1>{{ character_name }}</h1>
+                        <div class="character-details">
+                            <span class="level-badge">
+                                <i class="fas fa-star"></i> Lv.{{ basic_info.character_level }}
+                            </span>
+                            <span class="class-badge">
+                                <i class="fas fa-sword"></i> {{ basic_info.class }}
+                            </span>
+                            <span class="server-badge">
+                                <i class="fas fa-server"></i> {{ basic_info.server }}
+                            </span>
+                        </div>
+                        {% if basic_info.guild %}
+                            <div class="guild-info">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>{{ basic_info.guild }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <section>
-        <h2>스탯 정보</h2>
-        <ul>
-            <li><strong>힘:</strong> {{ stat_info.strength }}</li>
-            <li><strong>민첩:</strong> {{ stat_info.dexterity }}</li>
-            <li><strong>지능:</strong> {{ stat_info.intelligence }}</li>
-            <li><strong>운:</strong> {{ stat_info.luck }}</li>
-        </ul>
-    </section>
+                <!-- 캐릭터 정보 그리드 -->
+                <div class="character-grid">
+                    <!-- 기본 정보 -->
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h2>기본 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="label">캐릭터 이름</span>
+                                <span class="value">{{ basic_info.character_name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">레벨</span>
+                                <span class="value level">{{ basic_info.character_level }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">직업</span>
+                                <span class="value class">{{ basic_info.class }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">서버</span>
+                                <span class="value server">{{ basic_info.server }}</span>
+                            </div>
+                            {% if basic_info.guild %}
+                                <div class="info-item">
+                                    <span class="label">길드</span>
+                                    <span class="value guild">{{ basic_info.guild }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </section>
 
-    <section>
-        <h2>아이템 정보</h2>
-        <ul>
-            {% for item in item_info %}
-                <li>{{ item.name }} - {{ item.type }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 스탯 정보 -->
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h2>스탯 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="stat-grid">
+                                <div class="stat-item">
+                                    <div class="stat-icon strength">
+                                        <i class="fas fa-fist-raised"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-name">힘</span>
+                                        <span class="stat-value">{{ stat_info.strength }}</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon dexterity">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-name">민첩</span>
+                                        <span class="stat-value">{{ stat_info.dexterity }}</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon intelligence">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-name">지능</span>
+                                        <span class="stat-value">{{ stat_info.intelligence }}</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon luck">
+                                        <i class="fas fa-clover"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-name">운</span>
+                                        <span class="stat-value">{{ stat_info.luck }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-    <section>
-        <h2>능력 정보</h2>
-        <ul>
-            {% for ability in ability_info %}
-                <li>{{ ability.name }}: {{ ability.description }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 아이템 정보 -->
+                    {% if item_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-sword"></i>
+                            <h2>아이템 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="item-list">
+                                {% for item in item_info %}
+                                    <div class="item-item">
+                                        <div class="item-icon">
+                                            <i class="fas fa-gem"></i>
+                                        </div>
+                                        <div class="item-info">
+                                            <span class="item-name">{{ item.name }}</span>
+                                            <span class="item-type">{{ item.type }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>링크 스킬 정보</h2>
-        <ul>
-            {% for link_skill in link_skill_info %}
-                <li>{{ link_skill.name }} - 효과: {{ link_skill.effect }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 능력 정보 -->
+                    {% if ability_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-magic"></i>
+                            <h2>능력 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="ability-list">
+                                {% for ability in ability_info %}
+                                    <div class="ability-item">
+                                        <div class="ability-icon">
+                                            <i class="fas fa-sparkles"></i>
+                                        </div>
+                                        <div class="ability-info">
+                                            <span class="ability-name">{{ ability.name }}</span>
+                                            <span class="ability-desc">{{ ability.description }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>V 매트릭스</h2>
-        <ul>
-            {% for vmatrix in vmatrix_info %}
-                <li>{{ vmatrix.name }} - {{ vmatrix.effect }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 링크 스킬 정보 -->
+                    {% if link_skill_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-link"></i>
+                            <h2>링크 스킬</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="skill-list">
+                                {% for link_skill in link_skill_info %}
+                                    <div class="skill-item">
+                                        <div class="skill-icon">
+                                            <i class="fas fa-chain"></i>
+                                        </div>
+                                        <div class="skill-info">
+                                            <span class="skill-name">{{ link_skill.name }}</span>
+                                            <span class="skill-effect">{{ link_skill.effect }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>상징 정보</h2>
-        <ul>
-            {% for symbol in symbol_info %}
-                <li>{{ symbol.name }} - 효과: {{ symbol.effect }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- V 매트릭스 -->
+                    {% if vmatrix_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-cube"></i>
+                            <h2>V 매트릭스</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="matrix-list">
+                                {% for vmatrix in vmatrix_info %}
+                                    <div class="matrix-item">
+                                        <div class="matrix-icon">
+                                            <i class="fas fa-cube"></i>
+                                        </div>
+                                        <div class="matrix-info">
+                                            <span class="matrix-name">{{ vmatrix.name }}</span>
+                                            <span class="matrix-effect">{{ vmatrix.effect }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>하이퍼 스탯</h2>
-        <ul>
-            <li><strong>힘:</strong> {{ hyper_stat_info.strength }}</li>
-            <li><strong>민첩:</strong> {{ hyper_stat_info.dexterity }}</li>
-            <li><strong>지능:</strong> {{ hyper_stat_info.intelligence }}</li>
-            <li><strong>운:</strong> {{ hyper_stat_info.luck }}</li>
-        </ul>
-    </section>
+                    <!-- 상징 정보 -->
+                    {% if symbol_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-star"></i>
+                            <h2>상징 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="symbol-list">
+                                {% for symbol in symbol_info %}
+                                    <div class="symbol-item">
+                                        <div class="symbol-icon">
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <div class="symbol-info">
+                                            <span class="symbol-name">{{ symbol.name }}</span>
+                                            <span class="symbol-effect">{{ symbol.effect }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>세트 효과</h2>
-        <ul>
-            {% for set_effect in set_effect_info %}
-                <li>{{ set_effect.name }} - 효과: {{ set_effect.effect }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 하이퍼 스탯 -->
+                    {% if hyper_stat_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <h2>하이퍼 스탯</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="hyper-stat-grid">
+                                <div class="hyper-stat-item">
+                                    <span class="hyper-stat-name">힘</span>
+                                    <span class="hyper-stat-value">{{ hyper_stat_info.strength }}</span>
+                                </div>
+                                <div class="hyper-stat-item">
+                                    <span class="hyper-stat-name">민첩</span>
+                                    <span class="hyper-stat-value">{{ hyper_stat_info.dexterity }}</span>
+                                </div>
+                                <div class="hyper-stat-item">
+                                    <span class="hyper-stat-name">지능</span>
+                                    <span class="hyper-stat-value">{{ hyper_stat_info.intelligence }}</span>
+                                </div>
+                                <div class="hyper-stat-item">
+                                    <span class="hyper-stat-name">운</span>
+                                    <span class="hyper-stat-value">{{ hyper_stat_info.luck }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    <section>
-        <h2>헥사 매트릭스</h2>
-        <ul>
-            {% for hexamatrix in hexamatrix_info %}
-                <li>{{ hexamatrix.name }} - 효과: {{ hexamatrix.effect }}</li>
-            {% endfor %}
-        </ul>
-    </section>
+                    <!-- 세트 효과 -->
+                    {% if set_effect_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-layer-group"></i>
+                            <h2>세트 효과</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="set-effect-list">
+                                {% for set_effect in set_effect_info %}
+                                    <div class="set-effect-item">
+                                        <div class="set-effect-icon">
+                                            <i class="fas fa-layer-group"></i>
+                                        </div>
+                                        <div class="set-effect-info">
+                                            <span class="set-effect-name">{{ set_effect.name }}</span>
+                                            <span class="set-effect-desc">{{ set_effect.effect }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
 
-    {% else %}
-    <p>캐릭터 정보가 없습니다.</p>
-    {% endif %}
+                    <!-- 헥사 매트릭스 -->
+                    {% if hexamatrix_info %}
+                    <section class="info-card">
+                        <div class="card-header">
+                            <i class="fas fa-hexagon"></i>
+                            <h2>헥사 매트릭스</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="hexa-list">
+                                {% for hexamatrix in hexamatrix_info %}
+                                    <div class="hexa-item">
+                                        <div class="hexa-icon">
+                                            <i class="fas fa-hexagon"></i>
+                                        </div>
+                                        <div class="hexa-info">
+                                            <span class="hexa-name">{{ hexamatrix.name }}</span>
+                                            <span class="hexa-effect">{{ hexamatrix.effect }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endif %}
+                </div>
+
+            {% else %}
+                <!-- 캐릭터를 찾을 수 없을 때 -->
+                <div class="no-character">
+                    <div class="no-character-content">
+                        <i class="fas fa-search"></i>
+                        <h2>캐릭터를 찾을 수 없습니다</h2>
+                        <p>캐릭터 이름을 다시 확인해주세요.</p>
+                        <a href="{% url 'main_page' %}" class="btn-primary">
+                            <i class="fas fa-home"></i> 홈으로 돌아가기
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script src="{% static 'js/character_info.js' %}"></script>
 </body>
 </html>

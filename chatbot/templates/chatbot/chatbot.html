@@ -1,83 +1,479 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>메이플스토리 챗봇</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            text-align: center;
-        }
-        #chat-box {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ccc;
-            overflow-y: auto;
-            padding: 10px;
-            background-color: #f9f9f9;
-            text-align: left;
-        }
-        .user, .bot {
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .user {
-            background-color: #d1e7fd;
-            text-align: right;
-        }
-        .bot {
-            background-color: #e9ecef;
-            text-align: left;
-        }
-        #user-input {
-            width: 80%;
-            padding: 10px;
-        }
-        button {
-            padding: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <title>메이플스토리 AI 챗봇</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}?v=maple-orange">
+    <link rel="stylesheet" href="{% static 'css/main_page.css' %}?v=maple-orange">
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}?v=maple-orange">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-dragon"></i>
+                    <span>메이플스토리 AI</span>
+                </div>
+                <button class="nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="메뉴 토글">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="nav" id="primaryNav">
+                    <a href="{% url 'main_page' %}" class="nav-link">
+                        <i class="fas fa-home"></i> 홈
+                    </a>
+                    <a href="{% url 'chatbot' %}" class="nav-link active">
+                        <i class="fas fa-comments"></i> 챗봇
+                    </a>
+                    <a href="{% url 'character_info' %}" class="nav-link">
+                        <i class="fas fa-user"></i> 캐릭터 정보
+                    </a>
+                </nav>
+                <div class="user-actions">
+                    <button id="clearHistoryBtn" class="btn-clear-history" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i> 대화 초기화
+                    </button>
+                    <button id="loginBtn" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                </div>
+            </div>
+        </header>
 
-    <h2>메이플스토리 챗봇</h2>
-    <div id="chat-box"></div>
+        <!-- 상단 광고 배너 -->
+        <div class="ad-banner" aria-label="상단 광고 배너">
+            <div class="ad-slot ad-slot--horizontal" data-ad-slot="leaderboard">
+                상단 광고 970x90 영역
+            </div>
+        </div>
 
-    <input type="text" id="user-input" placeholder="질문을 입력하세요">
-    <button onclick="sendMessage()">전송</button>
+        <!-- 페이지 레이아웃: 채팅 본문 + 사이드 광고 -->
+        <div class="page-grid">
+            <main class="chat-main">
+                <!-- 챗봇 컨테이너 -->
+                <div class="chatbot-container">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="fas fa-robot"></i>
+                    <span>메이플스토리 AI 어시스턴트</span>
+                </div>
+                <div class="status-indicator" id="status-indicator">
+                    <i class="fas fa-circle"></i>
+                    <span id="status-text">연결 확인 중...</span>
+                </div>
+            </div>
+            
+            <!-- 채팅 영역 -->
+            <div class="chat-area">
+                <div id="chat-box" class="chat-messages">
+                    <div class="welcome-message">
+                        <div class="message bot">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="sender-name">메이플스토리 AI</span>
+                                    <span class="message-time" id="current-time"></span>
+                                </div>
+                                <div class="message-text">
+                                    안녕하세요! 메이플스토리에 대한 질문이 있으시면 언제든 물어보세요. 
+                                    게임 정보, 캐릭터 정보, 아이템 정보, 퀘스트 등 무엇이든 도와드릴 수 있습니다.
+                                    <br><br>
+                                    <strong>새로운 기능:</strong>
+                                    <ul>
+                                        <li>💬 대화 히스토리 유지</li>
+                                        <li>🔍 RAG 기반 정확한 정보 제공</li>
+                                        <li>📚 소스 문서 참조</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 입력 영역 -->
+                <div class="input-container">
+                    <div class="suggested-prompts" aria-label="추천 프롬프트">
+                        <button class="prompt-chip" data-text="오늘 패치노트 요약해줘">오늘 패치노트 요약</button>
+                        <button class="prompt-chip" data-text="아델 250레벨 사냥터 추천해줘">아델 250 사냥터</button>
+                        <button class="prompt-chip" data-text="무자본 시작 직업 추천 이유와 함께 알려줘">무자본 직업 추천</button>
+                        <button class="prompt-chip" data-text="이번 주 보스 공략 핵심만 정리해줘">이번 주 보스 공략</button>
+                    </div>
+                    <div class="input-wrapper">
+                        <textarea id="user-input" 
+                                  placeholder="메이플스토리에 대해 질문해보세요..." 
+                                  rows="1"
+                                  onkeydown="handleKeyPress(event)"></textarea>
+                        <button id="send-button" onclick="sendMessage()" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>AI가 응답을 생성하고 있습니다...</span>
+                    </div>
+                </div>
+                </div>
+            </main>
+
+            <aside class="sidebar-ads" aria-label="사이드 광고">
+                <div class="ad-card">
+                    <div class="ad-slot ad-slot--square" data-ad-slot="medium-rectangle">
+                        사이드 광고 300x250
+                    </div>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-slot ad-slot--tall" data-ad-slot="skyscraper">
+                        사이드 광고 160x600
+                    </div>
+                </div>
+                <div class="ad-card brand-visual" aria-label="브랜드/마스코트 이미지 영역">
+                    브랜드 이미지 영역(추후 교체)
+                </div>
+            </aside>
+        </div>
+    </div>
 
     <script>
-        function sendMessage() {
-            let userInput = document.getElementById("user-input").value;
-            let chatBox = document.getElementById("chat-box");
+        let isConnected = false;
+        let messageCount = 0;
+        let chatHistory = [];
+        
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            checkServerStatus();
+            setupAutoResize();
+            loadChatHistory();
+            setupNavToggle();
+            setupSuggestedPrompts();
+        };
+        // 내비게이션 토글
+        function setupNavToggle() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const nav = document.getElementById('primaryNav');
+            if (navToggle && nav) {
+                navToggle.addEventListener('click', () => {
+                    const isOpen = nav.classList.toggle('open');
+                    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+            }
+        }
 
-            if (userInput.trim() === "") return;
+        // 추천 프롬프트 클릭
+        function setupSuggestedPrompts() {
+            const chips = document.querySelectorAll('.prompt-chip');
+            const textarea = document.getElementById('user-input');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    textarea.value = chip.getAttribute('data-text') || chip.textContent.trim();
+                    textarea.dispatchEvent(new Event('input'));
+                    textarea.focus();
+                });
+            });
+        }
 
-            // 사용자 메시지 추가
-            let userMessage = `<div class="user">🙋‍♂️ ${userInput}</div>`;
-            chatBox.innerHTML += userMessage;
-
-            // Django 서버에 요청 보내기
-            fetch(`/ask-fastapi/?question=${encodeURIComponent(userInput)}`)
+        
+        // 현재 시간 업데이트
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        // 텍스트 영역 자동 크기 조정
+        function setupAutoResize() {
+            const textarea = document.getElementById('user-input');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+        
+        // 서버 상태 확인
+        function checkServerStatus() {
+            fetch('{% url "chatbot_health" %}')
                 .then(response => response.json())
                 .then(data => {
-                    let botMessage = `<div class="bot">🤖 ${data.response}</div>`;
-                    chatBox.innerHTML += botMessage;
-                    chatBox.scrollTop = chatBox.scrollHeight;  // 자동 스크롤
+                    if (data.status === 'healthy') {
+                        updateStatus('connected', '연결됨');
+                        isConnected = true;
+                        document.getElementById('send-button').disabled = false;
+                    } else {
+                        updateStatus('disconnected', '연결 안됨');
+                        isConnected = false;
+                        document.getElementById('send-button').disabled = true;
+                    }
                 })
                 .catch(error => {
-                    let errorMessage = `<div class="bot">⚠️ 오류 발생: ${error.message}</div>`;
-                    chatBox.innerHTML += errorMessage;
+                    updateStatus('disconnected', '연결 안됨');
+                    isConnected = false;
+                    document.getElementById('send-button').disabled = true;
                 });
-
-            document.getElementById("user-input").value = "";  // 입력 필드 초기화
         }
-    </script>
+        
+        // 채팅 히스토리 로드
+        function loadChatHistory() {
+            fetch('{% url "chatbot_history" %}?user_id=anonymous')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.history.length > 0) {
+                        chatHistory = data.history;
+                        displayChatHistory();
+                    }
+                })
+                .catch(error => {
+                    console.log('히스토리 로드 실패:', error);
+                });
+        }
+        
+        // 채팅 히스토리 표시
+        function displayChatHistory() {
+            const chatBox = document.getElementById("chat-box");
+            const welcomeMessage = chatBox.querySelector('.welcome-message');
+            
+            // 환영 메시지 제거
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+            
+            // 히스토리 메시지들 추가
+            chatHistory.forEach(item => {
+                addMessage('user', item.user, '사용자');
+                addMessage('bot', item.assistant, '메이플스토리 AI');
+            });
+        }
+        
+        // 히스토리 초기화
+        function clearHistory() {
+            if (confirm('대화 히스토리를 초기화하시겠습니까?')) {
+                fetch('{% url "chatbot_clear_history" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: 'anonymous'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 채팅 박스 초기화
+                        const chatBox = document.getElementById("chat-box");
+                        chatBox.innerHTML = `
+                            <div class="welcome-message">
+                                <div class="message bot">
+                                    <div class="message-avatar">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="sender-name">메이플스토리 AI</span>
+                                            <span class="message-time" id="current-time"></span>
+                                        </div>
+                                        <div class="message-text">
+                                            대화가 초기화되었습니다. 새로운 질문을 해주세요!
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        chatHistory = [];
+                        messageCount = 0;
+                    }
+                })
+                .catch(error => {
+                    console.log('히스토리 초기화 실패:', error);
+                });
+            }
+        }
+        
+        // 상태 업데이트
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            indicator.className = `status-indicator ${status}`;
+            statusText.textContent = text;
+        }
+        
+        // 키보드 이벤트 처리
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // 메시지 전송
+        function sendMessage() {
+            let userInput = document.getElementById("user-input");
+            let chatBox = document.getElementById("chat-box");
+            let typingIndicator = document.getElementById("typing-indicator");
+            let sendButton = document.getElementById("send-button");
+            
+            const message = userInput.value.trim();
+            if (message === "" || !isConnected) return;
+            
+            // 사용자 메시지 추가
+            addMessage('user', message, '사용자');
+            
+            // 입력 필드 초기화 및 버튼 비활성화
+            userInput.value = "";
+            userInput.style.height = 'auto';
+            sendButton.disabled = true;
+            
+            // 타이핑 인디케이터 표시
+            typingIndicator.style.display = 'flex';
+            
+            // Django 서버에 요청
+            fetch('{% url "chatbot_ask" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    question: message,
+                    user_id: 'anonymous'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                typingIndicator.style.display = 'none';
+                sendButton.disabled = false;
+                
+                if (data.status === 'success') {
+                    let responseText = data.response;
+                    
+                    // RAG 소스 정보 추가
+                    if (data.has_rag && data.sources && data.sources.length > 0) {
+                        responseText += '\n\n<strong>참고 소스:</strong>\n';
+                        data.sources.forEach((source, index) => {
+                            responseText += `${index + 1}. ${source}\n`;
+                        });
+                    }
+                    
+                    addMessage('bot', responseText, '메이플스토리 AI');
+                } else {
+                    addMessage('bot', data.error || '죄송합니다. 응답을 생성할 수 없습니다.', '메이플스토리 AI', 'error');
+                }
+            })
+            .catch(error => {
+                typingIndicator.style.display = 'none';
+                sendButton.disabled = false;
+                addMessage('bot', '네트워크 오류가 발생했습니다. 다시 시도해주세요.', '메이플스토리 AI', 'error');
+            });
+        }
+        
+        // CSRF 토큰 가져오기
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 메시지 추가 함수
+        function addMessage(type, text, sender, messageType = 'normal') {
+            const chatBox = document.getElementById("chat-box");
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const messageClass = messageType === 'error' ? 'message bot error' : `message ${type}`;
+            const iconClass = type === 'user' ? 'fas fa-user' : 'fas fa-robot';
+            
+            const formatted = formatText(text);
+            const copyAction = type === 'bot' ? `<div class="message-actions"><button class="copy-btn" title="복사"><i class="fas fa-copy"></i></button></div>` : '';
+            const messageHtml = `
+                <div class="${messageClass}">
+                    <div class="message-avatar">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="sender-name">${sender}</span>
+                            <span class="message-time">${timeString}</span>
+                        </div>
+                        <div class="message-text">${formatted}</div>
+                        ${copyAction}
+                    </div>
+                </div>
+            `;
+            
+            chatBox.innerHTML += messageHtml;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            messageCount++;
+            // 복사 버튼 위임
+            if (type === 'bot') {
+                const lastMsg = chatBox.lastElementChild;
+                const btn = lastMsg?.querySelector('.copy-btn');
+                const textEl = lastMsg?.querySelector('.message-text');
+                if (btn && textEl) {
+                    btn.addEventListener('click', () => {
+                        copyToClipboard(textEl.innerText);
+                    });
+                }
+            }
+        }
+        
+        // HTML 이스케이프 함수
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
+        // 텍스트 포맷팅: 줄바꿈/URL 링크
+        function formatText(text) {
+            const escaped = escapeHtml(text);
+            const withLinks = escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1<\/a>');
+            return withLinks.replace(/\n/g, '<br/>');
+        }
+
+        // 복사 기능
+        function copyToClipboard(str) {
+            navigator.clipboard.writeText(str).then(() => {
+                // 간단한 확인
+                console.log('복사 완료');
+            }).catch(() => {
+                console.log('복사 실패');
+            });
+        }
+        
+        // 입력 필드 변경 감지
+        document.getElementById('user-input').addEventListener('input', function() {
+            const sendButton = document.getElementById('send-button');
+            sendButton.disabled = this.value.trim() === '' || !isConnected;
+        });
+        
+        // 주기적으로 서버 상태 확인
+        setInterval(checkServerStatus, 30000); // 30초마다 확인
+    </script>
 </body>
 </html>
