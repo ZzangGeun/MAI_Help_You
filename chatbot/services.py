@@ -12,22 +12,27 @@ from langchain.llms.base import LLM
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel
+# from peft import PeftModel  # Not used here
 from huggingface_hub import login
 
 
 logger = logging.getLogger(__name__)
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
-login(HUGGINGFACE_TOKEN)
+# 로그인 토큰이 있을 때만 허브 로그인 시도
+if HUGGINGFACE_TOKEN:
+    try:
+        login(HUGGINGFACE_TOKEN)
+    except Exception as _e:
+        logger.warning("Hugging Face Hub 로그인 실패: %s", str(_e))
 
 class CustomLLM(LLM):
     """커스텀 파인튜닝된 모델을 LangChain과 연동하는 클래스"""
     
-    model: Optional[Any] = None
-    tokenizer: Optional[Any] = None
-    model_path: str = "fine_tuned_model/merged_qwen"
+    model: Any = None
+    tokenizer: Any = None
+    model_path: str = os.getenv("LOCAL_MODEL_PATH", "fine_tuned_model/merged_qwen")
     
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_path: Optional[str] = None):
         super().__init__()
         if model_path:
             self.model_path = model_path
@@ -42,16 +47,19 @@ class CustomLLM(LLM):
                 try:
                     # 로컬 모델에서 토크나이저 로드
                     self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, auth_token=HUGGINGFACE_TOKEN)
-                    self.tokenizer.pad_token = self.tokenizer.eos_token
+                    if getattr(self.tokenizer, "pad_token", None) is None:
+                        self.tokenizer.pad_token = getattr(self.tokenizer, "eos_token", None)
                     
                     # 로컬 모델 로드
+                    device = "cuda" if torch.cuda.is_available() else "cpu"
+                    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
                     self.model = AutoModelForCausalLM.from_pretrained(
                         self.model_path,
-                        device_map="auto",
-                        torch_dtype=torch.float16,
+                        torch_dtype=dtype,
                         trust_remote_code=True,
                         auth_token=HUGGINGFACE_TOKEN
                     )
+                    self.model.to(device)
                     logger.info("로컬 파인튜닝된 모델이 성공적으로 로드되었습니다.")
                     return
                 except Exception as e:
@@ -59,18 +67,22 @@ class CustomLLM(LLM):
             
 
             logger.info("공개 모델을 로드합니다...")
-            base_model_name = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B" 
+            base_model_name = os.getenv("HF_BASE_MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B") 
             
             # 토크나이저 로드
-            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-            self.tokenizer.pad_token = self.tokenizer.eos_token
+            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+            if getattr(self.tokenizer, "pad_token", None) is None:
+                self.tokenizer.pad_token = getattr(self.tokenizer, "eos_token", None)
             
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            dtype = torch.float16 if torch.cuda.is_available() else torch.float32
             # 베이스 모델 로드
             self.model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                device_map="auto",
-                torch_dtype=torch.float16
+                torch_dtype=dtype,
+                trust_remote_code=True
             )
+            self.model.to(device)
             
             logger.info("공개 모델이 성공적으로 로드되었습니다.")
                 
@@ -161,11 +173,12 @@ class ChatbotService:
             )
             
             # 벡터 스토어 경로
-            vectorstore_path = "MAI_db/indexex/faiss_index"
+            vectorstore_path = os.getenv("FAISS_INDEX_PATH", "MAI_db/indexex/faiss_index")
             
             if os.path.exists(vectorstore_path):
                 # 기존 벡터 스토어 로드
-                self.vectorstore = FAISS.load_local(vectorstore_path, embeddings)
+                # allow_dangerous_deserialization=True는 신뢰된 로컬 파일만 대상으로 사용
+                self.vectorstore = FAISS.load_local(vectorstore_path, embeddings, allow_dangerous_deserialization=True)
                 logger.info("기존 벡터 스토어를 로드했습니다.")
             else:
                 # 새로운 벡터 스토어 생성
@@ -190,7 +203,7 @@ class ChatbotService:
         """벡터 스토어를 생성합니다."""
         try:
             # 데이터 로드 (MAI_db/json_data에서)
-            data_path = "MAI_db/json_data"
+            data_path = os.getenv("RAG_DATA_PATH", "MAI_db/json_data")
             if os.path.exists(data_path):
                 loader = DirectoryLoader(
                     data_path,
@@ -210,8 +223,10 @@ class ChatbotService:
                 self.vectorstore = FAISS.from_documents(texts, embeddings)
                 
                 # 벡터 스토어 저장
-                os.makedirs("MAI_db/indexex", exist_ok=True)
-                self.vectorstore.save_local("MAI_db/indexex/faiss_index")
+                # 인덱스 저장 경로 처리
+                index_path = os.getenv("FAISS_INDEX_PATH", "MAI_db/indexex/faiss_index")
+                os.makedirs(os.path.dirname(index_path), exist_ok=True)
+                self.vectorstore.save_local(index_path)
                 logger.info("새로운 벡터 스토어를 생성했습니다.")
             else:
                 logger.warning("데이터 경로를 찾을 수 없습니다.")
@@ -219,7 +234,7 @@ class ChatbotService:
         except Exception as e:
             logger.error(f"벡터 스토어 생성 중 오류 발생: {str(e)}")
     
-    def get_response(self, question: str, user_id: str = None) -> Dict[str, Any]:
+    def get_response(self, question: str, user_id: Optional[str] = None) -> Dict[str, Any]:
         """질문에 대한 답변을 생성합니다."""
         try:
             if self.qa_chain:
@@ -257,7 +272,7 @@ class ChatbotService:
                 "has_rag": False
             }
     
-    def get_chat_history(self, user_id: str = None) -> List[Dict[str, str]]:
+    def get_chat_history(self, user_id: Optional[str] = None) -> List[Dict[str, str]]:
         """채팅 히스토리를 반환합니다."""
         try:
             messages = self.memory.chat_memory.messages
@@ -275,7 +290,7 @@ class ChatbotService:
             logger.error(f"채팅 히스토리 조회 중 오류 발생: {str(e)}")
             return []
     
-    def clear_history(self, user_id: str = None):
+    def clear_history(self, user_id: Optional[str] = None):
         """채팅 히스토리를 초기화합니다."""
         try:
             self.memory.clear()
