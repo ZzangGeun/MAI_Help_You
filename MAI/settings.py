@@ -8,6 +8,13 @@ dotenv.load_dotenv()
 NEXON_API_KEY = os.getenv('NEXON_API_KEY')  # .env 파일에서 API 키를 불러옴
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
+# Database Settings
+DATABASE_USER = os.getenv('DATABASE_USER')
+DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
+DATABASE_NAME = os.getenv('DATABASE_NAME')
+DATABASE_HOST = os.getenv('DATABASE_HOST')
+DATABASE_PORT = os.getenv('DATABASE_PORT')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -73,8 +80,12 @@ WSGI_APPLICATION = "MAI.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": DATABASE_NAME,
+        "USER": DATABASE_USER,
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": DATABASE_HOST,
+        "PORT": DATABASE_PORT,
     }
 }
 

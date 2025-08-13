@@ -1,6 +1,7 @@
 import os
 import logging
 from typing import List, Dict, Any, Optional
+import requests
 from langchain.schema import HumanMessage, AIMessage, BaseMessage
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
@@ -18,6 +19,14 @@ from huggingface_hub import login
 
 logger = logging.getLogger(__name__)
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+# 원격 FastAPI 모델 사용 여부 (기본: FASTAPI_MODEL_URL 존재 시 True)
+FASTAPI_MODEL_URL = os.getenv("FASTAPI_MODEL_URL", "http://127.0.0.1:8001/api/chat")
+USE_REMOTE_LLM = os.getenv("USE_REMOTE_LLM", "auto").lower()
+if USE_REMOTE_LLM not in {"true", "false"}:
+    # auto 모드: 환경 변수 FASTAPI_MODEL_URL 이 지정되어 있으면 원격 사용
+    REMOTE_MODE = bool(FASTAPI_MODEL_URL)
+else:
+    REMOTE_MODE = USE_REMOTE_LLM == "true"
 # 로그인 토큰이 있을 때만 허브 로그인 시도
 if HUGGINGFACE_TOKEN:
     try:
@@ -140,26 +149,37 @@ class CustomLLM(LLM):
         return "custom_maplestory_llm"
 
 class ChatbotService:
-    """LangChain 기반 챗봇 서비스"""
-    
+    """LangChain 기반 챗봇 서비스 (로컬/원격 LLM 모드)
+
+    - 로컬 모드: 기존처럼 CustomLLM + (옵션) RAG 인덱스를 초기화.
+    - 원격 모드: FastAPI 모델 엔드포인트로 HTTP 호출, 로컬 모델/임베딩 미로딩.
+      (RAG 유지 희망 시 향후 retrieval 결과를 프롬프트에 주입하는 확장 가능)
+    - 사용자별 히스토리는 Django 서버 메모리에 (간단 dict) 저장하여 프롬프트 확장에 활용.
+    """
+
     def __init__(self):
+        self.remote_mode = REMOTE_MODE
         try:
-            self.llm = CustomLLM()
+            # 공용 memory (사용자별 메시지는 dict 에 저장)
             self.memory = ConversationBufferMemory(
                 memory_key="chat_history",
                 return_messages=True
             )
+            self.user_histories: Dict[str, List[BaseMessage]] = {}
             self.vectorstore = None
             self.qa_chain = None
-            self._setup_rag()
+
+            if not self.remote_mode:
+                # 무거운 로딩: 필요할 때만 수행
+                self.llm = CustomLLM()
+                self._setup_rag()
+            else:
+                self.llm = None  # 원격 호출 사용
+                logger.info("ChatbotService: 원격 LLM 모드 활성화 (모델 로딩 생략)")
         except Exception as e:
             logger.error(f"ChatbotService 초기화 중 오류: {str(e)}")
-            # 기본 설정으로 초기화
             self.llm = None
-            self.memory = ConversationBufferMemory(
-                memory_key="chat_history",
-                return_messages=True
-            )
+            self.user_histories = {}
             self.vectorstore = None
             self.qa_chain = None
     
@@ -235,35 +255,66 @@ class ChatbotService:
             logger.error(f"벡터 스토어 생성 중 오류 발생: {str(e)}")
     
     def get_response(self, question: str, user_id: Optional[str] = None) -> Dict[str, Any]:
-        """질문에 대한 답변을 생성합니다."""
+        """질문에 대한 답변을 생성합니다.
+
+        user_id 가 없을 경우 'anonymous' 키로 히스토리를 분리한다.
+        (뷰 레벨에서 세션 키를 전달하므로 실제로는 세션 기반 식별자 사용 기대)
+        """
         try:
-            if self.qa_chain:
-                # RAG를 사용한 답변
-                result = self.qa_chain({"question": question})
-                response = result["answer"]
-                source_documents = result.get("source_documents", [])
-                
-                return {
-                    "response": response,
-                    "sources": [doc.page_content[:200] + "..." for doc in source_documents],
-                    "has_rag": True
-                }
-            elif self.llm:
-                # 기본 모델만 사용
-                response = self.llm._call(question)
-                return {
-                    "response": response,
-                    "sources": [],
-                    "has_rag": False
-                }
+            uid = user_id or "anonymous"
+            # 사용자별 이전 히스토리 주입
+            if uid in self.user_histories:
+                self.memory.chat_memory.messages = self.user_histories[uid]
             else:
-                # 모델이 없는 경우 기본 응답
-                return {
-                    "response": "죄송합니다. AI 모델을 로드할 수 없습니다. 잠시 후 다시 시도해주세요.",
-                    "sources": [],
-                    "has_rag": False
-                }
-                
+                # 비어 있는 경우 초기화
+                self.memory.chat_memory.messages = []
+
+            if self.remote_mode:
+                # 최근 히스토리 몇 개(최대 5쌍) 프롬프트에 포함 (간단 컨텍스트 유지)
+                prior = self.get_chat_history(uid)
+                condensed = ""
+                for pair in prior[-5:]:
+                    condensed += f"사용자: {pair['user']}\nAI: {pair['assistant']}\n"
+                final_question = question if not condensed else (
+                    "다음은 지금까지의 대화입니다:\n" + condensed + "\n사용자 질문: " + question + "\nAI 답변:" )
+                try:
+                    resp = requests.post(
+                        FASTAPI_MODEL_URL,
+                        json={"question": final_question, "user_id": uid},
+                        timeout=60
+                    )
+                    if resp.status_code == 200:
+                        j = resp.json()
+                        # FastAPI 응답 구조에 따라 response 키 사용
+                        response = j.get("response") or j.get("answer") or "응답을 가져오지 못했습니다."
+                    else:
+                        response = f"원격 모델 오류: HTTP {resp.status_code}"
+                except Exception as e:
+                    response = f"원격 모델 호출 실패: {e}"
+                source_documents = []
+            else:
+                if self.qa_chain:
+                    result = self.qa_chain({"question": question})
+                    response = result["answer"]
+                    source_documents = result.get("source_documents", [])
+                elif self.llm:
+                    response = self.llm._call(question)
+                    source_documents = []
+                else:
+                    return {
+                        "response": "죄송합니다. AI 모델을 로드할 수 없습니다. 잠시 후 다시 시도해주세요.",
+                        "sources": [],
+                        "has_rag": False
+                    }
+
+            # 최신 히스토리 저장 (체인 실행 후 memory.chat_memory.messages 가 업데이트됨)
+            self.user_histories[uid] = list(self.memory.chat_memory.messages)
+
+            return {
+                "response": response,
+                "sources": [doc.page_content[:200] + "..." for doc in source_documents] if source_documents else [],
+                "has_rag": bool(source_documents)
+            }
         except Exception as e:
             logger.error(f"답변 생성 중 오류 발생: {str(e)}")
             return {
@@ -273,27 +324,28 @@ class ChatbotService:
             }
     
     def get_chat_history(self, user_id: Optional[str] = None) -> List[Dict[str, str]]:
-        """채팅 히스토리를 반환합니다."""
+        """채팅 히스토리를 반환합니다 (사용자/세션 구분)."""
         try:
-            messages = self.memory.chat_memory.messages
-            history = []
-            
+            uid = user_id or "anonymous"
+            messages = self.user_histories.get(uid, [])
+            history: List[Dict[str, str]] = []
             for i in range(0, len(messages), 2):
                 if i + 1 < len(messages):
                     history.append({
                         "user": messages[i].content,
                         "assistant": messages[i + 1].content
                     })
-            
             return history
         except Exception as e:
             logger.error(f"채팅 히스토리 조회 중 오류 발생: {str(e)}")
             return []
     
     def clear_history(self, user_id: Optional[str] = None):
-        """채팅 히스토리를 초기화합니다."""
+        """채팅 히스토리를 초기화합니다 (해당 사용자/세션만)."""
         try:
-            self.memory.clear()
+            uid = user_id or "anonymous"
+            if uid in self.user_histories:
+                del self.user_histories[uid]
             return True
         except Exception as e:
             logger.error(f"히스토리 초기화 중 오류 발생: {str(e)}")
