@@ -18,49 +18,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
 
     // 로그인 버튼 클릭 시 모달 열기
-    loginBtn.addEventListener('click', function() {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // 스크롤 방지
-    });
+    if (loginBtn && modal) {
+        loginBtn.addEventListener('click', function() {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // 스크롤 방지
+        });
+    }
 
     // X 버튼 클릭 시 모달 닫기
-    closeBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 복원
-    });
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // 스크롤 복원
+        });
+    }
 
     // 모달 외부 클릭 시 닫기
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
+    if (modal) {
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
 
     // ESC 키로 모달 닫기
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && modal.style.display === 'block') {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
+    if (modal) {
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
 
     // 로그인 폼 제출 처리
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        // 간단한 유효성 검사
-        if (!username || !password) {
-            showNotification('아이디와 비밀번호를 모두 입력해주세요.', 'error');
-            return;
-        }
-        
-        // 로그인 처리 (실제로는 서버에 요청)
-        handleLogin(username, password);
-    });
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 간단한 유효성 검사
+            if (!username || !password) {
+                showNotification('아이디와 비밀번호를 모두 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 로그인 처리 (실제로는 서버에 요청)
+            handleLogin(username, password);
+        });
+    }
 
     // 검색 폼 개선
     const searchForm = document.querySelector('.search-form');
