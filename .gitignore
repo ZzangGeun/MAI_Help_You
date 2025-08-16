@@ -6,4 +6,4 @@ debug.log
 *.jsonl
 *.csv
 notebook/unsloth_compiled_cache/
-fine_tuned_model/
+finetuned/
