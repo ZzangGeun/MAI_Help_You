@@ -10,9 +10,9 @@
 
 {% block content %}
     <!-- 상단 배너 (선택) -->
-    <div class="ad-banner" aria-label="상단 광고 배너">
-        <div class="ad-slot ad-slot--horizontal" data-ad-slot="leaderboard">상단 광고 970x90 영역</div>
-    </div>
+        <div class="ad-banner" aria-label="상단 광고 배너">
+            {% include 'includes/_ad_slot.html' with slot='leaderboard' size='970x90' class='ad-slot--horizontal' %}
+        </div>
 
     <!-- 페이지 그리드: 채팅 본문 + 사이드 광고 -->
     <div class="page-grid">
@@ -79,13 +79,13 @@
             </div>
         </main>
 
-        <aside class="sidebar-ads" aria-label="사이드 광고">
-            <div class="ad-card">
-                <div class="ad-slot ad-slot--square" data-ad-slot="medium-rectangle">사이드 광고 300x250</div>
-            </div>
-            <div class="ad-card">
-                <div class="ad-slot ad-slot--tall" data-ad-slot="skyscraper">사이드 광고 160x600</div>
-            </div>
+            <aside class="sidebar-ads" aria-label="사이드 광고">
+                <div class="ad-card">
+                    {% include 'includes/_ad_slot.html' with slot='medium_rectangle' size='300x250' class='ad-slot--square' %}
+                </div>
+                <div class="ad-card">
+                    {% include 'includes/_ad_slot.html' with slot='skyscraper' size='160x600' class='ad-slot--tall' %}
+                </div>
             <div class="ad-card brand-visual" aria-label="브랜드/마스코트 이미지 영역">브랜드 이미지 영역(추후 교체)</div>
         </aside>
     </div>
