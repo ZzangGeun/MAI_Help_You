@@ -8,13 +8,14 @@ Usage:
   {% include 'includes/_ad_slot.html' with slot='leaderboard' size='970x90' class='my-2' %}
 {% endcomment %}
 
+{% load dict_extras %}
 {% if ADS_ENABLED %}
-  {% if ADS_PROVIDER == 'adsense' and ADSENSE_CLIENT and ADS_SLOTS.get(slot) %}
+  {% if ADS_PROVIDER == 'adsense' and ADSENSE_CLIENT %}
     <!-- Google AdSense -->
     <ins class="adsbygoogle {{ class|default:'' }}"
          style="display:block"
          data-ad-client="{{ ADSENSE_CLIENT }}"
-         data-ad-slot="{{ ADS_SLOTS.get(slot) }}"
+         data-ad-slot="{{ ADS_SLOTS|dict_get:slot }}"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
     <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
