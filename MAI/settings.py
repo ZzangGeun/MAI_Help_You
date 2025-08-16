@@ -8,12 +8,22 @@ dotenv.load_dotenv()
 NEXON_API_KEY = os.getenv('NEXON_API_KEY')  # .env 파일에서 API 키를 불러옴
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-# Database Settings
-DATABASE_USER = os.getenv('DATABASE_USER')
-DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
-DATABASE_NAME = os.getenv('DATABASE_NAME')
-DATABASE_HOST = os.getenv('DATABASE_HOST')
-DATABASE_PORT = os.getenv('DATABASE_PORT')
+# Ads settings (optional)
+ADS_ENABLED = os.getenv('ADS_ENABLED', 'false').lower() == 'true'
+ADS_PROVIDER = os.getenv('ADS_PROVIDER', 'mock')  # 'mock' | 'adsense'
+ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', '')
+ADS_SLOTS = {
+    'leaderboard': os.getenv('ADS_SLOT_LEADERBOARD', ''),     # 970x90 등
+    'medium_rectangle': os.getenv('ADS_SLOT_MEDIUM_RECT', ''), # 300x250
+    'skyscraper': os.getenv('ADS_SLOT_SKYSCRAPER', ''),        # 160x600
+}
+
+# # Database Settings
+# DATABASE_USER = os.getenv('DATABASE_USER')
+# DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
+# DATABASE_NAME = os.getenv('DATABASE_NAME')
+# DATABASE_HOST = os.getenv('DATABASE_HOST')
+# DATABASE_PORT = os.getenv('DATABASE_PORT')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,6 +77,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.ads_context.ads_settings",
             ],
         },
     },
@@ -78,14 +89,22 @@ WSGI_APPLICATION = "MAI.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": DATABASE_NAME,
+#         "USER": DATABASE_USER,
+#         "PASSWORD": DATABASE_PASSWORD,
+#         "HOST": DATABASE_HOST,
+#         "PORT": DATABASE_PORT,
+#     }
+# }
+
+SQLITE_DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": DATABASE_NAME,
-        "USER": DATABASE_USER,
-        "PASSWORD": DATABASE_PASSWORD,
-        "HOST": DATABASE_HOST,
-        "PORT": DATABASE_PORT,
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": SQLITE_DB_PATH,
     }
 }
 

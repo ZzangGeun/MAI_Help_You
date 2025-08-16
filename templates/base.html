@@ -12,6 +12,9 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
   {% block head_extra %}{% endblock %}
+  {% if ADS_ENABLED and ADS_PROVIDER == 'adsense' and ADSENSE_CLIENT %}
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_CLIENT }}" crossorigin="anonymous"></script>
+  {% endif %}
 </head>
 <body class="app-body">
   <header class="topbar">
