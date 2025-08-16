@@ -4,6 +4,6 @@ debug.log
 *.json
 *.jsonl
 *.csv
-notebook/unsloth_compiled_cache/
 fine_tuned_model/
 *.pyc
+
