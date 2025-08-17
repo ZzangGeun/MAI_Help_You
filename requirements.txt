@@ -14,7 +14,7 @@ accelerate==0.25.0
 bitsandbytes==0.41.3
 numpy<2.0.0
 
-# LangChain
+# LangChain (legacy; can be removed after full migration)
 langchain==0.1.0
 langchain-community==0.0.10
 langchain-core==0.1.16  # ← 0.1.10 → 0.1.16로 수정
@@ -26,6 +26,14 @@ langchain-community[chroma]==0.0.10
 # Vector Database
 faiss-cpu==1.7.4
 chromadb==0.4.22
+
+# LlamaIndex + Postgres (pgvector)
+llama-index>=0.10.0
+llama-index-vector-stores-postgres>=0.2.0
+llama-index-embeddings-huggingface>=0.2.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
 
 # HTTP Requests
 requests==2.31.0
