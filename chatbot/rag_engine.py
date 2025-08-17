@@ -8,6 +8,7 @@ from llama_index.core import Document, StorageContext, VectorStoreIndex
 from llama_index.core.vector_stores.types import VectorStoreQuery
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.postgres import PGVectorStore
+from config.env import get_pg_config, get_rag_config
 
 
 logger = logging.getLogger(__name__)
@@ -22,26 +23,22 @@ class RagEngine:
     - 질의 시 top_k 유사 문서의 텍스트를 반환
     """
 
-    def __init__(
-        self,
-        table_name: str = os.getenv("PGVECTOR_TABLE", "mai_rag_index"),
-        top_k: int = int(os.getenv("RAG_TOP_K", "3")),
-    ) -> None:
-        self.table_name = table_name
-        self.top_k = top_k
+    def __init__(self) -> None:
+        pg = get_pg_config()
+        rag = get_rag_config()
+        self.table_name = pg["table"]
+        self.top_k = rag["top_k"]
 
         # Postgres 접속 정보
-        self.host = os.getenv("PG_HOST", "localhost")
-        self.port = int(os.getenv("PG_PORT", "5432"))
-        self.db = os.getenv("PG_DB", "postgres")
-        self.user = os.getenv("PG_USER", "postgres")
-        self.password = os.getenv("PG_PASSWORD", "postgres")
+        self.host = pg["host"]
+        self.port = pg["port"]
+        self.db = pg["db"]
+        self.user = pg["user"]
+        self.password = pg["password"]
 
         # 임베딩 모델 (CPU)
-        self.embed_model = HuggingFaceEmbedding(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-        self.embed_dim = 384
+        self.embed_model = HuggingFaceEmbedding(model_name=rag["embed_model"]) 
+        self.embed_dim = rag["embed_dim"]
 
         # Vector Store 초기화
         self.vector_store = PGVectorStore.from_params(
@@ -89,7 +86,7 @@ class RagEngine:
             return 0
 
     def _ingest_from_dir(self) -> None:
-        data_path = os.getenv("RAG_DATA_PATH", "MAI_db/json_data")
+        data_path = get_rag_config()["data_path"]
         if not os.path.exists(data_path):
             logger.warning("RAG 데이터 경로를 찾을 수 없습니다: %s", data_path)
             return
@@ -112,13 +109,16 @@ class RagEngine:
             return
 
         storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
-        VectorStoreIndex.from_documents(
-            documents,
-            storage_context=storage_context,
-            show_progress=True,
-            embed_model=self.embed_model,
-        )
-        logger.info("pgvector에 %d개 문서 인덱싱 완료", len(documents))
+        try:
+            VectorStoreIndex.from_documents(
+                documents,
+                storage_context=storage_context,
+                show_progress=True,
+                embed_model=self.embed_model,
+            )
+            logger.info("pgvector에 %d개 문서 인덱싱 완료", len(documents))
+        except Exception as e:
+            logger.warning("문서 인덱싱 중 오류(나중에 재시도 가능): %s", e)
 
     # --- 공개 API ---
     def retrieve_texts(self, query: str, top_k: Optional[int] = None) -> List[Tuple[str, dict]]:

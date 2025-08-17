@@ -18,12 +18,12 @@ ADS_SLOTS = {
     'skyscraper': os.getenv('ADS_SLOT_SKYSCRAPER', ''),        # 160x600
 }
 
-# # Database Settings
-# DATABASE_USER = os.getenv('DATABASE_USER')
-# DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
-# DATABASE_NAME = os.getenv('DATABASE_NAME')
-# DATABASE_HOST = os.getenv('DATABASE_HOST')
-# DATABASE_PORT = os.getenv('DATABASE_PORT')
+# Optional: Postgres settings for pgvector RAG (Django app still uses SQLite by default)
+PG_HOST = os.getenv('PG_HOST')
+PG_PORT = os.getenv('PG_PORT')
+PG_DB = os.getenv('PG_DB') or os.getenv('PGDATABASE')
+PG_USER = os.getenv('PG_USER') or os.getenv('PGUSER')
+PG_PASSWORD = os.getenv('PG_PASSWORD') or os.getenv('PGPASSWORD')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
