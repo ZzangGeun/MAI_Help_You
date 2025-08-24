@@ -1,90 +1,329 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}메이플스토리 AI 어시스턴트{% endblock %}
-
-{% block head_extra %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAI - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/main_page.css' %}">
-{% endblock %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" href="{% static 'css/main_page.css' %}?v={{ timestamp }}"charset="utf-8">
+</head>
+<body>
 
-{% block content %}
-    <!-- Hero -->
-    <section class="hero-section">
-        <div class="hero-visual" aria-hidden="true"></div>
-        <div class="hero-content">
-            <h1>메이플스토리 정보탐색 챗봇</h1>
-            <p>정령에게 무엇이든 물어보세요. 공략, 장비, 히스토리까지 한 번에!</p>
-            <div class="hero-buttons">
-                <a class="btn-login" href="{% url 'chatbot' %}"><i class="fas fa-comments"></i> 챗봇 시작하기</a>
-                <a class="btn-login" style="background:linear-gradient(45deg,#FFAE35,#FF7A18)" href="{% url 'character_info' %}"><i class="fas fa-user"></i> 캐릭터 검색</a>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-content">
+                <div class="maple-logo">
+                    <img src="{% static 'image/m_logo.png' %}" alt="MapleStory Logo">
+                </div>
+                <div class="search-box">
+                    <input type="text" placeholder="캐릭터 닉네임" class="character-search">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="user-status">
+                    <span class="status-text">내정보</span>
+                    <div class="status-divider"></div>
+                    <span class="status-text">로그아웃</span>
+                </div>
             </div>
         </div>
-    </section>
 
-    <!-- Search -->
-    <section class="search-section">
-        <div class="search-container">
-            <h2>캐릭터를 바로 검색해보세요</h2>
-            <form class="search-form" action="{% url 'character_info' %}" method="GET">
-                <div class="search-input-group">
-                    <input id="character_name" type="text" name="character_name" placeholder="캐릭터 이름을 입력하세요" required>
-                    <button class="search-btn" type="submit"><i class="fas fa-search"></i> 검색</button>
-                </div>
-            </form>
+        <!-- Main Headline -->
+        <div class="main-headline">
+            <h1>메이플 스토리<br>정보탐색 CHAT BOT</h1>
         </div>
-    </section>
 
-    <!-- Info Grid -->
-    <div class="info-grid">
-        <section class="info-section">
-            <div class="section-header">
-                <h2><i class="fas fa-calendar-alt"></i> 이벤트 정보</h2>
-            </div>
-            {% if event_info and event_info.event_notice %}
-                <div class="content-list">
-                    {% for event in event_info.event_notice %}
-                        <div class="content-item">
-                            <a class="item-link" href="{{ event.url }}" target="_blank" rel="noopener">
-                                <div class="item-title">{{ event.title }}</div>
-                                <div class="item-date">{{ event.date_event_start }} ~ {{ event.date_event_end }}</div>
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="far fa-calendar-xmark"></i>
-                    <p>진행 중인 이벤트가 없습니다.</p>
-                </div>
-            {% endif %}
-        </section>
+        <!-- Main Center Image (Figma reference) -->
+        <div class="main-center">
+            <img src="{% static 'image/main_center_img.png' %}" alt="Main Center" class="main-center-img">
+        </div>
 
-        <section class="info-section">
-            <div class="section-header">
-                <h2><i class="fas fa-bullhorn"></i> 공지사항</h2>
+        <!-- Advertisement Placeholder -->
+        <div class="ad-placeholder">
+            <!-- This section can be used for future ads -->
+        </div>
+
+        <!-- Main Chat Section -->
+        <div class="main-chat-section">
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <span class="chat-placeholder">메이플에 관해서 궁금한게 있나요? 정령에게 메세지를 보내보세요!</span>
+                    <img src="{% static 'image/돌의정령.png' %}" alt="Spirit" class="spirit-icon">
+                </div>
             </div>
-            {% if notice_info and notice_info.notice %}
-                <div class="content-list">
-                    {% for notice in notice_info.notice %}
-                        <div class="content-item">
-                            <a class="item-link" href="{{ notice.url }}" target="_blank" rel="noopener">
-                                <div class="item-title">{{ notice.title }}</div>
-                                <div class="item-date">{{ notice.date }}</div>
-                            </a>
+        </div>
+
+        <!-- Suggested Questions -->
+        <div class="suggested-questions">
+            <div class="question-bubble"><i class="fas fa-search"></i> 메르세데스 4차 스킬트리 알려줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 180렙 신궁 사냥터 추천해줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 뇌전 드랍장소 알려줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 핑크색 치장 아이템 추천해줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 전사 직업 추천해줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 메소 버는법 알려줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 지금 메소 시세 알려줘.</div>
+            <div class="question-bubble"><i class="fas fa-search"></i> 메르세데스 4차 스킬트리 알려줘.</div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Event Section -->
+                <div class="content-section">
+                    <h2 class="section-title">EVENT</h2>
+                    <div class="event-banners">
+                        <div class="event-banner event-1">
+                            <div class="event-content">
+                                <h3>What's NEXT</h3>
+                                <div class="event-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.12.05 ~ 2024.12.18</span>
+                                </div>
+                            </div>
                         </div>
-                    {% endfor %}
+                        <div class="event-banner event-2">
+                            <div class="event-content">
+                                <h3>(수정) 스페셜 월드</h3>
+                                <div class="event-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2024.12.19</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="event-banner event-3">
+                            <div class="event-content">
+                                <h3>직업 탄지로 육성 이벤트</h3>
+                                <div class="event-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2024.12.19</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="event-banner event-4">
+                            <div class="event-content">
+                                <h3>탄지로의 모험일지</h3>
+                                <div class="event-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2024.12.19</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="navigation-dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                    </div>
                 </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="far fa-newspaper"></i>
-                    <p>공지사항이 없습니다.</p>
+
+                <!-- Cash Shop Section -->
+                <div class="content-section">
+                    <h2 class="section-title">CASH SHOP</h2>
+                    <div class="cash-banners">
+                        <div class="cash-banner cash-1">
+                            <div class="cash-content">
+                                <h3>11월 21일 캐시아이템 업데이트<br>그랜드 컬렉션</h3>
+                                <div class="cash-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2025.01.02</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cash-banner cash-2">
+                            <div class="cash-content">
+                                <h3>미스틱 컬렉션</h3>
+                                <div class="cash-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2025.01.02</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cash-banner cash-3">
+                            <div class="cash-content">
+                                <h3>스페셜 루나 크리스탈</h3>
+                                <div class="cash-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2024.11.21 ~ 2025.01.02</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cash-banner cash-4">
+                            <div class="cash-content">
+                                <h3>프리미엄 헤어&성형 쿠폰</h3>
+                                <div class="cash-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>상시판매</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="navigation-dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                    </div>
                 </div>
-            {% endif %}
-        </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Overall Ranking -->
+                <div class="ranking-section">
+                    <h2 class="ranking-title">종합(일반) TOP 10</h2>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <span class="rank">1</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어괴물</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">2</span>
+                            <div class="character-icon job-adele"></div>
+                            <span class="character-name">안녕하세요</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">3</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어물괴</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">4</span>
+                            <div class="character-icon job-adele"></div>
+                            <span class="character-name">안녕하세요</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">5</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어물괴</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combat Power Ranking -->
+                <div class="ranking-section">
+                    <h2 class="ranking-title">전투력 TOP 10</h2>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <span class="rank">1</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어괴물</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">2</span>
+                            <div class="character-icon job-adele"></div>
+                            <span class="character-name">안녕하세요</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">3</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어물괴</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">4</span>
+                            <div class="character-icon job-adele"></div>
+                            <span class="character-name">안녕하세요</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <span class="rank">5</span>
+                            <div class="character-icon job-luna"></div>
+                            <span class="character-name">오징어물괴</span>
+                            <div class="character-info">
+                                <span class="server">루나</span>
+                                <span class="level">Lv.299</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <span>홈</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <span>CHAT BOT</span>
+            </div>
+            <div class="nav-item">
+                <span>캐릭터 검색</span>
+            </div>
+            <div class="nav-item">
+                <span>큐브</span>
+            </div>
+            <div class="nav-item">
+                <span>스타포스</span>
+            </div>
+            <div class="nav-item">
+                <span>(API 연동)</span>
+            </div>
+            <div class="user-menu">
+                <span class="user-text">내정보</span>
+                <div class="user-divider"></div>
+                <span class="user-text">로그아웃</span>
+            </div>
+        </div>
+
+        <!-- Side Characters -->
+        <div class="side-characters">
+            <img src="{% static 'image/Polygon1.png' %}" alt="Character Left" class="char-left">
+            <img src="{% static 'image/Polygon2.png' %}" alt="Character Right" class="char-right">
+        </div>
+
+        <!-- Chat Bubble -->
+        <div class="chat-bubble">
+            <span>아무거나 물어봐욤!</span>
+        </div>
+
+        <!-- Floating Elements -->
+        <div class="floating-elements">
+            <img src="{% static 'image/물의정령.png' %}" alt="Spirit" class="floating-spirit">
+            <img src="{% static 'image/말풍선.png' %}" alt="Bubble" class="floating-bubble">
+        </div>
     </div>
-{% endblock %}
 
-{% block scripts %}
     <script src="{% static 'js/main_page.js' %}"></script>
-{% endblock %}
+</body>
+</html>
