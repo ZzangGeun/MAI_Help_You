@@ -6,4 +6,5 @@ debug.log
 *.csv
 fine_tuned_model/
 *.pyc
+offload_cache/
 
