@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from model import ask_question
+from .model import ask_question
 
 router = APIRouter()
 
