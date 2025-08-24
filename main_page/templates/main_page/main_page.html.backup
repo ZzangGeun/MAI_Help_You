@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}메이플스토리 AI 어시스턴트{% endblock %}
+
+{% block head_extra %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main_page.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero -->
+    <section class="hero-section">
+        <div class="hero-visual" aria-hidden="true"></div>
+        <div class="hero-content">
+            <h1>메이플스토리 정보탐색 챗봇</h1>
+            <p>정령에게 무엇이든 물어보세요. 공략, 장비, 히스토리까지 한 번에!</p>
+            <div class="hero-buttons">
+                <a class="btn-login" href="{% url 'chatbot' %}"><i class="fas fa-comments"></i> 챗봇 시작하기</a>
+                <a class="btn-login" style="background:linear-gradient(45deg,#FFAE35,#FF7A18)" href="{% url 'character_info' %}"><i class="fas fa-user"></i> 캐릭터 검색</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search -->
+    <section class="search-section">
+        <div class="search-container">
+            <h2>캐릭터를 바로 검색해보세요</h2>
+            <form class="search-form" action="{% url 'character_info' %}" method="GET">
+                <div class="search-input-group">
+                    <input id="character_name" type="text" name="character_name" placeholder="캐릭터 이름을 입력하세요" required>
+                    <button class="search-btn" type="submit"><i class="fas fa-search"></i> 검색</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+        <section class="info-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-alt"></i> 이벤트 정보</h2>
+            </div>
+            {% if event_info and event_info.event_notice %}
+                <div class="content-list">
+                    {% for event in event_info.event_notice %}
+                        <div class="content-item">
+                            <a class="item-link" href="{{ event.url }}" target="_blank" rel="noopener">
+                                <div class="item-title">{{ event.title }}</div>
+                                <div class="item-date">{{ event.date_event_start }} ~ {{ event.date_event_end }}</div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="far fa-calendar-xmark"></i>
+                    <p>진행 중인 이벤트가 없습니다.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="info-section">
+            <div class="section-header">
+                <h2><i class="fas fa-bullhorn"></i> 공지사항</h2>
+            </div>
+            {% if notice_info and notice_info.notice %}
+                <div class="content-list">
+                    {% for notice in notice_info.notice %}
+                        <div class="content-item">
+                            <a class="item-link" href="{{ notice.url }}" target="_blank" rel="noopener">
+                                <div class="item-title">{{ notice.title }}</div>
+                                <div class="item-date">{{ notice.date }}</div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="far fa-newspaper"></i>
+                    <p>공지사항이 없습니다.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/main_page.js' %}"></script>
+{% endblock %}
