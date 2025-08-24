@@ -1,206 +1,104 @@
 # 코파일럿 지침 (MAI 프로젝트)
 
 ## 목적
-- Django + LlamaIndex (RAG) 프로젝트에서 AI 코딩 에이전트가 생산적으로 협업할 수 있도록 지원.
-- 선택적으로 FastAPI 마이크로서비스도 제공.
+메이플스토리 AI 챗봇 - Django + LlamaIndex(RAG) + PostgreSQL(pgvector) 기반 프로젝트에서 AI 코딩 에이전트의 생산적 협업 지원
 
----
+## 핵심 아키텍처
+**HTTP 요청 → `chatbot/views.py` → `ChatbotService` (`chatbot/services.py`) → `RagEngine` (`chatbot/rag_engine.py`) → PostgreSQL 벡터DB → LLM**
 
-## 전체 구조
-- Django 프로젝트 `MAI`  
-  - 앱: `chatbot`, `character_info`, `main_page`
-- 채팅 플로우:  
-  **HTTP 요청 → `chatbot/views.py` → `ChatbotService` (`chatbot/services.py`) → LlamaIndex QueryEngine → PostgreSQL 벡터DB → LLM**
-- RAG 데이터: `MAI_db/json_data/**`  
-  - 최초 실행 시 인덱스를 생성해 PostgreSQL에 저장  
-  - 이후에는 지속적으로 PostgreSQL에서 로드
-- 선택적 모드: `fastapi_model/`에서 별도의 API 제공 (유사한 HuggingFace 모델 로직 활용)
+### 프로젝트 구조 (실제)
+```
+MAI/                     # Django 메인 프로젝트
+├── chatbot/             # 챗봇 앱 (RAG + LLM 통합)
+├── character_info/      # 넥슨 API 캐릭터 정보
+├── main_page/          # 메인 페이지 
+apps/                   # 추가 앱들
+├── character/, chatbot/, main/
+fastapi_model/          # 선택적 FastAPI 마이크로서비스
+config/                 # 환경 설정 모듈
+├── env.py              # PostgreSQL/RAG/LLM 설정
+```
 
----
+## 핵심 패턴
 
-## 주요 파일/디렉토리
-- `MAI/settings.py`:  
-  - `.env` 로드 (`dotenv` 사용)  
-  - 기본 DB: SQLite  
-  - 환경 변수: `SECRET_KEY`, `NEXON_API_KEY`, `OPENAI_API_KEY`, `HUGGINGFACE_TOKEN`
-- `chatbot/services.py`:  
-  - RAG + LLM 코어 로직  
-  - 엔트리포인트:  
-    - `ChatbotService.get_response()`  
-    - `get_chat_history()`  
-    - `clear_history()`
-- `chatbot/views.py` + `chatbot/urls.py`:  
-  - `/chatbot/ask/`  
-  - `/chatbot/history/`  
-  - `/chatbot/clear-history/`  
-  - `/chatbot/health/`
-- `fastapi_model/{main.py, routes.py, model.py}`  
-  - FastAPI 별도 실행 진입점 (`uvicorn main:app`)
-- `MAI_db/json_data/`: RAG 원천 데이터
-- PostgreSQL DB: 벡터 저장소 (pgvector 확장 사용)
+### 1. 모듈 설계 (중요)
+- **`config/env.py`**: 모든 환경 설정을 중앙화 (`get_pg_config()`, `get_rag_config()`, `get_llm_config()`)
+- **`chatbot/services.py`**: 모듈 import 시 `chatbot_service = ChatbotService()` 싱글톤 초기화
+- **`chatbot/rag_engine.py`**: LlamaIndex + pgvector 래퍼, PostgreSQL 테이블 자동 생성
 
----
-
-## LLM / RAG 동작
-- `chatbot/services.py`에서 `chatbot_service = ChatbotService()`를 모듈 import 시점에 초기화 → 모델 및 메모리는 싱글톤처럼 동작
-- `CustomLLM`:  
-  - 로컬 파인튜닝 모델 (`fine_tuned_model/fine_tuned_model`)을 우선 시도  
-  - 없으면 `Qwen/Qwen3-8B`로 폴백
-- 임베딩: `sentence-transformers/all-MiniLM-L6-v2` (CPU)  
-- Retriever: `top_k=3`
-- 최초 실행 시:  
-  - `MAI_db/json_data/**` → LlamaIndex 인덱싱 → PostgreSQL에 저장  
-- Hugging Face Hub 로그인 필요 (`HUGGINGFACE_TOKEN`)
-
----
-
-## 개발 워크플로우 (Windows CMD)
-- 설치:  
-  ```bash
-  pip install -r requirements.txt
-
-
-# 코파일럿 지침 (MAI 프로젝트)
-
-## 목적
-- Django + LlamaIndex (RAG) 프로젝트에서 AI 코딩 에이전트가 생산적으로 협업할 수 있도록 지원.
-- 선택적으로 FastAPI 마이크로서비스도 제공.
-
----
-
-## 전체 구조
-- Django 프로젝트 `MAI`  
-  - 앱: `chatbot`, `character_info`, `main_page`
-- 채팅 플로우:  
-  **HTTP 요청 → `chatbot/views.py` → `ChatbotService` (`chatbot/services.py`) → LlamaIndex QueryEngine → PostgreSQL 벡터DB → LLM**
-- RAG 데이터: `MAI_db/json_data/**`  
-  - 최초 실행 시 인덱스를 생성해 PostgreSQL에 저장  
-  - 이후에는 지속적으로 PostgreSQL에서 로드
-- 선택적 모드: `fastapi_model/`에서 별도의 API 제공 (유사한 HuggingFace 모델 로직 활용)
-
----
-
-## 주요 파일/디렉토리
-- `MAI/settings.py`:  
-  - `.env` 로드 (`dotenv` 사용)  
-  - 기본 DB: SQLite  
-  - 환경 변수: `SECRET_KEY`, `NEXON_API_KEY`, `OPENAI_API_KEY`, `HUGGINGFACE_TOKEN`
-- `chatbot/services.py`:  
-  - RAG + LLM 코어 로직  
-  - 엔트리포인트:  
-    - `ChatbotService.get_response()`  
-    - `get_chat_history()`  
-    - `clear_history()`
-- `chatbot/views.py` + `chatbot/urls.py`:  
-  - `/chatbot/ask/`  
-  - `/chatbot/history/`  
-  - `/chatbot/clear-history/`  
-  - `/chatbot/health/`
-- `fastapi_model/{main.py, routes.py, model.py}`  
-  - FastAPI 별도 실행 진입점 (`uvicorn main:app`)
-- `MAI_db/json_data/`: RAG 원천 데이터
-- PostgreSQL DB: 벡터 저장소 (pgvector 확장 사용)
-
----
-
-## LLM / RAG 동작
-- `chatbot/services.py`에서 `chatbot_service = ChatbotService()`를 모듈 import 시점에 초기화 → 모델 및 메모리는 싱글톤처럼 동작
-- `CustomLLM`:  
-  - 로컬 파인튜닝 모델 (`fine_tuned_model/fine_tuned_model`)을 우선 시도  
-  - 없으면 `deepseek-ai/DeepSeek-R1-0528-Qwen3-8B`로 폴백
-- 임베딩: `sentence-transformers/all-MiniLM-L6-v2` (CPU)  
-- Retriever: `top_k=3`
-- 최초 실행 시:  
-  - `MAI_db/json_data/**` → LlamaIndex 인덱싱 → PostgreSQL에 저장  
-- Hugging Face Hub 로그인 필요 (`HUGGINGFACE_TOKEN`)
-
----
-
-## 개발 워크플로우 (Windows CMD)
-- 설치:  
-  ```bash
-  pip install -r requirements.txt
-
-cd fastapi_model
-uvicorn main:app --reload --port 8001
-
-SECRET_KEY=...
+### 2. 환경 변수 패턴 (.env 필수)
+```bash
+# 필수
 HUGGINGFACE_TOKEN=...
-NEXON_API_KEY=...
-OPENAI_API_KEY=...
+SECRET_KEY=...
 
-RAG 데이터 갱신:
+# PostgreSQL (pgvector)
+PG_HOST=localhost / PGHOST=localhost
+PG_DB=postgres / PGDATABASE=postgres
+PG_USER=postgres / PGUSER=postgres
+PG_PASSWORD=... / PGPASSWORD=...
 
-MAI_db/json_data/에 JSON 추가
+# 선택적
+LOCAL_MODEL_PATH=fine_tuned_model/merged_qwen
+HF_BASE_MODEL=deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
+```
 
-PostgreSQL 벡터 인덱스 재생성
+### 3. LLM 모델 로딩 우선순위 (`CustomLLM`)
+1. 로컬 파인튜닝 모델 (`fine_tuned_model/merged_qwen/`)
+2. HuggingFace 공개 모델 (`deepseek-ai/DeepSeek-R1-0528-Qwen3-8B`)
+3. **중요**: tokenizer에 `pad_token = eos_token` 자동 설정
 
-규칙 및 주의사항
+### 4. RAG 동작 패턴
+- **임베딩**: `sentence-transformers/all-MiniLM-L6-v2` (384차원, CPU)
+- **초기화**: 첫 실행 시 RAG 데이터 → pgvector 인덱싱 → 이후 DB 로드
+- **검색**: `top_k=3` 유사 문서 반환
 
-요청마다 모델 재초기화 금지 → chatbot_service 재사용
+## 주요 API 엔드포인트
+- `POST /chatbot/ask/`: 챗봇 질문 처리 (JSON: `{"question": "...", "user_id": "..."}`)
+- `GET /chatbot/history/`: 대화 히스토리 조회
+- `POST /chatbot/clear-history/`: 히스토리 초기화
+- FastAPI 대안: `POST /api/chat` (포트 8001)
 
-PostgreSQL 벡터 인덱스 경로/스키마 일관성 유지
+## 개발 워크플로우 (Windows)
 
-Windows 전용 경로 (CustomLLM.model_path)는 .env로 관리하도록 개선 권장
+### 필수 설정
+```cmd
+# 의존성 설치
+pip install -r requirements.txt
 
-Tokenizer는 pad_token = eos_token 설정 필요 (이미 코드 반영됨)
+# PostgreSQL pgvector 확장 활성화 (DB에서)
+CREATE EXTENSION IF NOT EXISTS vector;
 
-FastAPI CORS 허용: http://localhost:8000, http://127.0.0.1:8000
+# Django 서버 시작
+python manage.py runserver
 
-기본 DB는 SQLite (마이그레이션은 Django 표준 사용)
+# FastAPI 서버 (선택적)
+cd fastapi_model && uvicorn main:app --reload --port 8001
+```
 
-확장 방법
+### FastAPI Import 패턴 (중요)
+`fastapi_model/main.py`에서 **상대 import 사용**: `from .routes import router`
+- Python 패키지 충돌 방지 (시스템 `routes` vs 프로젝트 `routes.py`)
 
-새로운 챗봇 엔드포인트 추가:
+## 핵심 주의사항
 
-chatbot/views.py에 뷰 작성
+### ✅ 반드시 지킬 것
+1. **싱글톤 패턴**: `chatbot_service` 재사용 (요청마다 모델 재로딩 금지)
+2. **환경 변수**: 모든 설정은 `.env`에서 관리 (하드코딩 금지)
+3. **PostgreSQL 일관성**: pgvector 테이블명/스키마 변경 시 전체 동기화
 
-chatbot/urls.py에 라우트 등록
+### ❌ 피해야 할 것
+- 로컬 모델 경로 하드코딩 (폴백 로직 필수)
+- 요청 시마다 RAG 인덱스 재생성
+- FastAPI import에서 절대 경로 사용
 
-내부에서 chatbot_service.get_response() 호출
+### 디버깅 체크리스트
+1. **환경 변수**: `HUGGINGFACE_TOKEN` 설정 확인
+2. **PostgreSQL**: pgvector 확장 설치/활성화 확인
+3. **모델 로딩**: 로컬 → HuggingFace 폴백 로그 확인
+4. **RAG**: 첫 실행 시 인덱싱 완료 대기
 
-임베딩/모델 교체:
-
-chatbot/services.py 수정
-
-FastAPI 경로(fastapi_model/model.py)도 함께 변경
-
-RAG 데이터 경로 변경:
-
-json_data 경로 및 PostgreSQL 저장 위치 일관되게 수정
-
-외부 연동
-
-넥슨 API: NEXON_API_KEY (참고: main_page/get_nexon_api.py)
-
-Hugging Face Hub: HUGGINGFACE_TOKEN
-
-Do / Don’t
-
-✅ 할 것
-
-환경 변수는 반드시 .env에 설정 (하드코딩 금지)
-
-모델 초기화는 단일 인스턴스 유지 (요청마다 새로 로드 X)
-
-❌ 하지 말 것
-
-PostgreSQL 벡터 인덱스 스키마/위치 변경 (일관성 깨짐)
-
-로컬 파인튜닝 모델 경로 존재를 가정하지 말 것 (폴백 처리 필요)
-
-스모크 테스트
-
-Django 실행
-
-/chatbot/ 접속
-
-/chatbot/ask/에 POST 요청:
-{ "question": "테스트" }
-
-JSON 응답 확인:
-
-정상 응답
-
-PostgreSQL에 벡터 인덱스가 존재하면 
-has_rag = true
+## 확장 가이드
+- **새 챗봇 기능**: `chatbot/views.py` → `chatbot_service.get_response()` 호출
+- **모델 교체**: `config/env.py` 설정 변경 + `chatbot/services.py` 수정
+- **RAG 데이터 추가**: PostgreSQL 벡터 인덱스 재생성 필요
