@@ -125,27 +125,6 @@ paths:
                   job: { type: string, example: 히어로 }
                   owner: { type: integer, example: 1 }
 
-  /character/{id}/growth-tips/:
-    get:
-      summary: 캐릭터 성장 팁 조회
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-      responses:
-        "200":
-          description: 성장 팁 리스트
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  character_id: { type: integer, example: 101 }
-                  tips:
-                    type: array
-                    items: { type: string }
-
   /main/notice/:
     get:
       summary: 공지사항 조회
@@ -177,26 +156,6 @@ paths:
                 properties:
                   status: { type: string, example: ok }
                   timestamp: { type: string, format: date-time }
-
-  /token-usage/:
-    get:
-      summary: 토큰 사용량 조회
-      parameters:
-        - in: query
-          name: user_id
-          required: true
-          schema: { type: integer }
-      responses:
-        "200":
-          description: 토큰 사용량 정보
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user_id: { type: integer }
-                  total_tokens: { type: integer, example: 3521 }
-                  last_updated: { type: string, format: date-time }
 
 components:
   securitySchemes:
