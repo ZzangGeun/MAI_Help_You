@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #e89611 0%, #d4840a 100%);
+            padding: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e89611;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .search-input {
+            padding: 8px 40px 8px 15px;
+            border: none;
+            border-radius: 20px;
+            width: 250px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Navigation */
+        .navigation {
+            background: linear-gradient(135deg, #f4d4a7 0%, #e6c799 100%);
+            padding: 5px 0;
+            border-bottom: 1px solid #d4a574;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 0 20px;
+            height: 100%;
+        }
+
+        .nav-item {
+            color: #8b4513;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 16px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #e89611;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(232, 150, 17, 0.2);
+            color: #e89611;
+        }
+
+        .nav-item:hover::before, .nav-item.active::before {
+            width: 80%;
+        }
+
+        .user-info {
+            margin-left: auto;
+            color: #8b4513;
+            font-size: 14px;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 20px;
+            padding: 20px;
+            align-items: start;
+        }
+
+        /* Left Sidebar - Chat History */
+        .left-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chat-history-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .chat-history-header {
+            background: linear-gradient(135deg, #E6A12C 0%, #d4921f 100%);
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-history-content {
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .history-date {
+            font-family: 'Pretendard';
+            font-weight: 500;
+            font-size: 15px;
+            color: #E6A12C;
+            margin-bottom: 8px;
+        }
+
+        .history-text {
+            font-family: 'Pretendard';
+            font-weight: 300;
+            font-size: 14px;
+            line-height: 17px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        /* User Profile Section */
+        .user-profile-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 12px;
+            border: 3px solid #E6A12C;
+            width: 100%;
+            max-width: 250px;
+            height: fit-content;
+            position: relative;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .profile-avatar {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px solid #E6A12C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            box-shadow: 0 4px 12px rgba(230, 161, 44, 0.3);
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .profile-name {
+            font-family: 'Pretendard';
+            font-weight: 600;
+            font-size: 13px;
+            color: #000;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .profile-server {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: white;
+            border: 1px solid #E6A12C;
+            color: #5E5E5E;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-family: 'Pretendard';
+            font-weight: 500;
+            font-size: 10px;
+            letter-spacing: -0.02em;
+            width: fit-content;
+        }
+
+        .server-icon {
+            width: 8px;
+            height: 8px;
+            background: url('luna.png') center/cover;
+            border-radius: 1px;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: #F4D5B1;
+            margin: 2px 0;
+        }
+
+        .profile-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1px 0;
+        }
+
+        .stat-label {
+            font-family: 'Pretendard';
+            font-weight: 400;
+            font-size: 10px;
+            line-height: 1.2;
+            color: #666;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-value {
+            font-family: 'Pretendard';
+            font-weight: 600;
+            font-size: 10px;
+            line-height: 1.2;
+            color: #000;
+            letter-spacing: -0.02em;
+            text-align: right;
+            max-width: 65%;
+            word-break: keep-all;
+        }
+
+        .detail-link {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-family: 'Pretendard';
+            font-weight: 400;
+            font-size: 10px;
+            line-height: 1.2;
+            color: #5E5E5E;
+            text-decoration: underline;
+            letter-spacing: -0.02em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 6px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .detail-link:hover {
+            color: #E6A12C;
+            background: rgba(230, 161, 44, 0.1);
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .search-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            gap: 15px;
+            background: white;
+            border: 2px solid #E6A12C;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .search-button:hover {
+            background: #fff8f0;
+            transform: translateY(-1px);
+        }
+
+        .search-text {
+            font-family: 'Pretendard';
+            font-weight: 500;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #5E5E5E;
+            letter-spacing: -0.02em;
+        }
+
+        .search-icon {
+            width: 14px;
+            height: 14px;
+            background: #F5A335;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+        }
+
+        /* Main Chat Area - ChatGPT Style */
+        .chat-main {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, #e89611 0%, #d4840a 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .chat-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .chat-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #e89611;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #d4840a;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e89611 0%, #d4840a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtext {
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            max-width: 85%;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .message.bot {
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #e89611;
+            color: white;
+        }
+
+        .message.bot .message-avatar {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-content {
+            background: #e89611;
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* Chat Input Area */
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            padding: 8px 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #e89611;
+        }
+
+        .chat-input-main {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 8px 0;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        .chat-send-main {
+            background: #e89611;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .chat-send-main:hover {
+            background: #d4840a;
+            transform: scale(1.05);
+        }
+
+        .chat-send-main:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Quick Suggestions */
+        .quick-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #666;
+            padding: 8px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-btn:hover {
+            background: #e89611;
+            color: white;
+            border-color: #e89611;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-ad {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-ad:hover {
+            transform: translateY(-5px);
+        }
+
+        .ad-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .ad-subtitle {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 16px;
+        }
+
+
+        /* Send Button */
+        .floating-send-btn {
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            width: 60px;
+            height: 60px;
+            background: #E6A12C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-send-btn:hover {
+            background: #d4921f;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-sidebar, .right-sidebar {
+                display: none;
+            }
+            
+            .chat-main {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 36px;
+            }
+            
+            .main-subtitle {
+                font-size: 24px;
+            }
+            
+            .chat-main {
+                padding: 20px;
+            }
+            
+            .chat-interface {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .chat-input-main {
+                max-width: 100%;
+            }
+            
+            .quick-suggestions {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .suggestion-btn {
+                width: 100%;
+                max-width: 300px;
+                text-align: center;
+            }
+
+            .mascot-container {
+                width: 100%;
+                position: relative;
+            }
+
+            .speech-bubble {
+                font-size: 16px;
+                padding: 20px 90px 20px 25px;
+                min-height: 50px;
+            }
+
+            .mascot {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+                bottom: -12px;
+                right: -12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="test.html" class="logo" style="text-decoration: none; color: inherit;">
+                <div class="logo-icon">MAI</div>
+                Maple Story Chatbot
+            </a>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="캐릭터 닉네임">
+                <button class="search-btn">🔍</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <a href="test.html" class="nav-item">홈</a>
+            <a href="page2.html" class="nav-item active">CHAT BOT</a>
+            <a href="#" class="nav-item">캐릭터 검색</a>
+            <a href="#" class="nav-item">큐브</a>
+            <a href="#" class="nav-item">스타포스</a>
+            <a href="#" class="nav-item">(API 연동)</a>
+            <div class="user-info">내정보 | 로그아웃</div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar - Chat History -->
+        <aside class="left-sidebar">
+            <!-- Chat History -->
+            <div class="chat-history-container">
+                <div class="chat-history-header">CHAT BOT HISTORY</div>
+                <div class="chat-history-content">
+                    <div class="history-item">
+                        <div class="history-date">최근</div>
+                        <div class="history-text">고객 여러분의 목소리를 듣기 위해 설문조사를 진행합니다. 본 설문조사는 서비스 개선을 위한 중요한 자료로 활용될 예정이며, 참여해 주신 분들께는 추첨을 통해 소정의 선물을 드립니다. 설문에 소요되는 시간은 약 5분입니다. 많은 참여 부탁드립니다!</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-date">7일전</div>
+                        <div class="history-text">고객 여러분의 목소리를 듣기 위해 설문조사를 진행합니다. 본 설문조사는 서비스 개선을 위한 중요한 자료로 활용될 예정.</div>
+                        <div class="history-text">고객 설문조사 참여 요청</div>
+                        <div class="history-text">활용될 예정이며, 참여해 주신 분들께는 추첨을 통해 소정의 선물을 드립니다.</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-date">30일전</div>
+                        <div class="history-text">고객 여러분의 목소리를 듣기 위해 설문조사를 진행합니다.</div>
+                        <div class="history-text">본 설문조사는 서비스 개선을 위한 중요한 자료로 활용될 예정입니다.</div>
+                        <div class="history-text">많은 관심과 참여 부탁드립니다.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="user-profile-container">
+                <div class="detail-link">상세보기></div>
+                <div class="profile-section">
+                    <div class="profile-avatar">🧙‍♂️</div>
+                    <div class="profile-info">
+                        <div class="profile-name-section">
+                            <div class="profile-name">오지환</div>
+                            <div class="profile-server">
+                                <div class="server-icon"></div>
+                                <span>루나</span>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="profile-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">레벨</span>
+                                <span class="stat-value">299</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="stat-row">
+                                <span class="stat-label">직업</span>
+                                <span class="stat-value">키네시스</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="stat-row">
+                                <span class="stat-label">인기도</span>
+                                <span class="stat-value">28,825</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="stat-row">
+                                <span class="stat-label">전투력</span>
+                                <span class="stat-value">2억 582만 5654</span>
+                            </div>
+                            <div class="divider"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <div class="search-button">
+                        <span class="search-text">캐릭터 검색</span>
+                        <div class="search-icon">🔍</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-title">메이플스토리 정보탐색 ChatBot</div>
+                <div class="chat-subtitle">메이플스토리에 관한 모든 것을 물어보세요!</div>
+            </div>
+            
+            <!-- Chat Messages Area -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Message -->
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="welcome-icon">🧚‍♀️</div>
+                    <div class="welcome-text">안녕하세요! 메이플스토리 정령이에요!</div>
+                    <div class="welcome-subtext">스킬, 사냥터, 장비, 보스 공략 등 메이플스토리에 관한 모든 것을 물어보세요.</div>
+                    
+                    <!-- Quick Suggestions -->
+                    <div class="quick-suggestions">
+                        <button class="suggestion-btn" onclick="fillInput('메르세데스 4차 스킬트리 알려줘.')">메르세데스 4차 스킬트리</button>
+                        <button class="suggestion-btn" onclick="fillInput('180렙 신궁 사냥터 추천해줘.')">180렙 신궁 사냥터</button>
+                        <button class="suggestion-btn" onclick="fillInput('뇌전 드랍장소 알려줘.')">뇌전 드랍장소</button>
+                        <button class="suggestion-btn" onclick="fillInput('핑크색 치장 아이템 추천해줘.')">핑크색 치장 아이템</button>
+                        <button class="suggestion-btn" onclick="fillInput('메르세데스로 뒤엉킨 파편을 한번에 죽이기위한 공력 알려줘.')">파편 원킬 공격력</button>
+                        <button class="suggestion-btn" onclick="fillInput('보스 몬스터 추천해줘.')">보스 몬스터 추천</button>
+                    </div>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="message bot" id="typingIndicator" style="display: none;">
+                    <div class="message-avatar">🧚‍♀️</div>
+                    <div class="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Input Container -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea class="chat-input-main" placeholder="메이플스토리에 관해 궁금한 것을 물어보세요..." id="mainChatInput" rows="1"></textarea>
+                    <button class="chat-send-main" onclick="sendMainMessage()" id="sendButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="sidebar-ad">
+                <div class="ad-title">🎮 메이플스토리</div>
+                <div class="ad-subtitle">윈터 이벤트 진행중!</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Floating Send Button -->
+    <div class="floating-send-btn" onclick="scrollToChat()">💬</div>
+
+    <script>
+        let chatHistory = [];
+        let isTyping = false;
+
+        // Auto-resize textarea
+        function autoResize() {
+            const textarea = document.getElementById('mainChatInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+
+        // Fill input with suggestion
+        function fillInput(text) {
+            const input = document.getElementById('mainChatInput');
+            if (input) {
+                input.value = text;
+                input.focus();
+                autoResize();
+            }
+        }
+
+        // Add message to chat
+        function addMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            // Hide welcome message on first chat
+            if (welcomeMessage && chatHistory.length === 0) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🧚‍♀️';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = message;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'none';
+        }
+
+        // Simulate AI response
+        function simulateResponse(userMessage) {
+            if (isTyping) return;
+            
+            isTyping = true;
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                
+                let response = "죄송해요, 현재 실제 AI 응답 기능은 구현 중입니다. 곧 실제 메이플스토리 정보를 제공할 수 있을 거예요! 🎮";
+                
+                // Simple keyword responses
+                if (userMessage.includes('메르세데스')) {
+                    response = "🏹 메르세데스는 궁수 계열 직업으로, 높은 기동성과 아름다운 스킬 이펙트가 특징입니다!\n\n4차 전직 후 다양한 연계 스킬을 사용할 수 있어요:\n• 이슈타르의 링\n• 스피릿 인퓨전\n• 고급 퀴버\n• 레전드리 스피어\n\n궁수 직업 중에서도 화려한 스킬 연계가 매력적인 직업이에요! ✨";
+                } else if (userMessage.includes('사냥터')) {
+                    response = "🗺️ 180레벨 신궁 추천 사냥터를 알려드릴게요!\n\n**아케인리버 지역:**\n• 츄츄 아일랜드 - 코코넛 해변\n• 츄츄 아일랜드 - 슬라임 언덕\n\n**기타 추천 지역:**\n• 라헬 - 사막 지역\n• 루디브리엄 - 시계탑 상층부\n\n경험치 효율과 메소 수급을 고려했을 때 츄츄 아일랜드를 추천드려요! 🎯";
+                } else if (userMessage.includes('뇌전')) {
+                    response = "⚡ 뇌전은 고급 장비로, 다음 보스들에게서 드랍됩니다:\n\n**주요 드랍 보스:**\n• 자쿠무 (노말/카오스)\n• 혼테일 (노말/카오스)\n• 피아누스\n• 블러디 퀸\n\n**드랍 확률:**\n• 자쿠무에서 가장 높은 확률\n• 카오스 버전에서 더 높은 드랍률\n\n매일 보스를 처치하면서 운을 시험해보세요! 🎲";
+                } else if (userMessage.includes('보스')) {
+                    response = "👹 레벨대별 추천 보스를 알려드릴게요!\n\n**초보자 (120-150레벨):**\n• 자쿠무 (노말)\n• 혼테일 (노말)\n• 매그너스 (이지)\n\n**중급자 (150-200레벨):**\n• 피아누스\n• 반반\n• 카오스 자쿠무\n\n**고급자 (200레벨 이상):**\n• 카오스 혼테일\n• 하드 매그너스\n• 시그너스\n\n본인의 레벨과 장비에 맞는 보스를 선택하세요! 💪";
+                } else if (userMessage.includes('치장') || userMessage.includes('핑크')) {
+                    response = "💗 핑크색 치장 아이템 추천드릴게요!\n\n**헤어/성형:**\n• 핑크 트윈테일\n• 러블리 핑크 헤어\n• 분홍 포니테일\n\n**얼굴 장식:**\n• 핑크 하트 안경\n• 러블리 블러셔\n• 분홍 리본\n\n**전신 의상:**\n• 핑크 원피스 세트\n• 러블리 핑크 교복\n• 분홍 파티 드레스\n\n캐시샵에서 확인해보세요! ✨";
+                }
+                
+                addMessage(response, false);
+                isTyping = false;
+            }, 1000 + Math.random() * 2000); // Random delay 1-3 seconds
+        }
+
+        // Send message
+        function sendMainMessage() {
+            const input = document.getElementById('mainChatInput');
+            const message = input.value.trim();
+            const sendButton = document.getElementById('sendButton');
+            
+            if (message && !isTyping) {
+                // Add user message
+                addMessage(message, true);
+                chatHistory.push({type: 'user', message: message});
+                
+                // Clear input
+                input.value = '';
+                autoResize();
+                
+                // Disable send button temporarily
+                sendButton.disabled = true;
+                
+                // Simulate AI response
+                simulateResponse(message);
+                
+                // Re-enable send button after response
+                setTimeout(() => {
+                    sendButton.disabled = false;
+                }, 3000);
+            }
+        }
+
+        // Handle input events
+        function handleInput(event) {
+            const input = event.target;
+            const sendButton = document.getElementById('sendButton');
+            
+            // Auto resize
+            autoResize();
+            
+            // Enable/disable send button
+            sendButton.disabled = input.value.trim() === '' || isTyping;
+            
+            // Handle Enter key
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMainMessage();
+            }
+        }
+
+        function scrollToChat() {
+            const chatMain = document.querySelector('.chat-main');
+            if (chatMain) {
+                chatMain.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Set active navigation item
+        function setActiveNavItem(pageName) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.trim() === pageName) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active nav item for chat bot page
+            setActiveNavItem('CHAT BOT');
+            const mainInput = document.getElementById('mainChatInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            if (mainInput) {
+                mainInput.addEventListener('input', handleInput);
+                mainInput.addEventListener('keydown', handleInput);
+                
+                // Initial state
+                sendButton.disabled = true;
+            }
+
+            // Suggestion button clicks
+            document.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
