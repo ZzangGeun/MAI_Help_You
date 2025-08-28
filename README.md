@@ -35,8 +35,8 @@
 - 반응형 UI (메인/챗봇 페이지)
 
 ### AI/ML
-- 기본 모델: `deepseek-ai/DeepSeek-R1-0528-Qwen3-8B` 또는 로컬 파인튜닝 모델
-- 임베딩: `sentence-transformers/all-MiniLM-L6-v2`
+- 기본 모델: `Qwen3-4B` 또는 로컬 파인튜닝 모델
+- 임베딩: `Qwen-Embedding`
 
 ## 설치 & 실행
 
