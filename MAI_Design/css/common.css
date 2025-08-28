@@ -5,19 +5,19 @@
 
 /* CSS Variables - Theme Colors */
 :root {
-    --primary-color: #e89611;
-    --primary-dark: #d4840a;
-    --accent-color: #E6A12C;
-    --accent-dark: #d4921f;
+    --primary-color: #ffb7c5;
+    --primary-dark: #ff9eb5;
+    --accent-color: #ffc0cb;
+    --accent-dark: #ff91a4;
     --text-primary: #000000;
     --text-secondary: #5E5E5E;
     --text-muted: #666666;
-    --border-light: #F4D5B1;
+    --border-light: #ffeef1;
     --border-gray: #e0e0e0;
-    --background-light: #f8f9fa;
-    --background-gradient: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-    --header-gradient: linear-gradient(135deg, #e89611 0%, #d4840a 100%);
-    --nav-gradient: linear-gradient(135deg, #f4d4a7 0%, #e6c799 100%);
+    --background-light: #fdf8f9;
+    --background-gradient: linear-gradient(135deg, #fef7f8 0%, #fdeef1 100%);
+    --header-gradient: linear-gradient(135deg, #ffb7c5 0%, #ff9eb5 100%);
+    --nav-gradient: linear-gradient(135deg, #ffe4e9 0%, #ffd6de 100%);
     --shadow-light: 0 2px 10px rgba(0,0,0,0.2);
     --shadow-medium: 0 4px 15px rgba(0,0,0,0.1);
     --border-radius-small: 8px;
@@ -192,20 +192,45 @@ body {
     grid-template-columns: 250px 1fr 250px;
     gap: 20px;
     padding: 20px;
-    align-items: start;
+    align-items: stretch;
+    min-height: calc(100vh - 140px);
 }
 
-/* Home Page Layout Override */
+/* Home Page Layout Override - 기본 3컴럼 레이아웃 */
 .home-page .main-container {
     grid-template-columns: 250px 1fr 250px;
     max-width: 1400px;
+    align-items: stretch;
+    min-height: calc(100vh - 140px);
+}
+
+/* 2K 해상도에서 */
+@media (min-width: 1920px) and (max-width: 2559px) {
+    .home-page .main-container {
+        max-width: calc(1600px * var(--container-scale, 1.05));
+        grid-template-columns: calc(260px * var(--component-scale, 1.05)) 1fr calc(260px * var(--component-scale, 1.05));
+        gap: calc(22px * var(--spacing-scale, 1.1));
+        padding: calc(20px * var(--spacing-scale, 1.1));
+    }
+}
+
+/* 4K 해상도에서 */
+@media (min-width: 2560px) {
+    .home-page .main-container {
+        max-width: calc(1800px * var(--container-scale, 1.1));
+        grid-template-columns: calc(280px * var(--component-scale, 1.15)) 1fr calc(280px * var(--component-scale, 1.15));
+        gap: calc(25px * var(--spacing-scale, 1.3));
+        padding: calc(20px * var(--spacing-scale, 1.3));
+    }
 }
 
 /* Sidebar Styles */
 .left-sidebar, .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: calc(20px * var(--spacing-scale, 1));
+    height: 100%;
+    min-height: calc(600px * var(--component-scale, 1));
 }
 
 /* Common Button Styles */
@@ -255,13 +280,14 @@ body {
 .card-header {
     background: var(--accent-color);
     color: white;
-    padding: 12px 20px;
+    padding: calc(12px * var(--spacing-scale, 1)) calc(20px * var(--spacing-scale, 1));
     font-weight: bold;
     text-align: center;
+    font-size: calc(14px * var(--font-scale, 1));
 }
 
 .card-body {
-    padding: 15px;
+    padding: calc(15px * var(--spacing-scale, 1));
 }
 
 /* Floating Action Button */
@@ -290,6 +316,84 @@ body {
 }
 
 /* Responsive Design */
+/* 4K and Ultra-wide Support */
+@media (min-width: 2560px) {
+    :root {
+        --font-scale: 1.2;
+        --spacing-scale: 1.3;
+        --component-scale: 1.15;
+    }
+    
+    body {
+        font-size: calc(14px * var(--font-scale));
+    }
+    
+    .main-container {
+        max-width: 2400px;
+        padding: calc(20px * var(--spacing-scale));
+        gap: calc(20px * var(--spacing-scale));
+    }
+    
+    .header-content {
+        max-width: 2400px;
+        padding: 0 calc(20px * var(--spacing-scale));
+    }
+    
+    .nav-content {
+        max-width: 2400px;
+        padding: 0 calc(20px * var(--spacing-scale));
+    }
+    
+    /* Scale UI components */
+    .logo {
+        font-size: calc(20px * var(--font-scale));
+    }
+    
+    .search-input {
+        width: calc(250px * var(--component-scale));
+        padding: calc(8px * var(--spacing-scale)) calc(40px * var(--spacing-scale)) calc(8px * var(--spacing-scale)) calc(15px * var(--spacing-scale));
+        font-size: calc(14px * var(--font-scale));
+    }
+    
+    .nav-item {
+        padding: calc(6px * var(--spacing-scale)) calc(16px * var(--spacing-scale));
+        font-size: calc(14px * var(--font-scale));
+    }
+    
+    .card-header {
+        padding: calc(12px * var(--spacing-scale)) calc(20px * var(--spacing-scale));
+        font-size: calc(16px * var(--font-scale));
+    }
+    
+    .card-body {
+        padding: calc(15px * var(--spacing-scale));
+    }
+}
+
+/* 2K Resolution (1440p) */
+@media (min-width: 1920px) and (max-width: 2559px) {
+    :root {
+        --font-scale: 1.1;
+        --spacing-scale: 1.1;
+        --component-scale: 1.05;
+    }
+    
+    .main-container {
+        max-width: 1800px;
+        padding: calc(20px * var(--spacing-scale));
+        gap: calc(20px * var(--spacing-scale));
+    }
+    
+    .header-content {
+        max-width: 1800px;
+    }
+    
+    .search-input {
+        width: calc(250px * var(--component-scale));
+        font-size: calc(14px * var(--font-scale));
+    }
+}
+
 @media (max-width: 1024px) {
     .main-container {
         grid-template-columns: 1fr !important;
@@ -302,46 +406,54 @@ body {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --font-scale: 0.9;
+        --spacing-scale: 0.85;
+    }
+    
     .header-content {
         flex-direction: column;
-        gap: 15px;
-        padding: 0 15px;
+        gap: calc(15px * var(--spacing-scale));
+        padding: 0 calc(15px * var(--spacing-scale));
     }
     
     .nav-content {
         flex-wrap: wrap;
-        gap: 15px;
+        gap: calc(15px * var(--spacing-scale));
         justify-content: center;
     }
     
     .search-input {
         width: 200px;
+        font-size: calc(14px * var(--font-scale));
     }
     
     .main-container {
-        padding: 15px;
-        gap: 15px;
+        padding: calc(15px * var(--spacing-scale));
+        gap: calc(15px * var(--spacing-scale));
     }
     
     .character-search-input {
         max-width: 120px;
+        font-size: calc(13px * var(--font-scale));
     }
     
     .login-status-card, .character-search-card {
-        padding: 15px;
+        padding: calc(15px * var(--spacing-scale));
     }
     
     .floating-send-btn {
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
+        bottom: calc(30px * var(--spacing-scale));
+        right: calc(30px * var(--spacing-scale));
+        width: calc(50px * var(--component-scale, 1));
+        height: calc(50px * var(--component-scale, 1));
+        font-size: calc(20px * var(--font-scale));
     }
     
     .user-info {
         order: -1;
         margin: 0;
+        font-size: calc(14px * var(--font-scale));
     }
 }
 
@@ -350,8 +462,10 @@ body {
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: calc(20px * var(--spacing-scale, 1));
+    padding: calc(15px * var(--spacing-scale, 1));
+    max-height: calc(400px * var(--component-scale, 1));
+    overflow: hidden;
 }
 
 /* Character Info Display */
@@ -527,9 +641,14 @@ body {
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: calc(20px * var(--spacing-scale, 1));
+    padding: calc(15px * var(--spacing-scale, 1));
     text-align: center;
+    max-height: calc(350px * var(--component-scale, 1));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .login-form {

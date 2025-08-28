@@ -3,8 +3,58 @@
    채팅 페이지 전용 스타일
 ============================================================================= */
 
+/* Chat Page 4K and Ultra-wide Support */
+@media (min-width: 2560px) {
+    .main-container {
+        max-width: 2400px !important;
+        padding: calc(20px * var(--spacing-scale, 1.3)) !important;
+        gap: calc(25px * var(--spacing-scale, 1.3)) !important;
+        grid-template-columns: calc(280px * var(--component-scale, 1.15)) minmax(calc(1000px * var(--component-scale, 1.15)), 2fr) calc(280px * var(--component-scale, 1.15)) !important;
+    }
+    
+    .chat-main {
+        height: calc(700px * var(--component-scale, 1.15));
+    }
+    
+    .left-ad-banner,
+    .right-ad-banner {
+        width: 200px !important;
+        height: calc(100vh - 140px) !important;
+    }
+}
+
+/* Chat Page 2K Support */
+@media (min-width: 1920px) and (max-width: 2559px) {
+    .main-container {
+        max-width: 1800px !important;
+        padding: calc(20px * var(--spacing-scale, 1.1)) !important;
+        gap: calc(22px * var(--spacing-scale, 1.1)) !important;
+        grid-template-columns: calc(260px * var(--component-scale, 1.05)) minmax(calc(800px * var(--component-scale, 1.05)), 2fr) calc(260px * var(--component-scale, 1.05)) !important;
+    }
+    
+    .chat-main {
+        height: calc(700px * var(--component-scale, 1.05));
+    }
+}
+
 /* Chat Page Specific Ad Banner Adjustments */
 /* Responsive breakpoints for different screen sizes */
+@media (max-width: 1919px) and (min-width: 1600px) {
+    .left-ad-banner,
+    .right-ad-banner {
+        display: block;
+    }
+    
+    .main-container {
+        max-width: 1600px !important;
+        display: grid !important;
+        grid-template-columns: 250px minmax(600px, 1fr) 250px !important;
+        gap: 20px !important;
+        margin: 0 auto !important;
+        padding: 20px !important;
+    }
+}
+
 @media (max-width: 1599px) {
     .left-ad-banner,
     .right-ad-banner {
@@ -65,7 +115,7 @@
 }
 
 /* Show ads on large screens with enough space */
-@media (min-width: 1600px) {
+@media (min-width: 1600px) and (max-width: 1919px) {
     .left-ad-banner,
     .right-ad-banner {
         position: relative !important;
@@ -82,21 +132,59 @@
 }
 
 /* Chat Page Responsive Layout Adjustments */
+/* Ultra-wide and 4K Layout */
+@media (min-width: 2560px) {
+    body {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .main-container {
+        max-width: 2400px;
+        margin: 0 auto;
+        padding: calc(20px * var(--spacing-scale, 1.3));
+        display: grid;
+        grid-template-columns: calc(280px * var(--component-scale, 1.15)) minmax(calc(1000px * var(--component-scale, 1.15)), 2fr) calc(280px * var(--component-scale, 1.15));
+        gap: calc(25px * var(--spacing-scale, 1.3));
+        align-items: start;
+        justify-content: center;
+    }
+}
+
+/* 2K Layout */
+@media (min-width: 1920px) and (max-width: 2559px) {
+    body {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .main-container {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: calc(20px * var(--spacing-scale, 1.1));
+        display: grid;
+        grid-template-columns: calc(260px * var(--component-scale, 1.05)) minmax(calc(800px * var(--component-scale, 1.05)), 2fr) calc(260px * var(--component-scale, 1.05));
+        gap: calc(22px * var(--spacing-scale, 1.1));
+        align-items: start;
+        justify-content: center;
+    }
+}
+
 /* Only adjust layout when ads are shown (1600px+) */
-@media (min-width: 1600px) {
+@media (min-width: 1600px) and (max-width: 1919px) {
     /* Reset any body padding */
     body {
         padding-left: 0;
         padding-right: 0;
     }
     
-    /* 5-column grid layout with ads in columns 1 and 5 */
+    /* 3-column grid layout with independent ad banners */
     .main-container {
         max-width: 1600px;
         margin: 0 auto;
         padding: 20px;
         display: grid;
-        grid-template-columns: 200px 250px minmax(600px, 1fr) 250px 200px;
+        grid-template-columns: 250px minmax(600px, 1fr) 250px;
         gap: 20px;
         align-items: start;
         justify-content: center;
@@ -147,10 +235,10 @@
     }
 }
 
-@media (min-width: 1800px) {
+@media (min-width: 1800px) and (max-width: 1919px) {
     .main-container {
         max-width: 1800px;
-        grid-template-columns: 240px 280px minmax(800px, 1fr) 280px 240px;
+        grid-template-columns: 280px minmax(800px, 1fr) 280px;
         padding: 20px;
     }
     
@@ -445,7 +533,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    height: 700px;
+    height: calc(700px * var(--component-scale, 1));
     position: relative;
     overflow: hidden;
 }
@@ -454,31 +542,31 @@
 .chat-header {
     background: var(--header-gradient);
     color: white;
-    padding: 12px 20px;
+    padding: calc(12px * var(--spacing-scale, 1)) calc(20px * var(--spacing-scale, 1));
     text-align: center;
     border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0;
 }
 
 .chat-title {
-    font-size: 16px;
+    font-size: calc(16px * var(--font-scale, 1));
     font-weight: 600;
-    margin-bottom: 3px;
+    margin-bottom: calc(3px * var(--spacing-scale, 1));
 }
 
 .chat-subtitle {
-    font-size: 12px;
+    font-size: calc(12px * var(--font-scale, 1));
     opacity: 0.9;
 }
 
 /* Chat Messages Area */
 .chat-messages {
     flex: 1;
-    padding: 20px;
+    padding: calc(20px * var(--spacing-scale, 1));
     overflow-y: auto;
     background: var(--background-light);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: calc(16px * var(--spacing-scale, 1));
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -627,7 +715,7 @@
 
 /* Chat Input Area */
 .chat-input-container {
-    padding: 20px;
+    padding: calc(20px * var(--spacing-scale, 1));
     background: white;
     border-top: 1px solid var(--border-gray);
     border-radius: 0 0 var(--border-radius-medium) var(--border-radius-medium);
