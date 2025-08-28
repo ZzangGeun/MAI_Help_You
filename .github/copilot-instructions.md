@@ -63,8 +63,8 @@ HF_BASE_MODEL=deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
 
 ### 필수 설정
 ```cmd
-# 의존성 설치
-pip install -r requirements.txt
+# 가상환경 활성화
+conda activate mai_env
 
 # PostgreSQL pgvector 확장 활성화 (DB에서)
 CREATE EXTENSION IF NOT EXISTS vector;
