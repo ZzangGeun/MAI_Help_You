@@ -1,0 +1,90 @@
+# 공통 스키마 정의
+components:
+  schemas:
+    # 공통 응답 형식
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "작업이 성공적으로 완료되었습니다"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "잘못된 요청입니다"
+        code:
+          type: string
+          example: "INVALID_REQUEST"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 5
+
+  # 공통 파라미터
+  parameters:
+    UserIdParam:
+      name: user_id
+      in: query
+      description: 사용자 ID
+      required: true
+      schema:
+        type: integer
+        example: 1
+
+    PageParam:
+      name: page
+      in: query
+      description: 페이지 번호
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: 페이지당 항목 수
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  # 공통 보안 스키마
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Authorization: Bearer {token}"
