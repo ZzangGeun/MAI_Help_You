@@ -1,0 +1,326 @@
+# 프로젝트 전체에서 사용되는 데이터 모델 정의
+components:
+  schemas:
+    # 사용자 관련 모델
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 사용자 고유 ID
+          example: 1
+        username:
+          type: string
+          description: 사용자명
+          example: "user123"
+        email:
+          type: string
+          format: email
+          description: 이메일 주소
+          example: "user@example.com"
+        nickname:
+          type: string
+          description: 닉네임
+          example: "창삣삐"
+        profile_image:
+          type: string
+          format: uri
+          description: 프로필 이미지 URL
+          nullable: true
+          example: "https://example.com/profile/user123.jpg"
+        provider:
+          type: string
+          enum: [local, google, kakao, naver]
+          description: 로그인 제공자
+          example: "google"
+        is_active:
+          type: boolean
+          description: 계정 활성 상태
+          example: true
+        last_login:
+          type: string
+          format: date-time
+          description: 마지막 로그인 시간
+          nullable: true
+          example: "2024-01-15T10:30:00Z"
+        created_at:
+          type: string
+          format: date-time
+          description: 계정 생성 시간
+          example: "2024-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: 마지막 업데이트 시간
+          example: "2024-01-15T10:30:00Z"
+
+    # 챗봇 대화 모델
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 메시지 고유 ID
+          example: 1
+        user_id:
+          type: string
+          description: 사용자 식별자
+          example: "user123"
+        question:
+          type: string
+          description: 사용자 질문
+          example: "메이플에서 빠르게 레벨업하는 방법은?"
+        answer:
+          type: string
+          description: AI 답변
+          example: "효율적인 레벨업을 위해서는..."
+        conversation_id:
+          type: string
+          description: 대화 세션 ID
+          example: "conv_20240115_001"
+        sources:
+          type: array
+          description: 답변 생성에 사용된 참고 자료
+          items:
+            $ref: '#/components/schemas/SourceDocument'
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: 사용자 평가 (1-5점)
+          nullable: true
+          example: 4
+        processing_time:
+          type: number
+          format: float
+          description: 답변 생성 시간(초)
+          example: 2.34
+        created_at:
+          type: string
+          format: date-time
+          description: 메시지 생성 시간
+          example: "2024-01-15T10:30:00Z"
+
+    # RAG 소스 문서 모델
+    SourceDocument:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 문서 제목
+          example: "메이플스토리 레벨업 가이드"
+        content:
+          type: string
+          description: 관련 내용 발췌
+          example: "아케인 리버 지역에서는 일일 퀘스트를 통해..."
+        source:
+          type: string
+          description: 문서 출처
+          example: "official_guide.json"
+        score:
+          type: number
+          format: float
+          description: 유사도 점수 (0.0-1.0)
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.87
+        metadata:
+          type: object
+          description: 추가 메타데이터
+          properties:
+            category:
+              type: string
+              example: "leveling"
+            last_updated:
+              type: string
+              format: date
+              example: "2024-01-01"
+
+    # 캐릭터 장비 모델
+    Equipment:
+      type: object
+      properties:
+        slot:
+          type: string
+          description: 장비 슬롯
+          enum: [weapon, armor, accessory, pet]
+          example: "weapon"
+        name:
+          type: string
+          description: 장비명
+          example: "엑스칼리버"
+        grade:
+          type: string
+          description: 등급
+          enum: [common, rare, epic, unique, legendary]
+          example: "legendary"
+        level:
+          type: integer
+          description: 요구 레벨
+          minimum: 1
+          maximum: 300
+          example: 200
+        stats:
+          type: object
+          description: 장비 능력치
+          properties:
+            attack:
+              type: integer
+              example: 500
+            magic_attack:
+              type: integer
+              example: 0
+            defense:
+              type: integer
+              example: 100
+            hp:
+              type: integer
+              example: 0
+            mp:
+              type: integer
+              example: 0
+        enhancement:
+          type: integer
+          description: 강화 단계
+          minimum: 0
+          maximum: 25
+          example: 15
+        potential:
+          type: array
+          description: 잠재능력 옵션
+          items:
+            type: object
+            properties:
+              line:
+                type: integer
+                minimum: 1
+                maximum: 3
+                example: 1
+              option:
+                type: string
+                example: "공격력 +12%"
+              grade:
+                type: string
+                enum: [rare, epic, unique, legendary]
+                example: "legendary"
+
+    # 길드 모델
+    Guild:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 길드 고유 ID
+          example: 1
+        name:
+          type: string
+          description: 길드명
+          example: "최강길드"
+        level:
+          type: integer
+          description: 길드 레벨
+          minimum: 1
+          maximum: 30
+          example: 25
+        master:
+          type: string
+          description: 길드마스터 닉네임
+          example: "길드장님"
+        member_count:
+          type: integer
+          description: 현재 멤버 수
+          example: 45
+        max_members:
+          type: integer
+          description: 최대 멤버 수
+          example: 50
+        created_at:
+          type: string
+          format: date-time
+          description: 길드 생성일
+          example: "2023-06-01T00:00:00Z"
+        description:
+          type: string
+          description: 길드 소개
+          nullable: true
+          example: "함께 성장하는 길드입니다"
+        requirements:
+          type: object
+          description: 가입 조건
+          properties:
+            min_level:
+              type: integer
+              example: 150
+            auto_accept:
+              type: boolean
+              example: false
+
+    # 시스템 로그 모델
+    SystemLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 로그 ID
+          example: 1
+        level:
+          type: string
+          enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+          description: 로그 레벨
+          example: "INFO"
+        message:
+          type: string
+          description: 로그 메시지
+          example: "사용자 로그인 성공"
+        source:
+          type: string
+          description: 로그 발생 모듈
+          example: "auth.views"
+        user_id:
+          type: integer
+          description: 관련 사용자 ID
+          nullable: true
+          example: 1
+        ip_address:
+          type: string
+          description: 요청 IP 주소
+          nullable: true
+          example: "192.168.1.100"
+        user_agent:
+          type: string
+          description: 사용자 에이전트
+          nullable: true
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        extra_data:
+          type: object
+          description: 추가 데이터 (JSON)
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: 로그 생성 시간
+          example: "2024-01-15T10:30:00Z"
+
+    # API 토큰 모델
+    ApiToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT 토큰
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          description: 토큰 타입
+          enum: [access, refresh]
+          example: "access"
+        expires_at:
+          type: string
+          format: date-time
+          description: 토큰 만료 시간
+          example: "2024-01-15T11:30:00Z"
+        created_at:
+          type: string
+          format: date-time
+          description: 토큰 생성 시간
+          example: "2024-01-15T10:30:00Z"

@@ -1,9 +1,17 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include('main_page.urls')),
-    path('character_info/', include('character_info.urls')),
-    path('chatbot/', include('chatbot.urls'))
+    path('', include('apps.main_page.urls')),
+    path('character_info/', include('apps.character_info.urls')),
+    path('chatbot/', include('apps.chatbot.urls')),
+    path('auth/', include('apps.sns_login.urls')),  # SNS 로그인 추가
 ]
+
+# 개발 환경에서 미디어 파일 서빙
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

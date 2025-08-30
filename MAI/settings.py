@@ -1,154 +1,16 @@
-from pathlib import Path
+"""
+MAI 프로젝트 메인 설정 파일
+환경에 따라 적절한 설정을 로드합니다.
+"""
 import os
-import dotenv
-import os
+from decouple import config
 
-dotenv.load_dotenv()
+# 환경 변수에 따른 설정 파일 선택
+ENVIRONMENT = config('DJANGO_ENVIRONMENT', default='development')
 
-NEXON_API_KEY = os.getenv('NEXON_API_KEY')  # .env 파일에서 API 키를 불러옴
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-
-# Ads settings (optional)
-ADS_ENABLED = os.getenv('ADS_ENABLED', 'false').lower() == 'true'
-ADS_PROVIDER = os.getenv('ADS_PROVIDER', 'mock')  # 'mock' | 'adsense'
-ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', '')
-ADS_SLOTS = {
-    'leaderboard': os.getenv('ADS_SLOT_LEADERBOARD', ''),     # 970x90 등
-    'medium_rectangle': os.getenv('ADS_SLOT_MEDIUM_RECT', ''), # 300x250
-    'skyscraper': os.getenv('ADS_SLOT_SKYSCRAPER', ''),        # 160x600
-}
-
-# Optional: Postgres settings for pgvector RAG (Django app still uses SQLite by default)
-PG_HOST = os.getenv('PG_HOST')
-PG_PORT = os.getenv('PG_PORT')
-PG_DB = os.getenv('PG_DB') or os.getenv('PGDATABASE')
-PG_USER = os.getenv('PG_USER') or os.getenv('PGUSER')
-PG_PASSWORD = os.getenv('PG_PASSWORD') or os.getenv('PGPASSWORD')
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "main_page",
-    "character_info",
-    "chatbot",
-]
-
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
-
-ROOT_URLCONF = "MAI.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-                "config.ads_context.ads_settings",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "MAI.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": DATABASE_NAME,
-#         "USER": DATABASE_USER,
-#         "PASSWORD": DATABASE_PASSWORD,
-#         "HOST": DATABASE_HOST,
-#         "PORT": DATABASE_PORT,
-#     }
-# }
-
-SQLITE_DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": SQLITE_DB_PATH,
-    }
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-LANGUAGE_CODE = "ko-kr"
-
-TIME_ZONE = "Asia/Seoul"
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+if ENVIRONMENT == 'production':
+    from core.settings.production import *
+elif ENVIRONMENT == 'testing':
+    from core.settings.testing import *
+else:
+    from core.settings.development import *
