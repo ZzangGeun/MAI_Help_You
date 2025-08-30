@@ -1,0 +1,21 @@
+{
+  "name": "mai-chatbot-docs",
+  "version": "1.0.0",
+  "description": "메이플스토리 AI 챗봇 프로젝트 API 문서화 도구",
+  "scripts": {
+    "install-deps": "npm install -g @redocly/cli swagger-ui-dist",
+    "docs:serve": "redocly preview-docs api/openapi.yaml --port 3001",
+    "docs:build": "redocly build-docs api/openapi.yaml --output ./build/index.html",
+    "docs:validate": "redocly lint api/openapi.yaml",
+    "docs:bundle": "redocly bundle api/openapi.yaml --output ./build/openapi-bundled.yaml",
+    "postman:convert": "openapi2postmanv2 -s api/openapi.yaml -o postman/MAI_Chatbot.postman_collection.json",
+    "start": "npm run docs:serve"
+  },
+  "keywords": ["openapi", "swagger", "api-docs", "maplestory", "chatbot"],
+  "author": "MAI Chatbot Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@redocly/cli": "^1.5.0",
+    "openapi-to-postmanv2": "^4.19.0"
+  }
+}
