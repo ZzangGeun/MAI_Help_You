@@ -21,7 +21,7 @@ components:
         nickname:
           type: string
           description: 닉네임
-          example: "창삣삐"
+          example: "무당햄스터"
         profile_image:
           type: string
           format: uri
