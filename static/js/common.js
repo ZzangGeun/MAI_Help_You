@@ -58,8 +58,7 @@ function performSearch(query) {
     if (!query.trim()) return;
     
     // Check if we're on the home page
-    const isHomePage = window.location.pathname.includes('test_refactored.html') || 
-                       window.location.pathname.endsWith('/') ||
+    const isHomePage = window.location.pathname === '/' || 
                        window.location.pathname === '' ||
                        document.title.includes('MAI -');
     
@@ -87,7 +86,7 @@ function redirectToChatWithQuery(query) {
     
     // Redirect after a short delay for better UX
     setTimeout(() => {
-        window.location.href = 'page2_refactored.html';
+        window.location.href = 'chatbot_page.html';
     }, 500);
 }
 
