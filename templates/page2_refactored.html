@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
 </head>
 <body>
     <!-- Header -->
@@ -247,7 +248,7 @@
     <!-- Floating Send Button -->
     <div class="floating-send-btn" onclick="scrollToChat()">💬</div>
 
-    <script src="js/common.js"></script>
-    <script src="js/chat.js"></script>
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/chat.js' %}"></script>
 </body>
 </html>
