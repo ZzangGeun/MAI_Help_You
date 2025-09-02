@@ -138,51 +138,158 @@ function getAIResponse(userMessage) {
 }
 
 /**
- * Simulate AI response
+ * Get CSRF token for API requests
  */
-function simulateResponse(userMessage) {
+function getCsrfToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    return token ? token.value : '';
+}
+
+/**
+ * Get current user ID
+ */
+function getUserId() {
+    const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
+    return loginData && loginData.isLoggedIn ? loginData.userId : null;
+}
+
+/**
+ * Send message to real AI API
+ */
+async function sendToAI(userMessage) {
     if (isTyping) return;
     
     isTyping = true;
     showTypingIndicator();
     
-    const responseDelay = 1000 + Math.random() * 2000; // 1-3 seconds
-    
-    setTimeout(() => {
+    try {
+        const response = await fetch('/chatbot/ask/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                question: userMessage,
+                user_id: getUserId()
+            })
+        });
+        
+        const data = await response.json();
+        
         hideTypingIndicator();
         
-        const response = getAIResponse(userMessage);
-        addMessage(response, false);
-        
-        // Save to chat history only if logged in
-        const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
-        if (loginData && loginData.isLoggedIn) {
-            chatHistory.push(
-                { type: 'user', message: userMessage, timestamp: new Date() },
-                { type: 'bot', message: response, timestamp: new Date() }
-            );
+        if (data.status === 'success') {
+            // Display AI response
+            addMessage(data.response, false);
             
-            // Save to localStorage
-            window.MapleStoryChatBot.saveToStorage('chatHistory', chatHistory);
+            // Show sources if available
+            if (data.sources && data.sources.length > 0) {
+                displaySources(data.sources);
+            }
             
-            // Update sidebar history display
-            updateChatHistoryDisplay();
+            // Save to chat history
+            saveChatMessage(userMessage, data.response, data.has_rag);
             
-            // Show notification for first message
+            // Show notification for first message or if RAG was used
             if (chatHistory.length === 2) {
-                window.MapleStoryChatBot.showNotification('채팅이 시작되었습니다! 🎉', 'success');
+                window.MapleStoryChatBot.showNotification('AI 챗봇과 대화를 시작했습니다! 🎉', 'success');
+            } else if (data.has_rag) {
+                window.MapleStoryChatBot.showNotification('RAG 검색으로 더 정확한 답변을 제공했습니다! 📚', 'info', 2000);
             }
         } else {
-            // Show login reminder for non-logged-in users
-            if (!isTyping && chatHistory.length === 0) {
-                setTimeout(() => {
-                    window.MapleStoryChatBot.showNotification('로그인하시면 채팅 기록이 저장됩니다.', 'info', 4000);
-                }, 2000);
-            }
+            // Handle error response
+            addMessage(`죄송합니다. 오류가 발생했습니다: ${data.error}`, false);
+            window.MapleStoryChatBot.showNotification('답변 생성 중 오류가 발생했습니다.', 'error');
         }
         
-        isTyping = false;
-    }, responseDelay);
+    } catch (error) {
+        hideTypingIndicator();
+        console.error('API 호출 오류:', error);
+        
+        // Fallback to mock response if API fails
+        const fallbackResponse = getAIResponse(userMessage);
+        addMessage(`[오프라인 모드] ${fallbackResponse}`, false);
+        saveChatMessage(userMessage, fallbackResponse, false);
+        
+        window.MapleStoryChatBot.showNotification('API 연결에 실패했습니다. 오프라인 모드로 동작합니다.', 'warning');
+    }
+    
+    isTyping = false;
+}
+
+/**
+ * Save chat message to history
+ */
+function saveChatMessage(userMessage, botResponse, hasRag) {
+    const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
+    
+    // Always save to local storage for session persistence
+    chatHistory.push(
+        { type: 'user', message: userMessage, timestamp: new Date() },
+        { type: 'bot', message: botResponse, timestamp: new Date(), has_rag: hasRag }
+    );
+    
+    // Save to localStorage
+    window.MapleStoryChatBot.saveToStorage('chatHistory', chatHistory);
+    
+    // Update sidebar history display
+    updateChatHistoryDisplay();
+    
+    // Show login reminder for non-logged-in users (only once)
+    if ((!loginData || !loginData.isLoggedIn) && chatHistory.length === 2) {
+        setTimeout(() => {
+            window.MapleStoryChatBot.showNotification('로그인하시면 채팅 기록이 서버에 저장됩니다.', 'info', 4000);
+        }, 3000);
+    }
+}
+
+/**
+ * Display RAG sources
+ */
+function displaySources(sources) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages || !sources.length) return;
+    
+    const sourcesDiv = document.createElement('div');
+    sourcesDiv.className = 'message bot sources';
+    
+    const sourcesContent = document.createElement('div');
+    sourcesContent.className = 'message-content sources-content';
+    sourcesContent.innerHTML = `
+        <div class="sources-header">📚 참고 자료</div>
+        ${sources.map((source, index) => `
+            <div class="source-item">
+                <div class="source-title">${index + 1}. ${source.title}</div>
+                <div class="source-content">${source.content.substring(0, 150)}...</div>
+                <div class="source-score">신뢰도: ${(source.score * 100).toFixed(1)}%</div>
+            </div>
+        `).join('')}
+    `;
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = '📚';
+    
+    sourcesDiv.appendChild(avatar);
+    sourcesDiv.appendChild(sourcesContent);
+    
+    chatMessages.appendChild(sourcesDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Animate message appearance
+    window.MapleStoryChatBot.fadeIn(sourcesDiv, 300);
+}
+
+/**
+ * Simulate AI response (fallback for offline mode)
+ */
+function simulateResponse(userMessage) {
+    setTimeout(() => {
+        const response = getAIResponse(userMessage);
+        addMessage(`[오프라인 모드] ${response}`, false);
+        saveChatMessage(userMessage, response, false);
+    }, 1000);
 }
 
 /**
@@ -207,15 +314,15 @@ function sendMainMessage() {
         sendButton.disabled = true;
     }
     
-    // Simulate AI response
-    simulateResponse(message);
+    // Send to real AI API (with fallback)
+    sendToAI(message);
     
     // Re-enable send button after response
     setTimeout(() => {
         if (sendButton) {
             sendButton.disabled = false;
         }
-    }, 3000);
+    }, 5000); // Longer timeout for API calls
 }
 
 /**
@@ -385,7 +492,15 @@ function handlePendingQuery() {
                 
                 // Auto-send after a short delay for better UX
                 setTimeout(() => {
-                    sendMainMessage();
+                    // Add user message first
+                    addMessage(pendingQuery, true);
+                    
+                    // Clear input
+                    input.value = '';
+                    autoResize();
+                    
+                    // Send to AI API
+                    sendToAI(pendingQuery);
                 }, 1000);
             }
         }, 500);
