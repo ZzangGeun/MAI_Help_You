@@ -127,19 +127,26 @@ body {
 /* Navigation Styles */
 .navigation {
     background: var(--nav-gradient);
-    padding: 5px 0;
+    padding: 0;
     border-bottom: 1px solid #d4a574;
+    height: 44px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 .nav-content {
-    max-width: 1200px;
+    max-width: 2000px;
     margin: 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 40px;
     padding: 0 20px;
-    height: 100%;
+    height: 44px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .nav-item {
@@ -150,8 +157,11 @@ body {
     border-radius: var(--border-radius-large);
     transition: var(--transition-fast);
     font-size: 14px;
-    line-height: 1.2;
+    line-height: 1.5;
     position: relative;
+    display: flex;
+    align-items: center;
+    height: 32px;
 }
 
 .nav-item::before {
@@ -184,53 +194,31 @@ body {
     align-items: center;
 }
 
-/* Common Layout */
+/* Common Layout - 완전 유연한 창 크기 반응형 */
 .main-container {
-    max-width: 1400px;
+    max-width: min(95vw, 1400px);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 250px 1fr 250px;
-    gap: 20px;
-    padding: 20px;
-    align-items: stretch;
-    min-height: calc(100vh - 140px);
+    grid-template-columns: minmax(180px, 15%) 1fr minmax(180px, 15%);
+    gap: clamp(15px, 1.5vw, 25px);
+    padding: clamp(15px, 1.5vw, 25px);
+    align-items: start;
 }
 
-/* Home Page Layout Override - 기본 3컴럼 레이아웃 */
+/* Home Page Layout Override - 메인 컨텐츠 더 넓게 */
 .home-page .main-container {
-    grid-template-columns: 250px 1fr 250px;
-    max-width: 1400px;
-    align-items: stretch;
-    min-height: calc(100vh - 140px);
+    grid-template-columns: minmax(200px, 16%) 1fr minmax(200px, 16%);
 }
 
-/* 2K 해상도에서 */
-@media (min-width: 1920px) and (max-width: 2559px) {
-    .home-page .main-container {
-        max-width: calc(1600px * var(--container-scale, 1.05));
-        grid-template-columns: calc(260px * var(--component-scale, 1.05)) 1fr calc(260px * var(--component-scale, 1.05));
-        gap: calc(22px * var(--spacing-scale, 1.1));
-        padding: calc(20px * var(--spacing-scale, 1.1));
-    }
-}
-
-/* 4K 해상도에서 */
-@media (min-width: 2560px) {
-    .home-page .main-container {
-        max-width: calc(1800px * var(--container-scale, 1.1));
-        grid-template-columns: calc(280px * var(--component-scale, 1.15)) 1fr calc(280px * var(--component-scale, 1.15));
-        gap: calc(25px * var(--spacing-scale, 1.3));
-        padding: calc(20px * var(--spacing-scale, 1.3));
-    }
-}
+/* 해상도별 미디어 쿼리 제거 - 창 크기에 자연스럽게 반응 */
 
 /* Sidebar Styles */
 .left-sidebar, .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: calc(20px * var(--spacing-scale, 1));
-    height: 100%;
-    min-height: calc(600px * var(--component-scale, 1));
+    gap: clamp(15px, 1.5vw, 25px);
+    height: auto;
+    min-height: fit-content;
 }
 
 /* Common Button Styles */
@@ -275,6 +263,9 @@ body {
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(30vh - 60px);
 }
 
 .card-header {
@@ -288,6 +279,9 @@ body {
 
 .card-body {
     padding: calc(15px * var(--spacing-scale, 1));
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Floating Action Button */
@@ -317,6 +311,8 @@ body {
 
 /* Responsive Design */
 /* 4K and Ultra-wide Support */
+/* 4K Resolution (2560px+) - Disabled for normal sizing */
+/*
 @media (min-width: 2560px) {
     :root {
         --font-scale: 1.2;
@@ -344,7 +340,6 @@ body {
         padding: 0 calc(20px * var(--spacing-scale));
     }
     
-    /* Scale UI components */
     .logo {
         font-size: calc(20px * var(--font-scale));
     }
@@ -369,8 +364,10 @@ body {
         padding: calc(15px * var(--spacing-scale));
     }
 }
+*/
 
-/* 2K Resolution (1440p) */
+/* 2K Resolution (1440p) - Disabled for normal sizing */
+/*
 @media (min-width: 1920px) and (max-width: 2559px) {
     :root {
         --font-scale: 1.1;
@@ -393,11 +390,14 @@ body {
         font-size: calc(14px * var(--font-scale));
     }
 }
+*/
 
+/* 창 크기에 따른 자연스러운 반응형 - 사이드바 숨김 */
 @media (max-width: 1024px) {
     .main-container {
         grid-template-columns: 1fr !important;
-        gap: 15px;
+        gap: clamp(15px, 2vw, 20px);
+        padding: clamp(15px, 2vw, 20px);
     }
     
     .left-sidebar, .right-sidebar {
@@ -405,41 +405,37 @@ body {
     }
 }
 
+/* 모바일 크기에서의 추가 최적화 */
 @media (max-width: 768px) {
-    :root {
-        --font-scale: 0.9;
-        --spacing-scale: 0.85;
-    }
-    
     .header-content {
         flex-direction: column;
-        gap: calc(15px * var(--spacing-scale));
-        padding: 0 calc(15px * var(--spacing-scale));
+        gap: 15px;
+        padding: 0 15px;
     }
     
     .nav-content {
         flex-wrap: wrap;
-        gap: calc(15px * var(--spacing-scale));
+        gap: 15px;
         justify-content: center;
     }
     
     .search-input {
-        width: 200px;
-        font-size: calc(14px * var(--font-scale));
+        width: clamp(150px, 50vw, 250px);
+        font-size: 14px;
     }
     
     .main-container {
-        padding: calc(15px * var(--spacing-scale));
-        gap: calc(15px * var(--spacing-scale));
+        padding: 15px;
+        gap: 15px;
     }
     
     .character-search-input {
-        max-width: 120px;
-        font-size: calc(13px * var(--font-scale));
+        max-width: clamp(100px, 30vw, 150px);
+        font-size: 13px;
     }
     
     .login-status-card, .character-search-card {
-        padding: calc(15px * var(--spacing-scale));
+        padding: 15px;
     }
     
     .floating-send-btn {

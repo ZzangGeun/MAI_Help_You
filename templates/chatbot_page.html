@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <link rel="stylesheet" href="../static/css/common.css">
+    <link rel="stylesheet" href="../static/css/chat.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="test_refactored.html" class="logo">
+            <a href="main_page.html" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -23,8 +23,8 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <a href="test_refactored.html" class="nav-item">홈</a>
-            <a href="page2_refactored.html" class="nav-item active">CHAT BOT</a>
+            <a href="main_page.html" class="nav-item">홈</a>
+            <a href="chatbot_page.html" class="nav-item active">CHAT BOT</a>
             <a href="#" class="nav-item">캐릭터 검색</a>
             <a href="#" class="nav-item">큐브</a>
             <a href="#" class="nav-item">스타포스</a>
@@ -248,7 +248,7 @@
     <!-- Floating Send Button -->
     <div class="floating-send-btn" onclick="scrollToChat()">💬</div>
 
-    <script src="{% static 'js/common.js' %}"></script>
-    <script src="{% static 'js/chat.js' %}"></script>
+    <script src="../static/js/common.js"></script>
+    <script src="../static/js/chat.js"></script>
 </body>
 </html>

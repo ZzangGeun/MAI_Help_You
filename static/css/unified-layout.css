@@ -1,0 +1,345 @@
+/* =============================================================================
+   Unified Layout System
+   메인 컨테이너와 바텀 섹션을 통합한 반응형 레이아웃
+============================================================================= */
+
+/* 기존 스타일 오버라이드 */
+.home-page .main-container {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: auto !important;
+}
+
+.bottom-section {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 메인 콘텐츠와 사이드바가 컨테이너 높이를 따르도록 설정 */
+.main-content {
+    height: 100% !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.left-sidebar,
+.right-sidebar {
+    height: 100% !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(15px, 1.5vw, 25px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.left-sidebar .card,
+.right-sidebar .card {
+    flex: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* 통합 레이아웃 컨테이너 */
+.unified-layout-container {
+    max-width: min(95vw, 2000px);
+    margin: 0 auto;
+    padding: clamp(25px, 2vw, 40px) clamp(10px, 1vw, 15px) clamp(5px, 0.5vw, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1vw, 15px);
+    height: calc(100vh - 120px);
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
+}
+
+/* 메인 컨테이너 - 3컬럼 그리드 */
+.unified-layout-container .main-container {
+    display: grid;
+    grid-template-columns: 
+        minmax(200px, min(250px, 18%)) 
+        minmax(600px, 1fr) 
+        minmax(200px, min(250px, 18%));
+    gap: clamp(15px, 1.5vw, 25px);
+    margin: 0;
+    padding: clamp(10px, 1vw, 20px);
+    max-width: none;
+    flex: 1;
+    min-height: 0;
+}
+
+/* 바텀 섹션 - 4컬럼 그리드 */
+.unified-layout-container .bottom-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(15px, 1.5vw, 25px);
+    margin: 0;
+    padding: 0 0 clamp(30px, 3vw, 50px);
+    max-width: none;
+    flex: 0 0 auto;
+    min-height: 0;
+    height: fit-content;
+}
+
+/* 하단 섹션 카드들 높이 증가 */
+.unified-layout-container .bottom-section .section-card {
+    min-height: clamp(300px, 25vh, 400px);
+    display: flex;
+    flex-direction: column;
+}
+
+.unified-layout-container .bottom-section .section-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 2vw, 30px);
+    gap: clamp(12px, 1.5vw, 20px);
+}
+
+/* 하단 섹션 카드 헤더 크기 조정 */
+.unified-layout-container .bottom-section .section-header {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: bold;
+    padding: clamp(15px, 1.5vw, 25px);
+    margin-bottom: clamp(10px, 1vw, 15px);
+}
+
+/* 하단 섹션 카드 내부 요소 크기 조정 */
+.unified-layout-container .bottom-section .ranking-item-modern,
+.unified-layout-container .bottom-section .event-item,
+.unified-layout-container .bottom-section .cash-item {
+    padding: clamp(12px, 1.5vw, 18px);
+    margin-bottom: clamp(8px, 1vw, 12px);
+    border-radius: clamp(8px, 1vw, 12px);
+}
+
+/* 하단 섹션 텍스트 크기 조정 */
+.unified-layout-container .bottom-section .ranking-name,
+.unified-layout-container .bottom-section .event-title,
+.unified-layout-container .bottom-section .cash-title {
+    font-size: clamp(16px, 1.5vw, 20px);
+    font-weight: 600;
+}
+
+.unified-layout-container .bottom-section .ranking-details,
+.unified-layout-container .bottom-section .event-subtitle,
+.unified-layout-container .bottom-section .cash-subtitle {
+    font-size: clamp(14px, 1.2vw, 16px);
+    opacity: 0.8;
+}
+
+/* 스크롤 컨테이너 높이 조정 */
+.unified-layout-container .bottom-section .ranking-scroll-container,
+.unified-layout-container .bottom-section .cash-scroll-container,
+.unified-layout-container .bottom-section .event-scroll-container {
+    max-height: clamp(280px, 20vh, 320px);
+    overflow-y: auto;
+}
+
+/* 캐시샵 전용 스크롤 컨테이너 높이 증가 */
+.unified-layout-container .bottom-section .cash-scroll-container {
+    max-height: clamp(320px, 22vh, 380px);
+}
+
+/* 광고 배너는 별도 위치 (메인 컨테이너와 독립) */
+.left-ad-banner,
+.right-ad-banner {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 600px;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+    display: none;
+}
+
+.left-ad-banner {
+    left: 20px;
+}
+
+.right-ad-banner {
+    right: 20px;
+}
+
+/* 충분한 화면 너비에서만 광고 표시 */
+@media (min-width: 1800px) {
+    .left-ad-banner,
+    .right-ad-banner {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .unified-layout-container {
+        padding: clamp(30px, 2.5vw, 45px) 200px clamp(5px, 0.5vw, 8px);
+    }
+}
+
+/* 태블릿에서 레이아웃 조정 */
+@media (max-width: 1200px) {
+    .unified-layout-container .main-container {
+        grid-template-columns: 
+            minmax(180px, 20%) 
+            minmax(400px, 1fr) 
+            minmax(180px, 20%);
+    }
+    
+    .unified-layout-container .bottom-section {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .unified-layout-container .main-container {
+        grid-template-columns: 
+            minmax(150px, 25%) 
+            1fr 
+            minmax(150px, 25%);
+    }
+    
+    .unified-layout-container .bottom-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 모바일에서 1단 레이아웃 */
+@media (max-width: 768px) {
+    .unified-layout-container {
+        gap: clamp(20px, 4vw, 30px);
+        padding: clamp(20px, 3vw, 30px) clamp(8px, 2vw, 12px) clamp(5px, 1vw, 8px);
+    }
+    
+    .unified-layout-container .main-container {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(15px, 2vw, 25px);
+        padding: clamp(8px, 2vw, 15px);
+    }
+    
+    .unified-layout-container .bottom-section {
+        grid-template-columns: 1fr;
+        gap: clamp(15px, 2vw, 25px);
+        padding: 0 0 clamp(25px, 4vw, 40px);
+    }
+    
+    .unified-layout-container .bottom-section .section-card {
+        min-height: clamp(250px, 20vh, 350px);
+    }
+    
+    /* 모바일에서 카드 내용 조정 */
+    .unified-layout-container .bottom-section .section-content {
+        padding: clamp(15px, 3vw, 25px);
+        gap: clamp(10px, 2vw, 15px);
+    }
+    
+    .unified-layout-container .bottom-section .section-header {
+        font-size: clamp(16px, 3vw, 22px);
+        padding: clamp(12px, 2vw, 20px);
+    }
+    
+    .unified-layout-container .bottom-section .ranking-item-modern,
+    .unified-layout-container .bottom-section .event-item,
+    .unified-layout-container .bottom-section .cash-item {
+        padding: clamp(10px, 2vw, 15px);
+        margin-bottom: clamp(6px, 1.5vw, 10px);
+    }
+    
+    .unified-layout-container .bottom-section .ranking-scroll-container {
+        max-height: clamp(200px, 15vh, 250px);
+    }
+}
+
+/* 창 높이에 따른 반응형 */
+@media (max-height: 800px) {
+    .unified-layout-container {
+        height: calc(100vh - 80px);
+        max-height: calc(100vh - 80px);
+        gap: clamp(6px, 1vw, 10px);
+    }
+    
+    .main-content,
+    .left-sidebar,
+    .right-sidebar {
+        min-height: 0 !important;
+        max-height: none !important;
+        flex: 1 !important;
+    }
+}
+
+@media (max-height: 600px) {
+    .unified-layout-container {
+        height: calc(100vh - 60px);
+        max-height: calc(100vh - 60px);
+        gap: clamp(4px, 0.5vw, 8px);
+    }
+    
+    .main-content,
+    .left-sidebar,
+    .right-sidebar {
+        min-height: 0 !important;
+        max-height: none !important;
+        flex: 1 !important;
+    }
+}
+
+@media (min-height: 1080px) {
+    .unified-layout-container {
+        gap: clamp(12px, 1.5vw, 20px);
+    }
+    
+    .main-content,
+    .left-sidebar,
+    .right-sidebar {
+        min-height: 0 !important;
+        max-height: none !important;
+        flex: 1 !important;
+    }
+}
+
+@media (min-height: 1440px) {
+    .main-content,
+    .left-sidebar,
+    .right-sidebar {
+        min-height: 0 !important;
+        max-height: none !important;
+        flex: 1 !important;
+    }
+}
+
+/* 초대형 화면 지원 */
+@media (min-width: 2560px) {
+    .unified-layout-container {
+        max-width: min(85vw, 2200px);
+        padding: clamp(35px, 3vw, 50px) 220px clamp(5px, 0.5vw, 8px);
+    }
+    
+    .unified-layout-container .main-container {
+        grid-template-columns: 
+            minmax(280px, min(300px, 16%)) 
+            minmax(800px, 1fr) 
+            minmax(280px, min(300px, 16%));
+    }
+}
+
+/* 울트라와이드 모니터 지원 */
+@media (min-aspect-ratio: 21/9) and (min-width: 1800px) {
+    .unified-layout-container {
+        max-width: min(80vw, 2600px);
+        padding: clamp(40px, 3.5vw, 55px) 240px clamp(5px, 0.5vw, 8px);
+    }
+    
+    .unified-layout-container .main-container {
+        grid-template-columns: 
+            minmax(300px, 18%) 
+            1fr 
+            minmax(300px, 18%);
+    }
+}

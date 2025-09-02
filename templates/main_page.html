@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAI - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/home-layout-new.css' %}">
+    <link rel="stylesheet" href="../static/css/common.css">
+    <link rel="stylesheet" href="../static/css/home.css">
+    <link rel="stylesheet" href="../static/css/unified-layout.css">
+    <link rel="stylesheet" href="../static/css/height-responsive.css">
 </head>
 <body class="home-page">
 
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="test_refactored.html" class="logo">
+            <a href="main_page.html" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -25,8 +26,8 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <a href="test_refactored.html" class="nav-item active">홈</a>
-            <a href="page2_refactored.html" class="nav-item">CHAT BOT</a>
+            <a href="main_page.html" class="nav-item active">홈</a>
+            <a href="chatbot_page.html" class="nav-item">CHAT BOT</a>
             <a href="#" class="nav-item">캐릭터 검색</a>
             <a href="#" class="nav-item">큐브</a>
             <a href="#" class="nav-item">스타포스</a>
@@ -34,8 +35,10 @@
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Unified Layout Container -->
+    <div class="unified-layout-container">
+        <!-- Main Container -->
+        <div class="main-container">
         <!-- Left Advertisement Banner -->
         <div class="left-ad-banner">
             <div class="side-ad-content">
@@ -151,10 +154,10 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <!-- Modern 4-Grid Bottom Section -->
-    <div class="bottom-section">
+        <!-- Modern 4-Grid Bottom Section -->
+        <div class="bottom-section">
         <!-- Event Card -->
         <div class="section-card">
             <div class="section-header event-header">
@@ -355,9 +358,10 @@
             </div>
         </div>
     </div>
+    </div>
 
 
-    <script src="{% static 'js/common.js' %}"></script>
+    <script src="../static/js/common.js"></script>
     <script>
         // Search example function
         function searchExample(query) {
