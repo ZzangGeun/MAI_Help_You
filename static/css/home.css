@@ -3,7 +3,8 @@
    홈페이지 전용 스타일
 ============================================================================= */
 
-/* 4K and Ultra-wide Support for Home Page - 3단 그리드 유지 */
+/* 4K and Ultra-wide Support for Home Page - Disabled for normal sizing */
+/*
 @media (min-width: 2560px) {
     .home-page .main-container {
         max-width: calc(1800px * var(--container-scale, 1.1));
@@ -18,8 +19,10 @@
     }
     
 }
+*/
 
-/* 2K Resolution Support - 3단 그리드 유지 */
+/* 2K Resolution Support - Disabled for normal sizing */
+/*
 @media (min-width: 1920px) and (max-width: 2559px) {
     .home-page .main-container {
         max-width: calc(1600px * var(--container-scale, 1.05));
@@ -33,7 +36,6 @@
         min-height: calc(100vh - 180px);
     }
     
-    /* 2K에서 4단 그리드 너비 = 사이드바 + 메인 + 사이드바 */
     .bottom-section {
         max-width: calc((260px * var(--component-scale, 1.05)) * 2 + (800px * var(--component-scale, 1.05)) + (22px * var(--spacing-scale, 1.1)) * 2);
     }
@@ -44,8 +46,10 @@
         height: calc(100vh - 140px) !important;
     }
 }
+*/
 
-/* 1600px-1919px 범위 - 3단 그리드 유지 */
+/* 1600px-1919px 범위 미디어 쿼리 제거 - 유연한 시스템 사용 */
+/*
 @media (min-width: 1600px) and (max-width: 1919px) {
     .home-page .main-container {
         max-width: 1500px;
@@ -59,12 +63,10 @@
         min-height: calc(100vh - 160px);
     }
     
-    /* 1600px+에서 4단 그리드 너비 = 사이드바 + 메인 + 사이드바 */
     .bottom-section {
         max-width: calc(250px * 2 + 600px + 20px * 2);
     }
     
-    /* Position elements in correct grid columns */
     .home-page .left-sidebar {
         grid-column: 2;
     }
@@ -99,7 +101,10 @@
         margin: 0 auto !important;
     }
 }
+*/
 
+/* 1800~1919px 범위 미디어 쿼리 제거 - 유연한 시스템 사용 */
+/*
 @media (min-width: 1800px) and (max-width: 1919px) {
     .home-page .main-container {
         max-width: 1800px;
@@ -114,6 +119,7 @@
         height: calc(100vh - 140px) !important;
     }
 }
+*/
 
 /* Side Advertisement Banners - Fixed positioning */
 .left-ad-banner,
@@ -197,6 +203,8 @@
 }
 
 /* Responsive breakpoints for home page */
+/* 1599px 미디어 쿼리 제거 - 유연한 시스템 사용 */
+/*
 @media (max-width: 1599px) {
     .home-page .left-ad-banner,
     .home-page .right-ad-banner {
@@ -212,7 +220,10 @@
         padding: 20px;
     }
 }
+*/
 
+/* 1025px-1200px 범위 미디어 쿼리 제거 - 유연한 시스템 사용 */
+/*
 @media (max-width: 1200px) and (min-width: 1025px) {
     .home-page .main-container {
         max-width: 1000px;
@@ -221,8 +232,9 @@
         padding: 15px;
     }
 }
+*/
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .home-page .main-container {
         max-width: 100%;
         display: flex;
@@ -1317,7 +1329,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .bottom-section {
         grid-template-columns: 1fr 1fr;
         gap: calc(20px * var(--spacing-scale, 1));

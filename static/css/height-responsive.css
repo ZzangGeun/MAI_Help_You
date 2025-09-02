@@ -1,0 +1,83 @@
+/* =============================================================================
+   Height Responsive Utilities
+   창 높이에 반응하는 레이아웃 설정
+============================================================================= */
+
+/* 메인 콘텐츠 영역 높이 반응형 */
+.home-main {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 160px);
+}
+
+/* 사이드바 카드들의 높이 최적화 - unified-layout.css에서 처리 */
+/*
+.left-sidebar .card,
+.right-sidebar .card {
+    flex: 1;
+    min-height: calc(25vh - 40px);
+}
+*/
+
+/* 창 높이가 작을 때 최소 높이 조정 */
+@media (max-height: 800px) {
+    .home-page .main-container {
+        min-height: calc(100vh - 100px);
+    }
+    
+    .home-main {
+        min-height: calc(100vh - 140px);
+    }
+    
+    .card {
+        min-height: calc(20vh - 40px);
+    }
+    
+    /* .left-sidebar .card,
+    .right-sidebar .card {
+        min-height: calc(15vh - 30px);
+    } */
+}
+
+/* 창 높이가 매우 작을 때 */
+@media (max-height: 600px) {
+    .home-page .main-container {
+        min-height: calc(100vh - 80px);
+    }
+    
+    .home-main {
+        min-height: calc(100vh - 120px);
+    }
+    
+    .card {
+        min-height: 200px;
+    }
+    
+    /* .left-sidebar .card,
+    .right-sidebar .card {
+        min-height: 150px;
+    } */
+}
+
+/* 창 높이가 클 때 더 많은 공간 활용 */
+@media (min-height: 1080px) {
+    .card {
+        min-height: calc(35vh - 80px);
+    }
+    
+    /* .left-sidebar .card,
+    .right-sidebar .card {
+        min-height: calc(30vh - 60px);
+    } */
+}
+
+@media (min-height: 1440px) {
+    .card {
+        min-height: calc(40vh - 100px);
+    }
+    
+    /* .left-sidebar .card,
+    .right-sidebar .card {
+        min-height: calc(35vh - 80px);
+    } */
+}
