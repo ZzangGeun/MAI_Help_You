@@ -750,225 +750,74 @@ document.addEventListener('DOMContentLoaded', function() {
 window.performMainSearch = performMainSearch;
 
 /**
- * Modern Event Carousel functionality
+ * Carousel functionality for events and cash items
  */
-let currentEventIndex = 0;
-const events = [
-    {
-        icon: '🎮',
-        title: '윈터 스페셜 이벤트',
-        description: '12월 한정 특별 이벤트가 진행중입니다',
-        date: '📅 2024.12.01 ~ 2024.12.31'
-    },
-    {
-        icon: '🎁',
-        title: '연말 선물 이벤트',
-        description: '매일 접속하고 특별한 선물을 받아보세요',
-        date: '📅 2024.12.15 ~ 2025.01.15'
-    },
-    {
-        icon: '⭐',
-        title: '신년 행운 이벤트',
-        description: '새해를 맞이하여 행운의 보상이 기다립니다',
-        date: '📅 2025.01.01 ~ 2025.01.31'
-    },
-    {
-        icon: '🔥',
-        title: '경험치 2배 이벤트',
-        description: '한정 시간 동안 경험치를 2배로 획득하세요',
-        date: '📅 2024.12.20 ~ 2024.12.27'
-    }
-];
+const carouselData = {
+    events: [
+        { icon: '🎮', title: '윈터 스페셜 이벤트', description: '12월 한정 특별 이벤트가 진행중입니다', date: '📅 2024.12.01 ~ 2024.12.31' },
+        { icon: '🎁', title: '연말 선물 이벤트', description: '매일 접속하고 특별한 선물을 받아보세요', date: '📅 2024.12.15 ~ 2025.01.15' },
+        { icon: '⭐', title: '신년 행운 이벤트', description: '새해를 맞이하여 행운의 보상이 기다립니다', date: '📅 2025.01.01 ~ 2025.01.31' }
+    ],
+    cashItems: [
+        { image: '🎭', title: '신년 한정 코스튬', subtitle: '50% 할인 진행중', price: '2,400 캐시' },
+        { image: '💼', title: '프리미엄 패키지', subtitle: '특별 혜택 포함', price: '4,800 캐시' },
+        { image: '✨', title: '이펙트 아이템', subtitle: 'NEW 출시', price: '1,200 캐시' }
+    ]
+};
 
-function changeEvent(direction) {
-    const eventDisplay = document.getElementById('eventDisplay');
-    if (!eventDisplay) return;
+let carouselIndex = { event: 0, cash: 0 };
+
+function changeCarousel(type, direction) {
+    const items = carouselData[type + 's'];
+    const display = document.getElementById(type + 'Display');
+    if (!display || !items) return;
     
-    // Update index
-    currentEventIndex += direction;
-    if (currentEventIndex < 0) {
-        currentEventIndex = events.length - 1;
-    } else if (currentEventIndex >= events.length) {
-        currentEventIndex = 0;
-    }
+    carouselIndex[type] += direction;
+    if (carouselIndex[type] < 0) carouselIndex[type] = items.length - 1;
+    if (carouselIndex[type] >= items.length) carouselIndex[type] = 0;
     
-    // Add fade out effect
-    eventDisplay.style.transition = 'opacity 0.3s ease';
-    eventDisplay.style.opacity = '0';
+    // Add transition effect
+    display.style.transition = 'opacity 0.3s ease';
+    display.style.opacity = '0';
     
-    // Update content after fade out
     setTimeout(() => {
-        const event = events[currentEventIndex];
-        eventDisplay.innerHTML = `
-            <div class="event-icon">${event.icon}</div>
-            <div class="event-title-modern">${event.title}</div>
-            <div class="event-description">${event.description}</div>
-            <div class="event-date-modern">${event.date}</div>
-        `;
-        
-        // Fade back in
-        eventDisplay.style.opacity = '1';
+        const item = items[carouselIndex[type]];
+        if (type === 'event') {
+            display.innerHTML = `
+                <div class="event-icon">${item.icon}</div>
+                <div class="event-title-modern">${item.title}</div>
+                <div class="event-description">${item.description}</div>
+                <div class="event-date-modern">${item.date}</div>
+            `;
+        } else {
+            display.innerHTML = `
+                <div class="cash-banner-image">${item.image}</div>
+                <div class="cash-banner-title">${item.title}</div>
+                <div class="cash-banner-subtitle">${item.subtitle}</div>
+                <div class="cash-banner-price">${item.price}</div>
+            `;
+        }
+        display.style.opacity = '1';
     }, 150);
 }
 
-// Auto-rotate events every 5 seconds
+function changeEvent(direction) { changeCarousel('event', direction); }
+function changeCashItem(direction) { changeCarousel('cash', direction); }
+
+// Auto-rotate carousels
 setInterval(() => {
     if (document.getElementById('eventDisplay')) {
         changeEvent(1);
     }
 }, 5000);
 
-// Make function globally available
-window.changeEvent = changeEvent;
-
-/**
- * Cash Shop Carousel functionality
- */
-let currentCashIndex = 0;
-const cashItems = [
-    {
-        image: '🎭',
-        title: '신년 한정 코스튬',
-        subtitle: '50% 할인 진행중',
-        price: '2,400 캐시'
-    },
-    {
-        image: '💼',
-        title: '프리미엄 패키지',
-        subtitle: '특별 혜택 포함',
-        price: '4,800 캐시'
-    },
-    {
-        image: '✨',
-        title: '이펙트 아이템',
-        subtitle: 'NEW 출시',
-        price: '1,200 캐시'
-    },
-    {
-        image: '🎪',
-        title: '펫 컬렉션',
-        subtitle: '한정판 펫들',
-        price: '3,600 캐시'
-    },
-    {
-        image: '🎨',
-        title: '커스텀 스킨',
-        subtitle: '아티스트 콜라보',
-        price: '2,800 캐시'
-    }
-];
-
-function changeCashItem(direction) {
-    const cashDisplay = document.getElementById('cashDisplay');
-    if (!cashDisplay) return;
-    
-    // Update index
-    currentCashIndex += direction;
-    if (currentCashIndex < 0) {
-        currentCashIndex = cashItems.length - 1;
-    } else if (currentCashIndex >= cashItems.length) {
-        currentCashIndex = 0;
-    }
-    
-    // Add fade out effect
-    cashDisplay.style.transition = 'opacity 0.3s ease';
-    cashDisplay.style.opacity = '0';
-    
-    // Update content after fade out
-    setTimeout(() => {
-        const item = cashItems[currentCashIndex];
-        cashDisplay.innerHTML = `
-            <div class="cash-banner-image">${item.image}</div>
-            <div class="cash-banner-title">${item.title}</div>
-            <div class="cash-banner-subtitle">${item.subtitle}</div>
-            <div class="cash-banner-price">${item.price}</div>
-        `;
-        
-        // Fade back in
-        cashDisplay.style.opacity = '1';
-    }, 150);
-}
-
-// Auto-rotate cash items every 6 seconds
 setInterval(() => {
     if (document.getElementById('cashDisplay')) {
         changeCashItem(1);
     }
 }, 6000);
 
-// Make function globally available
+
+// Make functions globally available
+window.changeEvent = changeEvent;
 window.changeCashItem = changeCashItem;
-
-/**
- * Side Advertisement Banner Management
- */
-const sideAdBanners = {
-    left: [
-        {
-            image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%234285f4'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 A%3C/text%3E%3C/svg%3E",
-            link: "#",
-            alt: "Advertisement A"
-        },
-        {
-            image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%23ea4335'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 B%3C/text%3E%3C/svg%3E",
-            link: "#",
-            alt: "Advertisement B"
-        }
-    ],
-    right: [
-        {
-            image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%2334a853'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 C%3C/text%3E%3C/svg%3E",
-            link: "#",
-            alt: "Advertisement C"
-        },
-        {
-            image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%23fbbc04'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 D%3C/text%3E%3C/svg%3E",
-            link: "#",
-            alt: "Advertisement D"
-        }
-    ]
-};
-
-let currentAdIndex = { left: 0, right: 0 };
-
-function rotateSideAd(side) {
-    const container = document.getElementById(side + 'AdRotation');
-    if (!container) return;
-    
-    const ads = sideAdBanners[side];
-    if (!ads || ads.length === 0) return;
-    
-    currentAdIndex[side] = (currentAdIndex[side] + 1) % ads.length;
-    const currentAd = ads[currentAdIndex[side]];
-    
-    container.innerHTML = `
-        <div class="ad-item">
-            <img src="${currentAd.image}" alt="${currentAd.alt}" onclick="openAdLink('${currentAd.link}')">
-        </div>
-    `;
-}
-
-function openAdLink(url) {
-    if (url && url !== '#') {
-        window.open(url, '_blank');
-    }
-}
-
-// Initialize and start ad rotation
-function initializeSideAds() {
-    // Initial load
-    rotateSideAd('left');
-    rotateSideAd('right');
-    
-    // Rotate ads every 10 seconds
-    setInterval(() => {
-        rotateSideAd('left');
-    }, 10000);
-    
-    setInterval(() => {
-        rotateSideAd('right');
-    }, 12000); // Slightly different timing for variety
-}
-
-// Initialize side ads when page loads
-document.addEventListener('DOMContentLoaded', initializeSideAds);
