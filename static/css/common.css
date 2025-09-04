@@ -194,29 +194,22 @@ body {
     align-items: center;
 }
 
-/* Common Layout - 완전 유연한 창 크기 반응형 */
+/* Common Layout - 반응형 그리드 */
 .main-container {
-    max-width: min(95vw, 1400px);
+    max-width: 1400px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(180px, 15%) 1fr minmax(180px, 15%);
-    gap: clamp(15px, 1.5vw, 25px);
-    padding: clamp(15px, 1.5vw, 25px);
+    grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px);
+    gap: 20px;
+    padding: 20px;
     align-items: start;
 }
-
-/* Home Page Layout Override - 메인 컨텐츠 더 넓게 */
-.home-page .main-container {
-    grid-template-columns: minmax(200px, 16%) 1fr minmax(200px, 16%);
-}
-
-/* 해상도별 미디어 쿼리 제거 - 창 크기에 자연스럽게 반응 */
 
 /* Sidebar Styles */
 .left-sidebar, .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: clamp(15px, 1.5vw, 25px);
+    gap: 20px;
     height: auto;
     min-height: fit-content;
 }
@@ -265,20 +258,20 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: calc(30vh - 60px);
+    min-height: 200px;
 }
 
 .card-header {
     background: var(--accent-color);
     color: white;
-    padding: calc(12px * var(--spacing-scale, 1)) calc(20px * var(--spacing-scale, 1));
+    padding: 12px 20px;
     font-weight: bold;
     text-align: center;
-    font-size: calc(14px * var(--font-scale, 1));
+    font-size: 14px;
 }
 
 .card-body {
-    padding: calc(15px * var(--spacing-scale, 1));
+    padding: 15px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -287,17 +280,17 @@ body {
 /* Floating Action Button */
 .floating-send-btn {
     position: fixed;
-    bottom: 50px;
-    right: 50px;
-    width: 60px;
-    height: 60px;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
     background: var(--accent-color);
-    border-radius: var(--border-radius-round);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     cursor: pointer;
     box-shadow: var(--shadow-medium);
     transition: var(--transition-fast);
@@ -306,98 +299,19 @@ body {
 
 .floating-send-btn:hover {
     background: var(--accent-dark);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 /* Responsive Design */
 /* 4K and Ultra-wide Support */
-/* 4K Resolution (2560px+) - Disabled for normal sizing */
-/*
-@media (min-width: 2560px) {
-    :root {
-        --font-scale: 1.2;
-        --spacing-scale: 1.3;
-        --component-scale: 1.15;
-    }
-    
-    body {
-        font-size: calc(14px * var(--font-scale));
-    }
-    
-    .main-container {
-        max-width: 2400px;
-        padding: calc(20px * var(--spacing-scale));
-        gap: calc(20px * var(--spacing-scale));
-    }
-    
-    .header-content {
-        max-width: 2400px;
-        padding: 0 calc(20px * var(--spacing-scale));
-    }
-    
-    .nav-content {
-        max-width: 2400px;
-        padding: 0 calc(20px * var(--spacing-scale));
-    }
-    
-    .logo {
-        font-size: calc(20px * var(--font-scale));
-    }
-    
-    .search-input {
-        width: calc(250px * var(--component-scale));
-        padding: calc(8px * var(--spacing-scale)) calc(40px * var(--spacing-scale)) calc(8px * var(--spacing-scale)) calc(15px * var(--spacing-scale));
-        font-size: calc(14px * var(--font-scale));
-    }
-    
-    .nav-item {
-        padding: calc(6px * var(--spacing-scale)) calc(16px * var(--spacing-scale));
-        font-size: calc(14px * var(--font-scale));
-    }
-    
-    .card-header {
-        padding: calc(12px * var(--spacing-scale)) calc(20px * var(--spacing-scale));
-        font-size: calc(16px * var(--font-scale));
-    }
-    
-    .card-body {
-        padding: calc(15px * var(--spacing-scale));
-    }
-}
-*/
+/* Removed unused 4K and 2K resolution styles */
 
-/* 2K Resolution (1440p) - Disabled for normal sizing */
-/*
-@media (min-width: 1920px) and (max-width: 2559px) {
-    :root {
-        --font-scale: 1.1;
-        --spacing-scale: 1.1;
-        --component-scale: 1.05;
-    }
-    
-    .main-container {
-        max-width: 1800px;
-        padding: calc(20px * var(--spacing-scale));
-        gap: calc(20px * var(--spacing-scale));
-    }
-    
-    .header-content {
-        max-width: 1800px;
-    }
-    
-    .search-input {
-        width: calc(250px * var(--component-scale));
-        font-size: calc(14px * var(--font-scale));
-    }
-}
-*/
-
-/* 창 크기에 따른 자연스러운 반응형 - 사이드바 숨김 */
+/* 태블릿에서 사이드바 숨김 */
 @media (max-width: 1024px) {
     .main-container {
-        grid-template-columns: 1fr !important;
-        gap: clamp(15px, 2vw, 20px);
-        padding: clamp(15px, 2vw, 20px);
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
     }
     
     .left-sidebar, .right-sidebar {
@@ -405,7 +319,7 @@ body {
     }
 }
 
-/* 모바일 크기에서의 추가 최적화 */
+/* 모바일 최적화 */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -420,7 +334,7 @@ body {
     }
     
     .search-input {
-        width: clamp(150px, 50vw, 250px);
+        width: 200px;
         font-size: 14px;
     }
     
@@ -430,7 +344,7 @@ body {
     }
     
     .character-search-input {
-        max-width: clamp(100px, 30vw, 150px);
+        max-width: 150px;
         font-size: 13px;
     }
     
@@ -439,17 +353,11 @@ body {
     }
     
     .floating-send-btn {
-        bottom: calc(30px * var(--spacing-scale));
-        right: calc(30px * var(--spacing-scale));
-        width: calc(50px * var(--component-scale, 1));
-        height: calc(50px * var(--component-scale, 1));
-        font-size: calc(20px * var(--font-scale));
-    }
-    
-    .user-info {
-        order: -1;
-        margin: 0;
-        font-size: calc(14px * var(--font-scale));
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
     }
 }
 
@@ -458,9 +366,9 @@ body {
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    margin-bottom: calc(20px * var(--spacing-scale, 1));
-    padding: calc(15px * var(--spacing-scale, 1));
-    max-height: calc(400px * var(--component-scale, 1));
+    margin-bottom: 20px;
+    padding: 15px;
+    max-height: 400px;
     overflow: hidden;
 }
 
@@ -637,10 +545,10 @@ body {
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    margin-bottom: calc(20px * var(--spacing-scale, 1));
-    padding: calc(15px * var(--spacing-scale, 1));
+    margin-bottom: 20px;
+    padding: 15px;
     text-align: center;
-    max-height: calc(350px * var(--component-scale, 1));
+    max-height: 350px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
