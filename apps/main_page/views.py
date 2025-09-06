@@ -20,7 +20,12 @@ def main_page(request):
         **notice,
         'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
     }
+<<<<<<< HEAD
     return render(request, 'main_page/main_page.html', context)
+=======
+    
+    return render(request, 'main_page.html', context)
+>>>>>>> feature/Design
 
 
 def character_info_view(request):
