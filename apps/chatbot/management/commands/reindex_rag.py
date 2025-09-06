@@ -6,26 +6,32 @@ from apps.chatbot.rag_engine import RagEngine
 
 
 class Command(BaseCommand):
-    help = "Reindex RAG data into PostgreSQL(pgvector). Optionally truncate table first."
+    help = "Reindex RAG data into PostgreSQL(pgvector) using LangChain. Optionally truncate table first."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--truncate",
             action="store_true",
-            help="Truncate vector table before reindexing",
+            help="Truncate LangChain vector table before reindexing",
         )
 
     def handle(self, *args, **options):
         pg = get_pg_config()
-        if options.get("truncate") or pg.get("truncate_on_reindex"):
-            url = f"postgresql+psycopg2://{pg['user']}:{pg['password']}@{pg['host']}:{pg['port']}/{pg['db']}"
-            engine = create_engine(url)
-            with engine.connect() as conn:
-                conn.execute(text(f"TRUNCATE TABLE {pg['table']};"))
-                conn.commit()
-            self.stdout.write(self.style.WARNING(f"Truncated table {pg['table']}"))
+        
+        try:
+            rag = RagEngine()
+            
+            if options.get("truncate") or pg.get("truncate_on_reindex"):
+                # LangChain 테이블 정리
+                if rag.clear_documents():
+                    self.stdout.write(self.style.WARNING(f"Cleared LangChain vector collection: {rag.collection_name}"))
+                else:
+                    self.stdout.write(self.style.ERROR("Failed to clear existing documents"))
 
-        rag = RagEngine()
-        # RagEngine ctor will ingest if empty. Force ingest regardless.
-        rag._ingest_from_dir()
-        self.stdout.write(self.style.SUCCESS("RAG reindex completed."))
+            # 강제 재인덱싱
+            self.stdout.write(self.style.SUCCESS("Starting LangChain RAG reindexing..."))
+            rag._ingest_from_dir()
+            self.stdout.write(self.style.SUCCESS("LangChain RAG reindex completed successfully!"))
+            
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"RAG reindexing failed: {e}"))

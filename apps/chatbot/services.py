@@ -6,7 +6,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from huggingface_hub import login
 
-# LlamaIndex RAG
+# LangChain RAG 엔진
 from .rag_engine import RagEngine
 
 
@@ -101,11 +101,12 @@ class CustomLLM:
             return f"오류가 발생했습니다: {str(e)}"
 
 class ChatbotService:
-    """LlamaIndex(pgvector) 기반 챗봇 서비스 (로컬/원격 LLM 모드)
+    """LangChain(pgvector) 기반 챗봇 서비스 (로컬/원격 LLM 모드)
 
-    - 로컬 모드: CustomLLM + RagEngine 검색결과를 컨텍스트에 주입
+    - 로컬 모드: CustomLLM + LangChain RagEngine 검색결과를 컨텍스트에 주입
     - 원격 모드: FastAPI 모델 엔드포인트 호출 (간단 컨텍스트 주입)
     - 사용자별 히스토리는 메모리에 저장
+    - LangChain PGVector를 사용한 의미 검색 기능
     """
 
     def __init__(self):

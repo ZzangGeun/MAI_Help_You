@@ -1,21 +1,21 @@
-# 메이플스토리 AI 챗봇 (Django + LlamaIndex + PostgreSQL/pgvector)
+# 메이플스토리 AI 챗봇 (Django + LangChain + DRF + PostgreSQL/pgvector)
 
 ## 개요
-메이플스토리 게임 정보를 제공하는 AI 챗봇입니다. LlamaIndex 기반 RAG(Retrieval-Augmented Generation)와 PostgreSQL(pgvector)을 활용해 안정적인 검색/추론을 제공합니다. 대화 히스토리를 유지하면서, 관련 문서를 근거로 한 답변을 반환합니다.
+메이플스토리 게임 정보를 제공하는 AI 챗봇입니다. LangChain 기반 RAG(Retrieval-Augmented Generation)와 PostgreSQL(pgvector), Django REST Framework를 활용해 안정적인 검색/추론 및 RESTful API를 제공합니다. 대화 히스토리를 유지하면서, 관련 문서를 근거로 한 답변을 반환합니다.
 
 ## 주요 기능
 
 ### 🤖 AI 챗봇
 - 파인튜닝/허깅페이스 모델 기반 응답 생성
-- LlamaIndex Query Engine 연동
-- 근거 문서(소스) 표시
+- LangChain 기반 RAG 시스템 연동
+- 근거 문서(소스) 표시 및 유사도 점수
 - 대화 히스토리 유지 및 초기화
 
 ### 🔍 RAG 시스템
 - 임베딩: `sentence-transformers/all-MiniLM-L6-v2` (CPU)
-- 벡터 DB: PostgreSQL + pgvector
-- 최초 실행 시 `MAI_db/json_data/**` 인덱싱 → 이후에는 DB에서 로드
-- Retriever Top-K: 3
+- 벡터 DB: PostgreSQL + pgvector (LangChain PGVector)
+- 최초 실행 시 JSON 데이터 인덱싱 → 이후에는 DB에서 로드
+- 문서 청킹 및 유사도 검색 (Top-K: 3)
 
 ### 💬 대화 관리
 - 세션(또는 user_id)별 히스토리 저장/조회/초기화
@@ -24,9 +24,9 @@
 ## 기술 스택
 
 ### Backend
-- **Django 5.1.7**
-- **LlamaIndex**: RAG/Query Engine
-- **PostgreSQL + pgvector**: 벡터 스토어
+- **Django 5.1.7** + **Django REST Framework**
+- **LangChain**: RAG 시스템 및 문서 처리
+- **PostgreSQL + pgvector**: 벡터 스토어 (LangChain PGVector)
 - **Transformers**: 모델 로딩/추론
 - (선택) **FastAPI 마이크로서비스**: 별도 모델 엔드포인트
 
@@ -90,7 +90,7 @@ uvicorn main:app --reload --port 8001
 - 챗봇: `http://localhost:8000/chatbot/`
 
 2) 질문하기
-- 질문을 입력하면 LlamaIndex가 관련 문서를 검색하고 근거와 함께 답변을 생성
+- 질문을 입력하면 LangChain이 관련 문서를 검색하고 근거와 함께 답변을 생성
 
 3) 대화 관리
 - 히스토리 자동 저장, “대화 초기화” 버튼으로 클리어 가능
@@ -106,25 +106,37 @@ MAI/
 └── templates/               # 공통 레이아웃 및 include
 ```
 
-## RAG 동작 (LlamaIndex + pgvector)
-- 최초 실행 시 `MAI_db/json_data/**`를 인덱싱하여 PostgreSQL(pgvector)에 저장
-- 이후에는 DB에서 인덱스를 로드하여 Query Engine 구성
-- Retriever Top-K=3으로 근거 문서를 선별하여 답변에 반영
+## RAG 동작 (LangChain + pgvector)
+- 최초 실행 시 JSON 데이터를 인덱싱하여 PostgreSQL(pgvector)에 저장
+- LangChain PGVector로 벡터 스토어 관리 및 유사도 검색
+- 문서 청킹과 임베딩을 통해 의미 기반 검색 수행
+- Top-K=3으로 근거 문서를 선별하여 답변에 반영
 
 ## API 엔드포인트
+
+### 기존 Django API
 - `POST /chatbot/ask/` 질문 처리
 - `GET /chatbot/history/` 히스토리 조회
 - `POST /chatbot/clear-history/` 히스토리 초기화
 - `GET /chatbot/health/` 헬스 체크
 
+### 새로운 DRF API  
+- `POST /api/v1/chatbot/ask/` DRF 질문 처리
+- `GET /api/v1/chatbot/history/` DRF 히스토리 조회
+- `POST /api/v1/chatbot/clear-history/` DRF 히스토리 초기화
+- `GET /api/v1/chatbot/health/` DRF 헬스 체크
+- `GET /api/docs/` Swagger API 문서 (개발환경)
+
 ## 광고(선택)
 - 전역 인클루드 `includes/_ad_slot.html`로 어디서든 광고 슬롯 배치 가능
 - .env로 `ADS_ENABLED`, `ADS_PROVIDER=adsense`, `ADSENSE_CLIENT`, 슬롯 ID를 설정
 
-## 이전 버전 대비 변경점
-- LangChain → LlamaIndex (체인 중심에서 인덱스/Query Engine 중심으로 전환)
-- FAISS → PostgreSQL(pgvector) (파일 기반 인덱스에서 서버형 벡터DB로 전환)
-- 인덱스 생성/로드는 DB 일관성 유지 기준으로 동작
+## 최신 버전 변경점
+- **LlamaIndex → LangChain** (인덱스 중심에서 체인/에이전트 중심으로 전환)
+- **Django REST Framework 도입** (RESTful API 및 자동 문서화)
+- **개선된 문서 처리** (JSON 파싱 및 청킹 최적화)
+- **유사도 점수 제공** (검색 결과에 점수 포함)
+- **API 문서화** (Swagger UI 자동 생성)
 
 ## 문제 해결
 - pgvector 미설치: DB에서 `CREATE EXTENSION vector;` 실행 필요
