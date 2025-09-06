@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/common.css">
-    <link rel="stylesheet" href="/static/css/chat.css">
+    <link rel="stylesheet" href="../static/css/common.css">
+    <link rel="stylesheet" href="../static/css/chat.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="test_refactored.html" class="logo">
+            <a href="main_page.html" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -22,8 +23,8 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <a href="test_refactored.html" class="nav-item">홈</a>
-            <a href="page2_refactored.html" class="nav-item active">CHAT BOT</a>
+            <a href="main_page.html" class="nav-item">홈</a>
+            <a href="chatbot_page.html" class="nav-item active">CHAT BOT</a>
             <a href="#" class="nav-item">캐릭터 검색</a>
             <a href="#" class="nav-item">큐브</a>
             <a href="#" class="nav-item">스타포스</a>
@@ -36,11 +37,9 @@
         <!-- Left Advertisement Banner -->
         <div class="left-ad-banner">
             <div class="side-ad-content">
-                <div class="ad-rotation" id="leftAdRotation">
+                <div class="ad-rotation">
                     <div class="ad-item">
-                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; transform: rotate(-2deg);">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='700' viewBox='0 0 200 700'%3E%3Crect width='200' height='700' fill='%234285f4'/%3E%3Ctext x='100' y='350' text-anchor='middle' fill='white' font-size='20' font-weight='bold'%3E광고 A%3C/text%3E%3C/svg%3E" alt="Advertisement A">
-                        </div>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%234285f4'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 A%3C/text%3E%3C/svg%3E" alt="Advertisement A">
                     </div>
                 </div>
             </div>
@@ -233,11 +232,9 @@
         <!-- Right Advertisement Banner -->
         <div class="right-ad-banner">
             <div class="side-ad-content">
-                <div class="ad-rotation" id="rightAdRotation">
+                <div class="ad-rotation">
                     <div class="ad-item">
-                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; transform: rotate(2deg);">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='700' viewBox='0 0 200 700'%3E%3Crect width='200' height='700' fill='%2334a853'/%3E%3Ctext x='100' y='350' text-anchor='middle' fill='white' font-size='20' font-weight='bold'%3E광고 B%3C/text%3E%3C/svg%3E" alt="Advertisement B">
-                        </div>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%2334a853'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 B%3C/text%3E%3C/svg%3E" alt="Advertisement B">
                     </div>
                 </div>
             </div>
@@ -247,7 +244,7 @@
     <!-- Floating Send Button -->
     <div class="floating-send-btn" onclick="scrollToChat()">💬</div>
 
-    <script src="js/common.js"></script>
-    <script src="js/chat.js"></script>
+    <script src="../static/js/common.js"></script>
+    <script src="../static/js/chat.js"></script>
 </body>
 </html>
