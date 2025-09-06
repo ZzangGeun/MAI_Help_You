@@ -13,7 +13,7 @@ FASTAPI_URL = "http://localhost:8000/api/fastapi/ask"
 
 def chatbot_view(request):
     """챗봇 메인 페이지 뷰"""
-    return render(request, "chatbot/chatbot.html")
+    return render(request, "chatbot_page.html")
 
 @csrf_exempt
 @require_http_methods(["POST"])
