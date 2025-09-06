@@ -10,13 +10,13 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=lambda v: [s.strip() fo
 
 # Database - 프로덕션에서는 PostgreSQL 사용
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config('DB_NAME'),
-        "USER": config('DB_USER'),
-        "PASSWORD": config('DB_PASSWORD'),
-        "HOST": config('DB_HOST', default='localhost'),
-        "PORT": config('DB_PORT', default='5432'),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mai_web',        
+        'USER': 'postgres',       
+        'PASSWORD': '2559',   
+        'HOST': 'localhost',      
+        'PORT': '5432',           
     }
 }
 
