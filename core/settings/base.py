@@ -26,17 +26,23 @@ LOCAL_APPS = [
     "apps.main_page",
     "apps.character_info", 
     "apps.chatbot",
-    "apps.sns_login",
+    "apps.signup",  
+    "apps.api",  
 ]
 
 THIRD_PARTY_APPS = [
-    # 필요한 서드파티 앱들 추가
+    # Django REST Framework
+    'rest_framework',
+    'django_filters',
+    'corsheaders',
+    'drf_spectacular',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS 처리
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -101,3 +107,51 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# =======================
+# Django REST Framework 설정
+# =======================
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# API 문서화 설정 (drf-spectacular)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MAI (Maple AI Help You) API',
+    'DESCRIPTION': '메이플스토리 AI 챗봇 API 문서',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+}
+
+# CORS 설정 (개발 환경용 - 프로덕션에서는 더 제한적으로 설정)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React 개발서버
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",  # Django 개발서버
+    "http://127.0.0.1:8000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# 개발 환경에서만 모든 도메인 허용 (주의: 프로덕션에서는 사용하지 말 것)
+# CORS_ALLOW_ALL_ORIGINS = True

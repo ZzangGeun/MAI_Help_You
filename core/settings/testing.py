@@ -8,8 +8,12 @@ DEBUG = True
 # Test database - 메모리 내 SQLite 사용
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mai_web',        
+        'USER': 'postgres',       
+        'PASSWORD': '2559',   
+        'HOST': 'localhost',      
+        'PORT': '5432',           
     }
 }
 

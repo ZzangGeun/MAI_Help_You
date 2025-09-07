@@ -16,10 +16,11 @@ bitsandbytes==0.41.3
 numpy<2.0.0
 
 
-# LlamaIndex + Postgres (pgvector)
-llama-index>=0.10.0
-llama-index-vector-stores-postgres>=0.2.0
-llama-index-embeddings-huggingface>=0.2.0
+# LangChain + Postgres (pgvector)
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-postgres>=0.0.6
+sentence-transformers>=2.2.2
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
 pgvector>=0.2.5
@@ -30,6 +31,12 @@ httpx==0.25.2
 
 # Environment
 python-dotenv==1.0.0
+
+# Django REST Framework
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+drf-spectacular==0.27.0  # API 문서화
 
 # Development
 pytest==7.4.3
