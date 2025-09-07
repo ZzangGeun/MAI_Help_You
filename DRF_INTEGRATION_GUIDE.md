@@ -4,22 +4,27 @@
 
 기존 Django 프로젝트에 DRF를 점진적으로 도입하고, LangChain 기반 RAG 시스템으로 전환하여 기존 구조를 해치지 않으면서 RESTful API와 고급 AI 기능을 제공합니다.
 
-## 📁 새로운 프로젝트 구조
+## 📁 새로운 프로젝트 구조 (도메인별 분리)
 
 ```
 MAI_Help_You/
 ├── apps/
-│   ├── api/                    # 🆕 DRF API 전용 앱
+│   ├── api/                    # 🆕 DRF API 집계 라우터
 │   │   ├── __init__.py
 │   │   ├── apps.py
-│   │   ├── urls.py             # API v1 통합 URL
-│   │   ├── chatbot_urls.py     # 챗봇 API URL
-│   │   ├── chatbot_views.py    # 챗봇 API 뷰 (DRF)
-│   │   ├── chatbot_serializers.py  # 챗봇 시리얼라이저
-│   │   ├── character_urls.py   # 캐릭터 API (향후 확장)
-│   │   └── auth_urls.py        # 인증 API (향후 확장)
-│   ├── chatbot/               # 기존 챗봇 앱 (그대로 유지)
-│   ├── character_info/        # 기존 캐릭터 앱 (그대로 유지)
+│   │   ├── urls.py             # 도메인별 라우팅
+│   │   └── management/         # 관리 명령어
+│   ├── chatbot/
+│   │   └── api/                # 🆕 챗봇 API (도메인별)
+│   │       ├── urls.py
+│   │       ├── views.py
+│   │       └── serializers.py
+│   ├── character_info/
+│   │   └── api/                # 🆕 캐릭터 API (도메인별)
+│   ├── main_page/
+│   │   └── api/                # 🆕 메인 페이지 API (도메인별)
+│   ├── signup/
+│   │   └── api/                # 🆕 인증 API (도메인별)
 │   └── ...
 └── requirements.txt           # DRF 패키지 추가됨
 ```
