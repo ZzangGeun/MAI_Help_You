@@ -26,8 +26,8 @@ LOCAL_APPS = [
     "apps.main_page",
     "apps.character_info", 
     "apps.chatbot",
-    "apps.sns_login",
-    "apps.api",  # DRF API 앱
+    "apps.signup",  
+    "apps.api",  
 ]
 
 THIRD_PARTY_APPS = [

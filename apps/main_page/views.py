@@ -1,9 +1,17 @@
+from django.http.request import HttpRequest
 from django.shortcuts import render, redirect
-from .get_nexon_api import get_notice_list, get_api_data
+from .main_page_nexon_api_get import get_notice_list, get_api_data
 import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db import connection
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 import asyncio
 import aiohttp
 import time
@@ -20,202 +28,317 @@ def main_page(request):
         **notice,
         'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
     }
-<<<<<<< HEAD
-    return render(request, 'main_page/main_page.html', context)
-=======
     
     return render(request, 'main_page.html', context)
->>>>>>> feature/Design
 
 
+# 캐릭터 정보 페이지 뷰
 def character_info_view(request):
-    return render(request, "character_info/character_info.html")
+    return render(request, "character_info.html")
+
+# 회원가입 페이지 뷰
+def signup_view(request):
+    return render(request, "signup.html")
+
+# 로그인 페이지 뷰
+def login_view(request):
+    return render(request, "login.html")
+
+# =============================================================================
+# DRF APIView 예제들 (하이브리드 방식)
+# =============================================================================
 
 
-# JSON API 뷰들
-@require_http_methods(["GET"])
-def notice_list_api(request):
-    """공지사항 목록 조회 API"""
-    try:
-        # 쿼리 파라미터 처리
-        page = int(request.GET.get('page', 1))
-        limit = int(request.GET.get('limit', 10))
-        category = request.GET.get('category')
-        important_only = request.GET.get('important_only', 'false').lower() == 'true'
-        
-        # 넥슨 API에서 공지사항 데이터 가져오기
-        notice_data = get_api_data("/notice")
-        
-        if not notice_data:
-            return JsonResponse({
-                "success": False,
-                "message": "공지사항을 불러올 수 없습니다.",
-                "error_code": "API_ERROR"
-            }, status=503)
-        
-        # 공지사항 리스트 추출
-        notices = notice_data.get('notice', [])
-        
-        # 카테고리 필터링 (넥슨 API의 notice_type 기준)
-        if category:
-            notices = [n for n in notices if category.lower() in n.get('notice_type', '').lower()]
-        
-        # 페이지네이션 처리
-        total_count = len(notices)
-        start_idx = (page - 1) * limit
-        end_idx = start_idx + limit
-        paginated_notices = notices[start_idx:end_idx]
-        
-        # 응답 데이터 구성
-        response_data = {
-            "success": True,
-            "data": {
-                "notices": paginated_notices,
-                "pagination": {
-                    "current_page": page,
-                    "per_page": limit,
-                    "total_count": total_count,
-                    "total_pages": (total_count + limit - 1) // limit
+
+class LoginAPIView(APIView):
+    """
+    로그인 API (DRF APIView 예제)
+    """
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        summary="사용자 로그인",
+        description="사용자 인증을 수행합니다.",
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string', 'description': '아이디'},
+                    'password': {'type': 'string', 'description': '비밀번호'},
+                },
+                'required': ['id', 'password']
+            }
+        },
+        responses={
+            200: {
+                'description': '로그인 성공',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'message': '로그인 성공',
+                            'token': 'jwt_token_here',
+                            'user': {
+                                'id': 'user123',
+                                'username': 'testuser',
+                                'nickname': '테스트유저'
+                            },
+                            'status': 'success'
+                        }
+                    }
+                }
+            },
+            401: {'description': '인증 실패'},
+            400: {'description': '잘못된 요청'}
+        },
+        tags=["Authentication"]
+    )
+    def post(self, request):
+        """
+        POST /api/v1/auth/login/
+        """
+        try:
+            username = request.data.get('username')
+            password = request.data.get('password')
+            
+            if not username or not password:
+                return Response({
+                    'error': '사용자명과 비밀번호를 입력해주세요.',
+                    'status': 'error'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 실제 로그인 로직 (예제)
+            # TODO: 사용자 인증, JWT 토큰 생성 등
+            
+            return Response({
+                'message': '로그인 성공',
+                'token': f'jwt_token_for_{username}',
+                'user': {
+                    'id': f'user_{username}',
+                    'username': username,
+                    'nickname': f'{username}_닉네임'
+                },
+                'status': 'success'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"로그인 오류: {e}")
+            return Response({
+                'error': f'로그인 중 오류가 발생했습니다: {str(e)}',
+                'status': 'error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CharacterInfoAPIView(APIView):
+    """
+    캐릭터 정보 조회 API (DRF APIView 예제)
+    """
+    permission_classes = [IsAuthenticated]  # 인증된 사용자만 접근 가능
+    
+    @extend_schema(
+        summary="캐릭터 정보 조회",
+        description="특정 캐릭터의 상세 정보를 조회합니다.",
+        parameters=[
+            OpenApiParameter(
+                name='character_name',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description='캐릭터 이름',
+                required=True
+            ),
+            OpenApiParameter(
+                name='world_name',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='월드 이름 (선택사항)',
+                required=False
+            )
+        ],
+        responses={
+            200: {
+                'description': '캐릭터 정보 조회 성공',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'character': {
+                                'name': '테스트캐릭터',
+                                'level': 200,
+                                'class': '아크메이지',
+                                'world': '스카니아',
+                                'guild': '테스트길드'
+                            },
+                            'status': 'success'
+                        }
+                    }
+                }
+            },
+            404: {'description': '캐릭터를 찾을 수 없음'},
+            401: {'description': '인증 필요'}
+        },
+        tags=["Character"]
+    )
+    def get(self, request, character_name=None):
+        """
+        GET /api/v1/character/info/{character_name}/
+        """
+        try:
+            # URL 파라미터에서 캐릭터 이름 가져오기
+            if not character_name:
+                character_name = request.query_params.get('character_name')
+            
+            if not character_name:
+                return Response({
+                    'error': '캐릭터 이름이 필요합니다.',
+                    'status': 'error'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            world_name = request.query_params.get('world_name', '스카니아')
+            
+            # 실제 캐릭터 정보 조회 로직 (예제)
+            # TODO: Nexon API 호출, 데이터베이스 조회 등
+            
+            character_data = {
+                'name': character_name,
+                'level': 200,
+                'class': '아크메이지',
+                'world': world_name,
+                'guild': '테스트길드',
+                'last_updated': time.time()
+            }
+            
+            return Response({
+                'character': character_data,
+                'status': 'success'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"캐릭터 정보 조회 오류: {e}")
+            return Response({
+                'error': f'캐릭터 정보 조회 중 오류가 발생했습니다: {str(e)}',
+                'status': 'error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# =============================================================================
+# DRF Function-based View 예제들 (@api_view 데코레이터 사용)
+# =============================================================================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@extend_schema(
+    summary="공지사항 목록 조회 (Function-based)",
+    description="Function-based view를 사용한 공지사항 조회 예제",
+    responses={
+        200: {
+            'description': '공지사항 목록 조회 성공',
+            'content': {
+                'application/json': {
+                    'example': {
+                        'notices': [
+                            {
+                                'title': '공지사항 제목',
+                                'date': '2024-01-01',
+                                'url': 'https://example.com'
+                            }
+                        ],
+                        'total_count': 10,
+                        'status': 'success'
+                    }
                 }
             }
         }
+    },
+    tags=["Notice"]
+)
+def notice_list_api(request):
+    """
+    GET /api/v1/main/notices/
+    Function-based view 예제
+    """
+    try:
+        # 기존 함수 재사용
+        notice_data = get_notice_list()
         
-        return JsonResponse(response_data)
+        return Response({
+            'notices': notice_data.get('notices', []),
+            'total_count': len(notice_data.get('notices', [])),
+            'status': 'success'
+        }, status=status.HTTP_200_OK)
         
     except Exception as e:
-        logger.error(f"공지사항 조회 중 오류 발생: {str(e)}")
-        return JsonResponse({
-            "success": False,
-            "message": "서버 내부 오류가 발생했습니다.",
-            "error_code": "INTERNAL_ERROR"
-        }, status=500)
+        logger.error(f"공지사항 조회 오류: {e}")
+        return Response({
+            'error': f'공지사항 조회 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@require_http_methods(["GET"])
-def notice_detail_api(request, notice_id):
-    """공지사항 상세 조회 API"""
-    try:
-        # 전체 공지사항 목록에서 해당 ID 찾기
-        notice_data = get_api_data("/notice")
-        
-        if not notice_data:
-            return JsonResponse({
-                "success": False,
-                "message": "공지사항을 불러올 수 없습니다."
-            }, status=503)
-        
-        notices = notice_data.get('notice', [])
-        notice = next((n for n in notices if n.get('notice_id') == notice_id), None)
-        
-        if not notice:
-            return JsonResponse({
-                "success": False,
-                "message": "해당 공지사항을 찾을 수 없습니다."
-            }, status=404)
-        
-        return JsonResponse({
-            "success": True,
-            "data": notice
-        })
-        
-    except Exception as e:
-        logger.error(f"공지사항 상세 조회 중 오류 발생: {str(e)}")
-        return JsonResponse({
-            "success": False,
-            "message": "서버 내부 오류가 발생했습니다."
-        }, status=500)
-
-
-@require_http_methods(["GET"])
-def event_list_api(request):
-    """이벤트 목록 조회 API"""
-    try:
-        event_status = request.GET.get('status', 'ongoing')
-        
-        # 넥슨 API에서 이벤트 데이터 가져오기
-        event_data = get_api_data("/notice-event")
-        
-        if not event_data:
-            return JsonResponse({
-                "success": False,
-                "message": "이벤트 정보를 불러올 수 없습니다."
-            }, status=503)
-        
-        events = event_data.get('event_notice', [])
-        
-        return JsonResponse({
-            "success": True,
-            "data": {
-                "events": events
-            }
-        })
-        
-    except Exception as e:
-        logger.error(f"이벤트 조회 중 오류 발생: {str(e)}")
-        return JsonResponse({
-            "success": False,
-            "message": "서버 내부 오류가 발생했습니다."
-        }, status=500)
-
-
-@require_http_methods(["GET"])
-def health_check_api(request):
-    """서비스 상태 확인 API"""
-    try:
-        # 데이터베이스 연결 상태 확인
-        try:
-            connection.ensure_connection()
-            db_status = "connected"
-        except Exception:
-            db_status = "error"
-        
-        # 넥슨 API 상태 확인
-        try:
-            test_response = get_api_data("/notice")
-            external_api_status = "available" if test_response else "limited"
-        except Exception:
-            external_api_status = "unavailable"
-        
-        # 챗봇 서비스 상태 (추후 구현)
-        chatbot_status = "ready"
-        
-        # 전체 서비스 상태 결정
-        if db_status == "connected" and external_api_status == "available":
-            overall_status = "healthy"
-        elif db_status == "error" or external_api_status == "unavailable":
-            overall_status = "down"
-        else:
-            overall_status = "degraded"
-        
-        # 시스템 정보
-        try:
-            uptime = time.time() - psutil.boot_time()
-        except Exception:
-            uptime = 0
-        
-        response_data = {
-            "success": True,
-            "data": {
-                "status": overall_status,
-                "services": {
-                    "database": db_status,
-                    "chatbot": chatbot_status,
-                    "external_api": external_api_status
-                },
-                "uptime": uptime,
-                "version": "1.0.0"
-            }
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@extend_schema(
+    summary="API 키 검증 (Function-based)",
+    description="Function-based view를 사용한 API 키 검증 예제",
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'api_key': {'type': 'string', 'description': '검증할 API 키'}
+            },
+            'required': ['api_key']
         }
+    },
+    responses={
+        200: {
+            'description': 'API 키 검증 성공',
+            'content': {
+                'application/json': {
+                    'example': {
+                        'valid': True,
+                        'message': '유효한 API 키입니다.',
+                        'status': 'success'
+                    }
+                }
+            }
+        },
+        400: {'description': '잘못된 API 키'},
+        401: {'description': '인증 필요'}
+    },
+    tags=["API Key"]
+)
+def validate_api_key_api(request):
+    """
+    POST /api/v1/main/validate-api-key/
+    Function-based view 예제
+    """
+    try:
+        api_key = request.data.get('api_key')
         
-        if overall_status == "down":
-            return JsonResponse(response_data, status=503)
+        if not api_key:
+            return Response({
+                'error': 'API 키가 필요합니다.',
+                'status': 'error'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        return JsonResponse(response_data)
+        # 실제 API 키 검증 로직 (예제)
+        is_valid = len(api_key) >= 10  # 간단한 검증 예제
         
+        if is_valid:
+            return Response({
+                'valid': True,
+                'message': '유효한 API 키입니다.',
+                'status': 'success'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'valid': False,
+                'message': '유효하지 않은 API 키입니다.',
+                'status': 'error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
     except Exception as e:
-        logger.error(f"헬스체크 중 오류 발생: {str(e)}")
-        return JsonResponse({
-            "success": False,
-            "message": "헬스체크 실패",
-            "error_code": "HEALTH_CHECK_ERROR"
-        }, status=500)
+        logger.error(f"API 키 검증 오류: {e}")
+        return Response({
+            'error': f'API 키 검증 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
