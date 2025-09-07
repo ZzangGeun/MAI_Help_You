@@ -14,8 +14,9 @@ urlpatterns = [
     # 라우터 기반 URL (ViewSet용)
     path('', include(router.urls)),
     
-    # 개별 API URL들
-    path('chatbot/', include('apps.api.chatbot_urls')),
-    path('character/', include('apps.api.character_urls')),
-    path('auth/', include('apps.api.auth_urls')),
+    # 개별 API URL들 (도메인별로 분리됨)
+    path('chatbot/', include('apps.chatbot.api.urls')),
+    path('character/', include('apps.character_info.api.urls')),
+    path('main/', include('apps.main_page.api.urls')),
+    path('auth/', include('apps.signup.api.urls')),
 ]

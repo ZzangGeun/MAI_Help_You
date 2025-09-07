@@ -1,5 +1,5 @@
 """
-캐릭터 정보 API URL 설정 (향후 확장용)
+캐릭터 정보 API URL 설정 (도메인 전용)
 """
 from django.urls import path
 
