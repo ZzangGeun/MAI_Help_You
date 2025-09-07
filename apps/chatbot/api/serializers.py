@@ -1,5 +1,5 @@
 """
-챗봇 API 시리얼라이저
+챗봇 API 시리얼라이저 (도메인 전용)
 """
 from rest_framework import serializers
 
