@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -359,11 +358,17 @@
     <script>
         // Search example function
         function searchExample(query) {
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput) {
-                searchInput.value = query;
-                // Trigger search
-                window.MapleStoryChatBot.performSearch(query);
+            const mainSearchInput = document.getElementById('mainSearchInput');
+            if (mainSearchInput) {
+                mainSearchInput.value = query;
+                // Trigger main search
+                if (window.performMainSearch) {
+                    window.performMainSearch();
+                } else {
+                    // Fallback to redirect
+                    sessionStorage.setItem('pendingChatQuery', query);
+                    window.location.href = 'chatbot_page.html';
+                }
             }
         }
 

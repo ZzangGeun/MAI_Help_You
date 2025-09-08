@@ -1,118 +1,165 @@
 /* =============================================================================
-   Chat Page (page2.html) Specific Styles
+   Chat Page (chatbot_page.html) Specific Styles
    채팅 페이지 전용 스타일
 ============================================================================= */
 
-/* Chat Page 4K and Ultra-wide Support */
-@media (min-width: 2560px) {
-    .main-container {
-        max-width: 2400px !important;
-        padding: calc(20px * var(--spacing-scale, 1.3)) !important;
-        gap: calc(25px * var(--spacing-scale, 1.3)) !important;
-        grid-template-columns: calc(280px * var(--component-scale, 1.15)) minmax(calc(1000px * var(--component-scale, 1.15)), 2fr) calc(280px * var(--component-scale, 1.15)) !important;
-    }
-    
+/* =============================================================================
+   RESPONSIVE DESIGN - Mobile First Approach (Same as main_page)
+   표준 브레이크포인트: 480px, 768px, 1024px, 1200px, 1440px
+============================================================================= */
+
+/* Extra Large Desktop (1440px+) */
+@media (min-width: 1440px) {
     .chat-main {
-        height: calc(700px * var(--component-scale, 1.15));
-    }
-    
-    .left-ad-banner,
-    .right-ad-banner {
-        width: 200px !important;
-        height: calc(100vh - 140px) !important;
+        height: calc(700px * 1.1);
     }
 }
 
-/* Chat Page 2K Support */
-@media (min-width: 1920px) and (max-width: 2559px) {
-    .main-container {
-        max-width: 1800px !important;
-        padding: calc(20px * var(--spacing-scale, 1.1)) !important;
-        gap: calc(22px * var(--spacing-scale, 1.1)) !important;
-        grid-template-columns: calc(260px * var(--component-scale, 1.05)) minmax(calc(800px * var(--component-scale, 1.05)), 2fr) calc(260px * var(--component-scale, 1.05)) !important;
-    }
-    
+/* Large Desktop (1200px - 1439px) */
+@media (min-width: 1200px) and (max-width: 1439px) {
     .chat-main {
-        height: calc(700px * var(--component-scale, 1.05));
+        height: 700px;
     }
 }
 
-/* Chat Page Specific Ad Banner Adjustments */
-/* Responsive breakpoints for different screen sizes */
-@media (max-width: 1919px) and (min-width: 1600px) {
-    .left-ad-banner,
-    .right-ad-banner {
-        display: block;
-    }
-    
-    .main-container {
-        max-width: 1600px !important;
-        display: grid !important;
-        grid-template-columns: 250px minmax(600px, 1fr) 250px !important;
-        gap: 20px !important;
-        margin: 0 auto !important;
-        padding: 20px !important;
-    }
-}
-
-@media (max-width: 1599px) {
-    .left-ad-banner,
-    .right-ad-banner {
-        display: none;
-    }
-    
-    .main-container {
-        max-width: 1200px !important;
-        display: grid !important;
-        grid-template-columns: 250px minmax(600px, 1fr) 250px !important;
-        gap: 20px !important;
-        margin: 0 auto !important;
-        padding: 20px !important;
-    }
-}
-
-@media (max-width: 1200px) and (min-width: 1025px) {
-    .main-container {
-        max-width: 1000px !important;
-        grid-template-columns: 220px minmax(400px, 1fr) 220px !important;
-        gap: 15px !important;
-        padding: 15px !important;
-    }
-}
-
-@media (max-width: 1024px) {
-    .main-container {
-        max-width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 20px !important;
-        padding: 15px !important;
-    }
-    
+/* Desktop (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
     .chat-main {
-        order: 1;
-        width: 100% !important;
-        max-width: none !important;
-    }
-    
-    .left-sidebar {
-        order: 2;
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 20px !important;
-    }
-    
-    .right-sidebar {
-        order: 3;
-        width: 100% !important;
-    }
-    
-    /* Sidebar cards horizontal layout on mobile */
-    .left-sidebar > * {
-        flex: 1;
+        height: 650px;
     }
 }
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .chat-main {
+        height: 600px;
+    }
+    
+    .chat-input-wrapper {
+        padding: 6px 12px;
+    }
+    
+    .chat-messages {
+        padding: 15px;
+    }
+}
+
+/* Mobile Large (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    .chat-main {
+        height: 500px;
+    }
+    
+    .chat-header {
+        padding: 10px 15px;
+    }
+    
+    .chat-title {
+        font-size: 16px;
+    }
+    
+    .chat-subtitle {
+        font-size: 12px;
+    }
+    
+    .chat-messages {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-content {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+    
+    .welcome-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+    }
+    
+    .welcome-text {
+        font-size: 16px;
+    }
+}
+
+/* Mobile Small (0 - 479px) */
+@media (max-width: 479px) {
+    .chat-main {
+        height: 450px;
+    }
+    
+    .chat-header {
+        padding: 8px 12px;
+    }
+    
+    .chat-title {
+        font-size: 14px;
+    }
+    
+    .chat-subtitle {
+        font-size: 11px;
+    }
+    
+    .chat-messages {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .message {
+        max-width: 95%;
+    }
+    
+    .message-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .message-content {
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 16px;
+    }
+    
+    .chat-input-wrapper {
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+    
+    .chat-input-main {
+        font-size: 13px;
+    }
+    
+    .chat-send-main {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .welcome-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    .welcome-text {
+        font-size: 14px;
+    }
+    
+    .welcome-subtext {
+        font-size: 12px;
+    }
+    
+    .suggestion-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
+
 
 /* Show ads on large screens with enough space */
 @media (min-width: 1600px) and (max-width: 1919px) {
@@ -151,106 +198,57 @@
     }
 }
 
-/* 2K Layout */
-@media (min-width: 1920px) and (max-width: 2559px) {
-    body {
-        padding-left: 0;
-        padding-right: 0;
-    }
-    
-    .main-container {
-        max-width: 1800px;
-        margin: 0 auto;
-        padding: calc(20px * var(--spacing-scale, 1.1));
-        display: grid;
-        grid-template-columns: calc(260px * var(--component-scale, 1.05)) minmax(calc(800px * var(--component-scale, 1.05)), 2fr) calc(260px * var(--component-scale, 1.05));
-        gap: calc(22px * var(--spacing-scale, 1.1));
-        align-items: start;
-        justify-content: center;
-    }
+
+/* Ad Banner Styles for Chat Page - matches main_page */
+.left-ad-banner,
+.right-ad-banner {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 600px;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+    display: none;
 }
 
-/* Only adjust layout when ads are shown (1600px+) */
-@media (min-width: 1600px) and (max-width: 1919px) {
-    /* Reset any body padding */
-    body {
-        padding-left: 0;
-        padding-right: 0;
-    }
-    
-    /* 3-column grid layout with independent ad banners */
-    .main-container {
-        max-width: 1600px;
-        margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 250px minmax(600px, 1fr) 250px;
-        gap: 20px;
-        align-items: start;
-        justify-content: center;
-    }
-    
-    /* Move sidebars to columns 2 and 4 */
-    .left-sidebar {
-        grid-column: 2;
-    }
-    
-    .chat-main {
-        grid-column: 3;
-    }
-    
-    .right-sidebar {
-        grid-column: 4;
-    }
-    
-    /* Place ads in columns 1 and 5 */
-    .left-ad-banner {
-        grid-column: 1;
-        position: relative !important;
-    }
-    
-    .right-ad-banner {
-        grid-column: 5;
-        position: relative !important;
-    }
-    
-    /* Keep header and navigation full width */
-    .header,
-    .navigation {
-        margin-left: 0;
-        margin-right: 0;
-        width: 100%;
-    }
-    
-    /* Reset any width overrides */
-    .left-sidebar,
-    .right-sidebar {
-        width: auto;
-    }
-    
-    /* Chat main area uses grid space */
-    .chat-main {
-        width: auto;
-        min-width: 0;
-    }
-}
-
-@media (min-width: 1800px) and (max-width: 1919px) {
-    .main-container {
-        max-width: 1800px;
-        grid-template-columns: 280px minmax(800px, 1fr) 280px;
-        padding: 20px;
-    }
-    
-    /* Larger ads on bigger screens */
+@media (min-width: 1800px) {
     .left-ad-banner,
     .right-ad-banner {
-        width: 240px !important;
-        height: calc(100vh - 140px) !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 }
 
-/* Ad Banner Styles for Chat Page */
+.left-ad-banner {
+    left: 20px;
+}
+
+.right-ad-banner {
+    right: 20px;
+}
+
+.side-ad-content {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ad-rotation {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .ad-item {
     width: 100%;
     height: 100%;
@@ -834,71 +832,3 @@
     font-size: 16px;
 }
 
-/* Responsive Design for Chat Page */
-@media (max-width: 1024px) {
-    .chat-main {
-        padding: 30px;
-        height: 600px;
-    }
-}
-
-@media (max-width: 768px) {
-    .chat-title {
-        font-size: 20px;
-    }
-    
-    .chat-subtitle {
-        font-size: 12px;
-    }
-    
-    .chat-main {
-        padding: 20px;
-        height: 500px;
-    }
-    
-    .chat-input-wrapper {
-        flex-direction: column;
-        gap: 10px;
-        align-items: stretch;
-    }
-    
-    .chat-input-main {
-        max-width: 100%;
-    }
-    
-    .quick-suggestions {
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .suggestion-btn {
-        width: 100%;
-        max-width: 300px;
-        text-align: center;
-    }
-
-    .welcome-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
-    }
-
-    .welcome-text {
-        font-size: 16px;
-    }
-
-    .message {
-        max-width: 95%;
-    }
-
-    .message-content {
-        font-size: 13px;
-    }
-
-    .profile-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
-    }
-}

@@ -38,7 +38,10 @@ body {
     font-family: 'Pretendard', sans-serif;
     background: var(--background-gradient);
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
+
 
 /* Common Typography */
 .text-primary { color: var(--text-primary); }
@@ -200,18 +203,58 @@ body {
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px);
+    grid-template-areas: "right-sidebar main-content left-sidebar";
     gap: 20px;
-    padding: 20px;
+    padding: 15px 15px 0;
     align-items: start;
+    min-height: auto;
+    height: fit-content;
+}
+
+/* Chatbot Page Layout - matches main_page */
+.main-container.chatbot-layout {
+    max-width: 1400px;
+    grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px);
+    grid-template-areas: "right-sidebar main-content left-sidebar";
+    gap: 20px;
+    padding: 15px 15px 0;
 }
 
 /* Sidebar Styles */
-.left-sidebar, .right-sidebar {
+.left-sidebar {
     display: flex;
     flex-direction: column;
     gap: 20px;
     height: auto;
     min-height: fit-content;
+    grid-area: left-sidebar;
+}
+
+.right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: auto;
+    min-height: fit-content;
+    grid-area: right-sidebar;
+}
+
+.main-content {
+    grid-area: main-content;
+}
+
+/* Chat Main Area */
+.chat-main {
+    grid-area: main-content;
+}
+
+/* Ad Banner Areas */
+.left-ad-banner {
+    grid-area: left-ad;
+}
+
+.right-ad-banner {
+    grid-area: right-ad;
 }
 
 /* Common Button Styles */
@@ -306,16 +349,24 @@ body {
 /* 4K and Ultra-wide Support */
 /* Removed unused 4K and 2K resolution styles */
 
-/* 태블릿에서 사이드바 숨김 */
+/* 태블릿에서 세로 스택 레이아웃, 광고배너만 숨김 */
 @media (max-width: 1024px) {
     .main-container {
         grid-template-columns: 1fr;
-        gap: 15px;
+        grid-template-areas: 
+            "right-sidebar"
+            "main-content" 
+            "left-sidebar";
+        gap: 20px;
         padding: 15px;
     }
     
-    .left-sidebar, .right-sidebar {
-        display: none;
+    .main-container.chatbot-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "right-sidebar"
+            "main-content" 
+            "left-sidebar";
     }
 }
 
@@ -344,7 +395,6 @@ body {
     }
     
     .character-search-input {
-        max-width: 150px;
         font-size: 13px;
     }
     
@@ -458,7 +508,6 @@ body {
 
 .character-search-input {
     flex: 1;
-    max-width: 140px;
     padding: 10px 12px;
     border: 2px solid var(--border-gray);
     border-radius: var(--border-radius-small);
@@ -466,6 +515,7 @@ body {
     font-size: 13px;
     outline: none;
     transition: var(--transition-fast);
+    min-width: 0;
 }
 
 .character-search-input:focus {

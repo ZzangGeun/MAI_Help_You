@@ -159,7 +159,7 @@
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    padding: 35px 30px;
+    padding: 20px 25px;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -168,7 +168,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 600px;
+    min-height: 300px;
 }
 
 .main-content::before {
@@ -183,30 +183,30 @@
 }
 
 .main-title {
-    font-size: 52px;
+    font-size: 70px;
     font-weight: bold;
     background: linear-gradient(135deg, #ff69b4 0%, #ffb6c1 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 12px;
+    margin-bottom: 5px;
     position: relative;
     z-index: 1;
 }
 
 .main-subtitle {
-    font-size: 28px;
+    font-size: 40px;
     font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 18px;
+    margin-bottom: 30px;
     position: relative;
     z-index: 1;
 }
 
 .main-description {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-secondary);
-    margin-bottom: 25px;
+    margin-bottom: 50px;
     line-height: 1.4;
     max-width: 700px;
     margin-left: auto;
@@ -219,7 +219,7 @@
 .main-search-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
     position: relative;
     z-index: 1;
 }
@@ -232,7 +232,7 @@
     border-radius: 50px;
     box-shadow: 0 8px 25px rgba(255, 183, 197, 0.3);
     overflow: hidden;
-    max-width: 600px;
+    max-width: 800px;
     width: 100%;
     transition: all 0.3s ease;
 }
@@ -244,7 +244,7 @@
 
 .main-search-input {
     flex: 1;
-    padding: 15px 20px;
+    padding: 15px 22px;
     border: none;
     outline: none;
     font-size: 16px;
@@ -259,7 +259,7 @@
 }
 
 .main-search-btn {
-    padding: 15px 20px;
+    padding: 15px 22px;
     background: var(--primary-color);
     color: white;
     border: none;
@@ -268,7 +268,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    min-width: 50px;
+    min-width: 60px;
 }
 
 .main-search-btn:hover {
@@ -281,8 +281,8 @@
     background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
     border: 2px dashed var(--primary-color);
     border-radius: var(--border-radius-medium);
-    padding: 18px;
-    margin: 25px 0;
+    padding: 12px;
+    margin: 15px 0;
     text-align: center;
 }
 
@@ -323,17 +323,17 @@
     transform: translateY(-2px);
 }
 
-/* Bottom Section Cards - 4단 그리드 강제 적용 */
+/* Bottom Section Cards - 메인 컨테이너와 동일한 너비 */
 .bottom-section {
-    max-width: min(90vw, 1600px) !important;
-    margin: 20px auto 40px !important;
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    grid-template-rows: 1fr !important;
-    gap: clamp(20px, 2.5vw, 40px) !important;
-    padding: 0 clamp(20px, 3vw, 40px) !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    max-width: 1400px;
+    margin: 15px auto 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    gap: 20px;
+    padding: 0 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* 카드가 그리드 아이템으로 작동하도록 보장 */
@@ -348,7 +348,7 @@
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    min-height: clamp(300px, 35vh, 450px);
+    height: 180px;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -374,13 +374,13 @@
 .section-header {
     background: var(--primary-color);
     color: white;
-    padding: clamp(12px, 1.5vh, 18px) clamp(15px, 2vw, 25px);
+    padding: 8px 12px;
     font-weight: 600;
-    font-size: clamp(14px, 1.2vw, 18px);
+    font-size: 13px;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: clamp(40px, 5vh, 60px);
+    height: 32px;
 }
 
 .section-header.event-header,
@@ -397,11 +397,11 @@
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
-    width: 32px;
-    height: 32px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 10px;
     transition: var(--transition-fast);
     display: flex;
     align-items: center;
@@ -415,9 +415,11 @@
 
 .section-content {
     flex: 1;
-    padding: clamp(20px, 2.5vh, 35px) clamp(20px, 2vw, 30px);
+    padding: 8px;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Event Display */
@@ -428,13 +430,14 @@
     justify-content: center;
     height: 100%;
     text-align: center;
-    padding: clamp(15px, 2.5vh, 25px);
-    min-height: 200px;
+    padding: 8px;
+    min-height: 80px;
+    background: transparent;
 }
 
 .event-icon {
-    font-size: clamp(48px, 5vw, 72px);
-    margin-bottom: clamp(15px, 2vh, 25px);
+    font-size: clamp(17px, 2vw, 25px);
+    margin-bottom: clamp(6px, 0.7vh, 8px);
 }
 
 .event-title-modern {
@@ -453,12 +456,10 @@
 }
 
 .event-date-modern {
-    font-size: clamp(12px, 1vw, 16px);
+    font-size: 12px;
     color: var(--primary-color);
     font-weight: 500;
-    background: rgba(255, 183, 197, 0.1);
-    padding: clamp(6px, 0.8vh, 10px) clamp(12px, 1.5vw, 18px);
-    border-radius: 20px;
+    background: transparent;
 }
 
 /* Cash Shop Display */
@@ -468,25 +469,21 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: clamp(15px, 2vh, 25px);
-    padding: clamp(20px, 3vh, 35px);
-    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-    border-radius: 12px;
-    border: 2px solid #ffc107;
+    gap: 8px;
+    padding: 8px;
+    background: transparent;
     height: 100%;
-    min-height: 200px;
+    min-height: 80px;
 }
 
 .cash-banner-image {
-    font-size: clamp(48px, 5vw, 72px);
-    width: clamp(80px, 8vw, 120px);
-    height: clamp(80px, 8vw, 120px);
+    font-size: 24px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: transparent;
 }
 
 .cash-banner-title {
@@ -496,32 +493,30 @@
 }
 
 .cash-banner-subtitle {
-    font-size: clamp(14px, 1.2vw, 18px);
-    color: #e65100;
+    font-size: 14px;
+    color: var(--text-secondary);
     font-weight: 600;
-    background: rgba(230, 81, 0, 0.1);
-    padding: clamp(4px, 0.5vh, 8px) clamp(12px, 1.5vw, 18px);
-    border-radius: 20px;
+    background: transparent;
 }
 
 .cash-banner-price {
-    font-size: clamp(20px, 1.8vw, 28px);
+    font-size: 18px;
     font-weight: 700;
     color: var(--primary-color);
-    background: white;
-    padding: clamp(8px, 1vh, 12px) clamp(16px, 2vw, 24px);
-    border-radius: 25px;
-    border: 2px solid var(--primary-color);
+    background: transparent;
 }
 
 /* Rankings */
 .ranking-scroll-container {
     display: flex;
     flex-direction: column;
-    gap: clamp(8px, 1vh, 12px);
-    max-height: clamp(220px, 25vh, 350px);
+    gap: 3px;
+    flex: 1;
+    min-height: 0;
+    max-height: 100%;
     overflow-y: auto;
     padding-right: 4px;
+    box-sizing: border-box;
 }
 
 .ranking-scroll-container::-webkit-scrollbar {
@@ -541,11 +536,13 @@
 .ranking-item-modern {
     display: flex;
     align-items: center;
-    gap: clamp(12px, 1.5vw, 18px);
-    padding: clamp(8px, 1vh, 12px) clamp(10px, 1.2vw, 15px);
+    gap: 12px;
+    padding: 6px 8px;
     background: #f8f9fa;
     border-radius: 8px;
     transition: var(--transition-fast);
+    flex-shrink: 0;
+    min-height: 36px;
 }
 
 .ranking-item-modern:hover {
@@ -554,14 +551,14 @@
 }
 
 .ranking-badge {
-    width: clamp(24px, 2.5vw, 32px);
-    height: clamp(24px, 2.5vw, 32px);
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: clamp(11px, 1vw, 14px);
+    font-size: 10px;
     color: white;
     flex-shrink: 0;
 }
@@ -579,81 +576,252 @@
 }
 
 .ranking-name {
-    font-size: clamp(14px, 1.2vw, 18px);
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .ranking-details {
-    font-size: clamp(12px, 1vw, 16px);
+    font-size: 10px;
     color: var(--text-muted);
 }
 
-/* Responsive Design */
+/* =============================================================================
+   RESPONSIVE DESIGN - Mobile First Approach
+   표준 브레이크포인트: 480px, 768px, 1024px, 1200px, 1440px
+============================================================================= */
 
-/* 대형 화면 최적화 */
-@media (min-width: 1800px) {
-    .bottom-section {
-        max-width: 1800px;
-        gap: 40px;
-        padding: 0 40px;
+/* Extra Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+    .main-content {
+        min-height: 350px;
+        padding: 25px 35px;
     }
     
-    .section-card {
-        min-height: 450px;
-    }
-    
-    .section-content {
-        padding: 35px 30px;
-    }
-}
-
-/* 초대형 화면 최적화 */
-@media (min-width: 2400px) {
-    .bottom-section {
-        max-width: 2200px;
-        gap: 50px;
-        padding: 0 50px;
-    }
-    
-    .section-card {
-        min-height: 500px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .bottom-section {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 900px) {
-    .bottom-section {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
     .main-title {
-        font-size: 42px;
+        font-size: 80px;
     }
     
     .main-subtitle {
-        font-size: 24px;
+        font-size: 45px;
     }
     
+    .bottom-section {
+        max-width: 1400px;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 210px;
+    }
+}
+
+/* Large Desktop (1200px - 1439px) */
+@media (min-width: 1200px) and (max-width: 1439px) {
     .main-content {
-        padding: 25px 20px;
+        min-height: 320px;
+        padding: 22px 30px;
+    }
+    
+    .main-title {
+        font-size: 75px;
+    }
+    
+    .main-subtitle {
+        font-size: 42px;
+    }
+    
+    .bottom-section {
+        max-width: 1400px;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 195px;
+    }
+}
+
+/* Desktop (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .bottom-section {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1400px;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 180px;
+    }
+    
+    .main-title {
+        font-size: 70px;
+    }
+    
+    .main-subtitle {
+        font-size: 40px;
+    }
+}
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .main-content {
+        min-height: 280px;
+        padding: 20px 25px;
+    }
+    
+    .main-title {
+        font-size: 60px;
+    }
+    
+    .main-subtitle {
+        font-size: 35px;
+    }
+    
+    .main-description {
+        font-size: 14px;
+        margin-bottom: 35px;
+    }
+    
+    .main-search-container {
+        margin-bottom: 35px;
+    }
+    
+    .bottom-section {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 1400px;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 165px;
+    }
+}
+
+/* Mobile Large (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    .main-content {
+        min-height: 250px;
+        padding: 18px 20px;
+    }
+    
+    .main-title {
+        font-size: 48px;
+    }
+    
+    .main-subtitle {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+    
+    .main-description {
+        font-size: 13px;
+        margin-bottom: 30px;
+    }
+    
+    .main-search-container {
+        margin-bottom: 30px;
     }
     
     .bottom-section {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 20px;
         padding: 0 15px;
-        max-width: 100%;
+        max-width: 1400px;
     }
     
     .section-card {
-        min-height: 280px;
+        height: 150px;
+    }
+    
+    .section-header {
+        height: 28px;
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    .nav-arrow {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Mobile Small (0 - 479px) */
+@media (max-width: 479px) {
+    .main-content {
+        min-height: 220px;
+        padding: 15px 18px;
+    }
+    
+    .main-title {
+        font-size: 36px;
+    }
+    
+    .main-subtitle {
+        font-size: 22px;
+        margin-bottom: 18px;
+    }
+    
+    .main-description {
+        font-size: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .main-search-container {
+        margin-bottom: 25px;
+    }
+    
+    .main-search-input {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+    
+    .main-search-btn {
+        padding: 10px 15px;
+    }
+    
+    .bottom-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+        max-width: 1400px;
+    }
+    
+    .section-card {
+        height: 135px;
+    }
+    
+    .section-header {
+        height: 26px;
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+    
+    .nav-arrow {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+    }
+    
+    .search-hint {
+        padding: 10px;
+        margin: 12px 0;
+    }
+    
+    .search-hint-title {
+        font-size: 14px;
+    }
+    
+    .search-hint-text {
+        font-size: 11px;
+    }
+    
+    .search-example {
+        font-size: 11px;
+        padding: 3px 6px;
     }
 }
