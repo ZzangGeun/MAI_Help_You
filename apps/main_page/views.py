@@ -1,6 +1,6 @@
 from django.http.request import HttpRequest
 from django.shortcuts import render, redirect
-from .main_page_nexon_api_get import get_notice_list, get_api_data
+from .main_page_nexon_api_get import get_notice_list, get_api_data, get_ranking_list
 import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -19,8 +19,10 @@ logger = logging.getLogger(__name__)
 # HTML 페이지 뷰들
 def main_page(request):
     notice = get_notice_list()
+    ranking = get_ranking_list()
     context = {
         **notice,
+        **ranking,
         'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
     }
     
@@ -39,9 +41,56 @@ def signup_view(request):
 def login_view(request):
     return render(request, "login.html")
 
-# =============================================================================
-# DRF APIView 예제들 (하이브리드 방식)
-# =============================================================================
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def signup_api(request):
+    """
+    회원가입 API (기본 Django 뷰)
+    POST /api/signup/
+    """
+    try:
+        # JSON 데이터 파싱
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        email = data.get('email')
+        password = data.get('password')
+        nickname = data.get('nickname')
+        
+        if not all([user_id, email, password]):
+            return JsonResponse({
+                'error': '사용자ID, 이메일, 비밀번호를 모두 입력해주세요.',
+                'status': 'error'
+            }, status=400)
+        
+
+        # TODO: 사용자 생성, 이메일 중복 체크, 비밀번호 해싱 등
+        
+        return JsonResponse({
+            'message': '회원가입이 완료되었습니다.',
+            'user': {
+                'id': f'user_{user_id}',
+                'user_id': user_id,
+                'email': email,
+                'nickname': nickname
+            },
+            'status': 'success'
+        }, status=201)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'error': '잘못된 JSON 형식입니다.',
+            'status': 'error'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"회원가입 오류: {e}")
+        return JsonResponse({
+            'error': f'회원가입 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=500)
+
+
 
 
 
@@ -55,25 +104,26 @@ def login_api(request):
     try:
         # JSON 데이터 파싱
         data = json.loads(request.body)
-        username = data.get('username')
+        user_id = data.get('user_id')
         password = data.get('password')
+        email = data.get('email')
+        nickname = data.get('nickname')
         
-        if not username or not password:
+        if not user_id or not password:
             return JsonResponse({
-                'error': '사용자명과 비밀번호를 입력해주세요.',
+                'error': '사용자ID와 비밀번호를 입력해주세요.',
                 'status': 'error'
             }, status=400)
         
-        # 실제 로그인 로직 (예제)
         # TODO: 사용자 인증, JWT 토큰 생성 등
         
         return JsonResponse({
             'message': '로그인 성공',
-            'token': f'jwt_token_for_{username}',
+            'token': f'jwt_token_for_{user_id}',
             'user': {
-                'id': f'user_{username}',
-                'username': username,
-                'nickname': f'{username}_닉네임'
+                'user_id': user_id,
+                'nickname': nickname,
+                'email': email,
             },
             'status': 'success'
         }, status=200)
@@ -91,51 +141,97 @@ def login_api(request):
         }, status=500)
 
 
+
 @require_http_methods(["GET"])
-def character_info_api(request):
+def logout_api(request):
     """
-    캐릭터 정보 조회 API (기본 Django 뷰)
-    GET /api/character-info/
+    로그아웃 API (기본 Django 뷰)
+    GET /api/logout/
     """
+    return JsonResponse({'message': '로그아웃이 완료되었습니다.', 'status': 'success'}, status=200)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def chatbot_request_api(request):
+    """챗봇 요청 API (POST만 사용)"""
     try:
-        # 쿼리 파라미터에서 캐릭터 이름 가져오기
-        character_name = request.GET.get('character_name')
-        world_name = request.GET.get('world_name', '스카니아')
+        data = json.loads(request.body)
+        question = data.get('question')
+        user_id = data.get('user_id')
+        nickname = data.get('nickname')
         
-        if not character_name:
+        if not question:
             return JsonResponse({
-                'error': '캐릭터 이름이 필요합니다.',
+                'error': '질문을 입력해주세요.',
                 'status': 'error'
             }, status=400)
         
-        # 실제 캐릭터 정보 조회 로직 (예제)
-        # TODO: Nexon API 호출, 데이터베이스 조회 등
-        
-        character_data = {
-            'name': character_name,
-            'level': 200,
-            'class': '아크메이지',
-            'world': world_name,
-            'guild': '테스트길드',
-            'last_updated': time.time()
-        }
+        # 로그인 상태 확인
+        if user_id or nickname:
+            # 로그인 챗봇 기능
+            result = get_api_data("/chatbot", {
+                "question": question, 
+                "user_id": user_id, 
+                "nickname": nickname
+            })
+        else:
+            # 비로그인 챗봇 기능
+            result = get_api_data("/chatbot", {"question": question})
         
         return JsonResponse({
-            'character': character_data,
+            'response': result.get('response'),
             'status': 'success'
         }, status=200)
         
-    except Exception as e:
-        logger.error(f"캐릭터 정보 조회 오류: {e}")
+    except json.JSONDecodeError:
         return JsonResponse({
-            'error': f'캐릭터 정보 조회 중 오류가 발생했습니다: {str(e)}',
+            'error': '잘못된 JSON 형식입니다.',
+            'status': 'error'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"챗봇 요청 오류: {e}")
+        return JsonResponse({
+            'error': f'챗봇 요청 중 오류가 발생했습니다: {str(e)}',
             'status': 'error'
         }, status=500)
 
 
-# =============================================================================
-# DRF Function-based View 예제들 (@api_view 데코레이터 사용)
-# =============================================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def character_search_api(request):
+    """캐릭터 검색 API - character_info 페이지로 리다이렉트"""
+    try:
+        data = json.loads(request.body)
+        character_name = data.get('character_name')
+        
+        if not character_name:
+            return JsonResponse({
+                'error': '캐릭터 닉네임을 입력해주세요.',
+                'status': 'error'
+            }, status=400)
+        
+        # character_info 페이지로 리다이렉트
+        from django.shortcuts import redirect
+        from urllib.parse import quote
+        encoded_character_name = quote(character_name)
+        return redirect(f'/character-info/?character_name={encoded_character_name}')
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'error': '잘못된 JSON 형식입니다.',
+            'status': 'error'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"캐릭터 검색 오류: {e}")
+        return JsonResponse({
+            'error': f'캐릭터 검색 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=500)
+    
+
+
 
 @require_http_methods(["GET"])
 def notice_list_api(request):
@@ -161,51 +257,6 @@ def notice_list_api(request):
         }, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def validate_api_key_api(request):
-    """
-    API 키 검증 API (기본 Django 뷰)
-    POST /api/validate-api-key/
-    """
-    try:
-        # JSON 데이터 파싱
-        data = json.loads(request.body)
-        api_key = data.get('api_key')
-        
-        if not api_key:
-            return JsonResponse({
-                'error': 'API 키가 필요합니다.',
-                'status': 'error'
-            }, status=400)
-        
-        # 실제 API 키 검증 로직 (예제)
-        is_valid = len(api_key) >= 10  # 간단한 검증 예제
-        
-        if is_valid:
-            return JsonResponse({
-                'valid': True,
-                'message': '유효한 API 키입니다.',
-                'status': 'success'
-            }, status=200)
-        else:
-            return JsonResponse({
-                'valid': False,
-                'message': '유효하지 않은 API 키입니다.',
-                'status': 'error'
-            }, status=400)
-            
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'error': '잘못된 JSON 형식입니다.',
-            'status': 'error'
-        }, status=400)
-    except Exception as e:
-        logger.error(f"API 키 검증 오류: {e}")
-        return JsonResponse({
-            'error': f'API 키 검증 중 오류가 발생했습니다: {str(e)}',
-            'status': 'error'
-        }, status=500)
 
 
 # 추가 API 함수들
@@ -268,6 +319,25 @@ def notice_event_api(request):
             'status': 'error'
         }, status=500)
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def ranking_overall_api(request):
+    """전체 랭킹 API (기본 Django 뷰)"""
+    try:
+        ranking_data = get_ranking_list()
+        
+        return JsonResponse({
+            'ranking': ranking_data.get('overall_ranking', []),
+            'status': 'success'
+        }, status=200)
+        
+    except Exception as e:
+        logger.error(f"전체 랭킹 조회 오류: {e}")
+        return JsonResponse({
+            'error': f'전체 랭킹 조회 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=500)
+
 
 @require_http_methods(["GET"])
 def health_check_api(request):
@@ -288,52 +358,6 @@ def health_check_api(request):
             'status': 'unhealthy',
             'error': str(e),
             'timestamp': time.time()
-        }, status=500)
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def signup_api(request):
-    """
-    회원가입 API (기본 Django 뷰)
-    POST /api/signup/
-    """
-    try:
-        # JSON 데이터 파싱
-        data = json.loads(request.body)
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
-        
-        if not all([username, email, password]):
-            return JsonResponse({
-                'error': '사용자명, 이메일, 비밀번호를 모두 입력해주세요.',
-                'status': 'error'
-            }, status=400)
-        
-        # 실제 회원가입 로직 (예제)
-        # TODO: 사용자 생성, 이메일 중복 체크, 비밀번호 해싱 등
-        
-        return JsonResponse({
-            'message': '회원가입이 완료되었습니다.',
-            'user': {
-                'id': f'user_{username}',
-                'username': username,
-                'email': email
-            },
-            'status': 'success'
-        }, status=201)
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'error': '잘못된 JSON 형식입니다.',
-            'status': 'error'
-        }, status=400)
-    except Exception as e:
-        logger.error(f"회원가입 오류: {e}")
-        return JsonResponse({
-            'error': f'회원가입 중 오류가 발생했습니다: {str(e)}',
-            'status': 'error'
         }, status=500)
 
 
