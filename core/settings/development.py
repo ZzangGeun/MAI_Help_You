@@ -52,20 +52,9 @@ if DEBUG:
         pass
 
 # =======================
-# DRF 개발 환경 설정
+# 개발 환경 설정
 # =======================
 
 # 개발 환경에서는 모든 CORS 요청 허용
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
-# 개발 환경에서는 권한을 더 느슨하게 설정
-REST_FRAMEWORK.update({
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # 개발 환경에서는 모든 접근 허용
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
-})
