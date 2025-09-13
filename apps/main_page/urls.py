@@ -18,5 +18,4 @@ urlpatterns = [
     path('api/character-search/', views.character_search_api, name='character_search_api'),
 
     path('api/login/', views.login_api, name='login_api'),
-    path('api/signup/', views.signup_api, name='signup_api'),
 ]
