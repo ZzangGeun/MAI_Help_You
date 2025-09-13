@@ -15,8 +15,8 @@ urlpatterns = [
     path('', include(router.urls)),
     
     # 개별 API URL들 (도메인별로 분리됨)
-    path('chatbot/', include('apps.chatbot.api.urls')),
+    # path('chatbot/', include('apps.chatbot.api.urls')),  # 임시 비활성화
     path('character/', include('apps.character_info.api.urls')),
-    path('main/', include('apps.main_page.api.urls')),
+    # path('main/', include('apps.main_page.api.urls')),  # 임시 비활성화
     path('auth/', include('apps.signup.api.urls')),
 ]
