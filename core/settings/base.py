@@ -31,11 +31,8 @@ LOCAL_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    # Django REST Framework
-    'rest_framework',
-    'django_filters',
+    # CORS 설정
     'corsheaders',
-    'drf_spectacular',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -109,39 +106,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # =======================
-# Django REST Framework 설정
+# API 설정 (기본 Django)
 # =======================
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-# API 문서화 설정 (drf-spectacular)
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'MAI (Maple AI Help You) API',
-    'DESCRIPTION': '메이플스토리 AI 챗봇 API 문서',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SCHEMA_PATH_PREFIX': r'/api/',
-}
+# 기본 Django 뷰를 사용하므로 별도 설정 불필요
 
 # CORS 설정 (개발 환경용 - 프로덕션에서는 더 제한적으로 설정)
 CORS_ALLOWED_ORIGINS = [
