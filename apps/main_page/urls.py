@@ -15,6 +15,7 @@ urlpatterns = [
 
     ## 네비게이션 버튼 동작 urls
     path('api/character-info/', views.character_info_api, name='character_info_api'),
+    path('api/character-search/', views.character_search_api, name='character_search_api'),
     path('api/validate-api-key/', views.validate_api_key_api, name='validate_api_key_api'),
 
     path('api/login/', views.login_api, name='login_api'),
