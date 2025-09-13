@@ -18,5 +18,5 @@ urlpatterns = [
     # path('chatbot/', include('apps.chatbot.api.urls')),  # 임시 비활성화
     path('character/', include('apps.character_info.api.urls')),
     # path('main/', include('apps.main_page.api.urls')),  # 임시 비활성화
-    path('auth/', include('apps.signup.api.urls')),
+    # path('auth/', include('apps.signup.api.urls')),  # DRF 제거로 비활성화
 ]

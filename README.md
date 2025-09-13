@@ -1,4 +1,4 @@
-# 메이플스토리 AI 챗봇 (Django + LangChain + DRF + PostgreSQL/pgvector)
+# 메이플스토리 AI 챗봇 (Django + LangChain + PostgreSQL/pgvector)
 
 ## 개요
 메이플스토리 게임 정보를 제공하는 AI 챗봇입니다. LangChain 기반 RAG(Retrieval-Augmented Generation)와 PostgreSQL(pgvector), Django REST Framework를 활용해 안정적인 검색/추론 및 RESTful API를 제공합니다. 대화 히스토리를 유지하면서, 관련 문서를 근거로 한 답변을 반환합니다.
@@ -12,7 +12,7 @@
 - 대화 히스토리 유지 및 초기화
 
 ### 🔍 RAG 시스템
-- 임베딩: `Qwen3-Embedding-0.6B` (CPU)
+- 임베딩: `Qwen3-Embedding` (CPU)
 - 벡터 DB: PostgreSQL + pgvector
 - 최초 실행 시 `MAI_db/json_data/**` 인덱싱 → 이후에는 DB에서 로드
 - Retriever Top-K: 3
@@ -119,12 +119,6 @@ MAI/
 - `POST /chatbot/clear-history/` 히스토리 초기화
 - `GET /chatbot/health/` 헬스 체크
 
-### 새로운 DRF API  
-- `POST /api/v1/chatbot/ask/` DRF 질문 처리
-- `GET /api/v1/chatbot/history/` DRF 히스토리 조회
-- `POST /api/v1/chatbot/clear-history/` DRF 히스토리 초기화
-- `GET /api/v1/chatbot/health/` DRF 헬스 체크
-- `GET /api/docs/` Swagger API 문서 (개발환경)
 
 ## 광고(선택)
 - 전역 인클루드 `includes/_ad_slot.html`로 어디서든 광고 슬롯 배치 가능
@@ -132,7 +126,6 @@ MAI/
 
 ## 최신 버전 변경점
 - **LlamaIndex → LangChain** (인덱스 중심에서 체인/에이전트 중심으로 전환)
-- **Django REST Framework 도입** (RESTful API 및 자동 문서화)
 - **개선된 문서 처리** (JSON 파싱 및 청킹 최적화)
 - **유사도 점수 제공** (검색 결과에 점수 포함)
 - **API 문서화** (Swagger UI 자동 생성)
@@ -141,9 +134,3 @@ MAI/
 - pgvector 미설치: DB에서 `CREATE EXTENSION vector;` 실행 필요
 - 임베딩/허깅페이스 인증: `HUGGINGFACE_TOKEN` 확인
 - 첫 인덱싱 지연: 최초 1회 생성 후엔 DB 로드로 빠르게 동작
-
-## 라이선스
-교육용으로 제작되었습니다.
-
-## 기여
-버그/제안은 이슈로 남겨주세요.
