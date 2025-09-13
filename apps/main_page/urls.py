@@ -11,12 +11,11 @@ urlpatterns = [
     path('api/notice-cashshop/', views.notice_cashshop_api, name='notice_cashshop_api'),
     path('api/notice-update/', views.notice_update_api, name='notice_update_api'),
     path('api/notice-event/', views.notice_event_api, name='notice_event_api'),
+    path('api/ranking-overall/', views.ranking_overall_api, name='ranking_overall_api'),
     path('api/health/', views.health_check_api, name='health_check_api'),
 
     ## 네비게이션 버튼 동작 urls
-    path('api/character-info/', views.character_info_api, name='character_info_api'),
     path('api/character-search/', views.character_search_api, name='character_search_api'),
-    path('api/validate-api-key/', views.validate_api_key_api, name='validate_api_key_api'),
 
     path('api/login/', views.login_api, name='login_api'),
     path('api/signup/', views.signup_api, name='signup_api'),
