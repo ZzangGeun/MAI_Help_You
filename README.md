@@ -12,17 +12,10 @@
 - 대화 히스토리 유지 및 초기화
 
 ### 🔍 RAG 시스템
-<<<<<<< HEAD
-- 임베딩: `sentence-transformers/all-MiniLM-L6-v2` (CPU)
-- 벡터 DB: PostgreSQL + pgvector (LangChain PGVector)
-- 최초 실행 시 JSON 데이터 인덱싱 → 이후에는 DB에서 로드
-- 문서 청킹 및 유사도 검색 (Top-K: 3)
-=======
 - 임베딩: `Qwen3-Embedding-0.6B` (CPU)
 - 벡터 DB: PostgreSQL + pgvector
 - 최초 실행 시 `MAI_db/json_data/**` 인덱싱 → 이후에는 DB에서 로드
 - Retriever Top-K: 3
->>>>>>> 34fdad115d281c0c17ba603ca842d3015acb19d6
 
 ### 💬 대화 관리
 - 세션(또는 user_id)별 히스토리 저장/조회/초기화
