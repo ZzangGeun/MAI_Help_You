@@ -29,8 +29,46 @@
     left: 20px;
 }
 
+/* Adjust left ad banner positioning for different screen sizes */
+@media (min-width: 1800px) {
+    .left-ad-banner {
+        left: 60px; /* Closer to main content */
+    }
+}
+
+@media (min-width: 2560px) {
+    .left-ad-banner {
+        left: 80px; /* Slightly more space on larger screens */
+    }
+}
+
+@media (min-width: 3840px) {
+    .left-ad-banner {
+        left: 100px; /* More space on 4K screens */
+    }
+}
+
 .right-ad-banner {
     right: 20px;
+}
+
+/* Adjust right ad banner positioning for different screen sizes */
+@media (min-width: 1800px) {
+    .right-ad-banner {
+        right: 60px; /* Closer to main content */
+    }
+}
+
+@media (min-width: 2560px) {
+    .right-ad-banner {
+        right: 80px; /* Slightly more space on larger screens */
+    }
+}
+
+@media (min-width: 3840px) {
+    .right-ad-banner {
+        right: 100px; /* More space on 4K screens */
+    }
 }
 
 .side-ad-content {
@@ -168,7 +206,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 300px;
+    min-height: 450px; /* Increased base height for main content */
 }
 
 .main-content::before {
@@ -183,7 +221,7 @@
 }
 
 .main-title {
-    font-size: 70px;
+    font-size: clamp(32px, 4.5vw, 80px); /* Dynamic scaling based on viewport width */
     font-weight: bold;
     background: linear-gradient(135deg, #ff69b4 0%, #ffb6c1 100%);
     -webkit-background-clip: text;
@@ -192,27 +230,30 @@
     margin-bottom: 5px;
     position: relative;
     z-index: 1;
+    transition: font-size 0.3s ease;
 }
 
 .main-subtitle {
-    font-size: 40px;
+    font-size: clamp(22px, 2.7vw, 50px); /* Increased subtitle font size */
     font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 30px;
+    margin-bottom: clamp(20px, 3vh, 30px); /* Dynamic margin */
     position: relative;
     z-index: 1;
+    transition: font-size 0.3s ease;
 }
 
 .main-description {
-    font-size: 15px;
+    font-size: clamp(14px, 1.4vw, 22px); /* Increased description font size */
     color: var(--text-secondary);
-    margin-bottom: 50px;
+    margin-bottom: clamp(25px, 4vh, 50px); /* Dynamic margin */
     line-height: 1.4;
-    max-width: 700px;
+    max-width: clamp(300px, 80%, 800px); /* Dynamic max width */
     margin-left: auto;
     margin-right: auto;
     position: relative;
     z-index: 1;
+    transition: font-size 0.3s ease;
 }
 
 /* Main Search Box */
@@ -244,13 +285,14 @@
 
 .main-search-input {
     flex: 1;
-    padding: 15px 22px;
+    padding: clamp(12px, 1.5vh, 18px) clamp(18px, 2.5vw, 25px); /* Dynamic padding */
     border: none;
     outline: none;
-    font-size: 16px;
+    font-size: clamp(16px, 1.4vw, 20px); /* Increased search input font size */
     font-family: 'Pretendard', sans-serif;
     background: transparent;
     color: var(--text-primary);
+    transition: font-size 0.3s ease, padding 0.3s ease;
 }
 
 .main-search-input::placeholder {
@@ -259,7 +301,7 @@
 }
 
 .main-search-btn {
-    padding: 15px 22px;
+    padding: clamp(12px, 1.5vh, 18px) clamp(18px, 2.5vw, 25px); /* Dynamic padding */
     background: var(--primary-color);
     color: white;
     border: none;
@@ -268,7 +310,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    min-width: 60px;
+    min-width: clamp(50px, 4vw, 70px); /* Dynamic min width */
 }
 
 .main-search-btn:hover {
@@ -281,40 +323,52 @@
     background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
     border: 2px dashed var(--primary-color);
     border-radius: var(--border-radius-medium);
-    padding: 12px;
-    margin: 15px 0;
+    padding: clamp(10px, 1.5vh, 20px); /* Dynamic padding based on viewport height */
+    margin: clamp(12px, 2vh, 25px) 0; /* Dynamic margin */
     text-align: center;
+    min-height: clamp(120px, 12vh, 180px); /* Dynamic minimum height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .search-hint-title {
-    font-size: 16px;
+    font-size: clamp(16px, 1.4vw, 20px); /* Increased hint title font size */
     font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 8px;
+    margin-bottom: clamp(6px, 1vh, 10px); /* Dynamic margin */
+    transition: font-size 0.3s ease;
 }
 
 .search-hint-text {
-    font-size: 13px;
+    font-size: clamp(13px, 1.2vw, 17px); /* Increased hint text font size */
     color: var(--text-secondary);
-    margin-bottom: 12px;
+    margin-bottom: clamp(10px, 1.5vh, 15px); /* Dynamic margin */
+    transition: font-size 0.3s ease;
 }
 
 .search-examples {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: clamp(6px, 1vw, 12px); /* Dynamic gap based on viewport width */
     justify-content: center;
+    padding: clamp(5px, 1vh, 10px) 0; /* Dynamic vertical padding */
 }
 
 .search-example {
     background: white;
     border: 1px solid var(--primary-color);
     color: var(--primary-color);
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: clamp(4px, 0.6vh, 8px) clamp(8px, 1.2vw, 16px); /* Dynamic padding */
+    border-radius: clamp(8px, 1vw, 15px); /* Dynamic border radius */
+    font-size: clamp(12px, 1vw, 16px); /* Increased example button font size */
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.3s ease;
+    min-height: clamp(28px, 3.5vh, 40px); /* Dynamic minimum height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-example:hover {
@@ -325,8 +379,8 @@
 
 /* Bottom Section Cards - 메인 컨테이너와 동일한 너비 */
 .bottom-section {
-    max-width: 1400px;
-    margin: 15px auto 20px;
+    max-width: 95%;
+    margin: 15px auto 40px; /* Increased bottom margin from 20px to 40px */
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 1fr;
@@ -594,20 +648,12 @@
 /* Extra Large Desktop (1440px+) */
 @media (min-width: 1440px) {
     .main-content {
-        min-height: 350px;
+        min-height: 70vh; /* Increased height for main content */
         padding: 25px 35px;
     }
     
-    .main-title {
-        font-size: 80px;
-    }
-    
-    .main-subtitle {
-        font-size: 45px;
-    }
-    
     .bottom-section {
-        max-width: 1400px;
+        max-width: 95%;
         gap: 20px;
         padding: 0 15px;
     }
@@ -620,20 +666,12 @@
 /* Large Desktop (1200px - 1439px) */
 @media (min-width: 1200px) and (max-width: 1439px) {
     .main-content {
-        min-height: 320px;
+        min-height: 65vh; /* Increased height for main content */
         padding: 22px 30px;
     }
     
-    .main-title {
-        font-size: 75px;
-    }
-    
-    .main-subtitle {
-        font-size: 42px;
-    }
-    
     .bottom-section {
-        max-width: 1400px;
+        max-width: 95%;
         gap: 20px;
         padding: 0 15px;
     }
@@ -647,7 +685,7 @@
 @media (min-width: 1024px) and (max-width: 1199px) {
     .bottom-section {
         grid-template-columns: repeat(3, 1fr);
-        max-width: 1400px;
+        max-width: 95%;
         gap: 20px;
         padding: 0 15px;
     }
@@ -668,21 +706,8 @@
 /* Tablet (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
     .main-content {
-        min-height: 280px;
+        min-height: 60vh; /* Increased height for main content */
         padding: 20px 25px;
-    }
-    
-    .main-title {
-        font-size: 60px;
-    }
-    
-    .main-subtitle {
-        font-size: 35px;
-    }
-    
-    .main-description {
-        font-size: 14px;
-        margin-bottom: 35px;
     }
     
     .main-search-container {
@@ -691,7 +716,7 @@
     
     .bottom-section {
         grid-template-columns: repeat(2, 1fr);
-        max-width: 1400px;
+        max-width: 95%;
         gap: 20px;
         padding: 0 15px;
     }
@@ -704,22 +729,8 @@
 /* Mobile Large (480px - 767px) */
 @media (min-width: 480px) and (max-width: 767px) {
     .main-content {
-        min-height: 250px;
+        min-height: 55vh; /* Increased height for main content */
         padding: 18px 20px;
-    }
-    
-    .main-title {
-        font-size: 48px;
-    }
-    
-    .main-subtitle {
-        font-size: 28px;
-        margin-bottom: 20px;
-    }
-    
-    .main-description {
-        font-size: 13px;
-        margin-bottom: 30px;
     }
     
     .main-search-container {
@@ -730,7 +741,7 @@
         grid-template-columns: 1fr;
         gap: 20px;
         padding: 0 15px;
-        max-width: 1400px;
+        max-width: 95%;
     }
     
     .section-card {
@@ -753,22 +764,8 @@
 /* Mobile Small (0 - 479px) */
 @media (max-width: 479px) {
     .main-content {
-        min-height: 220px;
+        min-height: 50vh; /* Increased height for main content */
         padding: 15px 18px;
-    }
-    
-    .main-title {
-        font-size: 36px;
-    }
-    
-    .main-subtitle {
-        font-size: 22px;
-        margin-bottom: 18px;
-    }
-    
-    .main-description {
-        font-size: 12px;
-        margin-bottom: 25px;
     }
     
     .main-search-container {
@@ -788,7 +785,7 @@
         grid-template-columns: 1fr;
         gap: 20px;
         padding: 0 15px;
-        max-width: 1400px;
+        max-width: 95%;
     }
     
     .section-card {
@@ -823,5 +820,60 @@
     .search-example {
         font-size: 11px;
         padding: 3px 6px;
+    }
+}
+
+/* Ad Panel Spacing for Large Screens */
+@media (min-width: 1800px) {
+    .bottom-section {
+        margin: 15px auto 50px; /* Increased bottom margin for large screens */
+        max-width: calc(100vw - 480px); /* Match main-container */
+        width: 95%;
+    }
+}
+
+/* Large Screen Optimizations (4K and above) */
+@media (min-width: 2560px) {
+    .main-content {
+        min-height: 65vh; /* Increased height for large screens */
+    }
+    
+    .bottom-section {
+        margin: 15px auto 60px; /* Increased bottom margin for 4K screens */
+        max-width: calc(100vw - 520px); /* Match main-container */
+        width: 90%;
+        gap: 30px;
+        padding: 0 20px;
+    }
+    
+    .section-card {
+        height: 280px;
+    }
+}
+
+@media (min-width: 3840px) {
+    .main-content {
+        min-height: 60vh; /* Increased height for 4K displays */
+        max-height: 60vh; /* Prevent it from getting too tall */
+    }
+    
+    .bottom-section {
+        margin: 15px auto 80px; /* Increased bottom margin for ultra-wide screens */
+        max-width: calc(100vw - 560px); /* Match main-container */
+        width: 85%;
+        gap: 40px;
+        padding: 0 25px;
+    }
+    
+    .section-card {
+        height: 320px;
+    }
+    
+    .main-search-box {
+        max-width: 900px; /* Slightly larger for 4K */
+    }
+    
+    .main-search-container {
+        margin-bottom: 40px; /* Reduced margin */
     }
 }
