@@ -1,0 +1,22 @@
+<!-- Login Status Card -->
+<div class="login-status-card" id="loginStatusCard">
+        <!-- Login Form (shown when not logged in) -->
+        <div class="login-form" id="loginForm">
+            <input type="text" class="login-input" id="usernameInput" placeholder="아이디">
+            <input type="password" class="login-input" id="passwordInput" placeholder="비밀번호">
+            <button class="login-btn" onclick="performLogin()">로그인</button>
+        </div>
+        
+        <!-- User Profile (shown when logged in) -->
+        <div class="character-profile-display hidden" id="userProfile">
+            <div class="character-avatar-small">👤</div>
+            <div class="character-info-small">
+                <div class="character-name-small" id="loggedInUser">사용자</div>
+                <div class="character-details-small">로그인됨</div>
+            </div>
+        </div>
+        <div class="profile-actions hidden" id="profileActions">
+            <button class="profile-btn" onclick="showProfilePopup()">프로필</button>
+            <button class="logout-btn" onclick="performLogout()">로그아웃</button>
+        </div>
+</div>

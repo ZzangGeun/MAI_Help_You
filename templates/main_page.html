@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -24,12 +23,26 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <a href="main_page.html" class="nav-item active">홈</a>
-            <a href="chatbot_page.html" class="nav-item">CHAT BOT</a>
-            <a href="#" class="nav-item">캐릭터 검색</a>
-            <a href="#" class="nav-item">큐브</a>
-            <a href="#" class="nav-item">스타포스</a>
-            <a href="#" class="nav-item">(API 연동)</a>
+            <div class="nav-left">
+                <a href="main_page.html" class="nav-item active">홈</a>
+                <a href="chatbot_page.html" class="nav-item">CHAT BOT</a>
+                <a href="#" class="nav-item">캐릭터 검색</a>
+                <a href="#" class="nav-item">큐브</a>
+                <a href="#" class="nav-item">스타포스</a>
+                <a href="#" class="nav-item">(API 연동)</a>
+            </div>
+            <div class="nav-right">
+                <!-- Login Button (shown when not logged in) -->
+                <div class="nav-login-section" id="navLoginSection">
+                    <button class="nav-login-btn" onclick="console.log('Login button clicked'); showLoginPopup();">로그인</button>
+                </div>
+                <!-- User Profile (shown when logged in) -->
+                <div class="nav-user-profile hidden" id="navUserProfile">
+                    <span class="nav-user-name" id="navLoggedInUser">사용자</span>
+                    <button class="nav-profile-btn" onclick="showAccountPopup()">프로필</button>
+                    <button class="nav-logout-btn" onclick="performLogout()">로그아웃</button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -48,31 +61,46 @@
 
         <!-- Left Sidebar -->
         <aside class="left-sidebar">
-            <!-- Login Status Card -->
-            <div class="login-status-card" id="loginStatusCard">
-                    <!-- Login Form (shown when not logged in) -->
-                    <div class="login-form" id="loginForm">
-                        <input type="text" class="login-input" id="usernameInput" placeholder="아이디">
-                        <input type="password" class="login-input" id="passwordInput" placeholder="비밀번호">
-                        <button class="login-btn" onclick="performLogin()">로그인</button>
+
+            <!-- Character Info Display -->
+            <div class="character-info-display" id="characterInfoDisplay">
+                <div class="character-info-header">
+                    <div class="character-profile-avatar">🧙‍♂️</div>
+                    <div class="character-profile-info">
+                        <div class="character-profile-name" id="displayCharacterName">검색 결과가 여기에 표시됩니다</div>
+                        <div class="character-profile-server" id="displayServerName">-</div>
                     </div>
-                    
-                    <!-- User Profile (shown when logged in) -->
-                    <div class="character-profile-display hidden" id="userProfile">
-                        <div class="character-avatar-small">👤</div>
-                        <div class="character-info-small">
-                            <div class="character-name-small" id="loggedInUser">사용자</div>
-                            <div class="character-details-small">로그인됨</div>
-                        </div>
+                </div>
+                
+                <div class="character-detailed-stats">
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">레벨</span>
+                        <span class="detail-stat-value" id="displayCharacterLevel">-</span>
                     </div>
-                    <button class="logout-btn hidden" id="logoutBtn" onclick="performLogout()">로그아웃</button>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">직업</span>
+                        <span class="detail-stat-value" id="displayCharacterJob">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">인기도</span>
+                        <span class="detail-stat-value" id="displayCharacterFame">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">전투력</span>
+                        <span class="detail-stat-value" id="displayCharacterPower">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">유니온</span>
+                        <span class="detail-stat-value" id="displayUnionLevel">-</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Character Search Card -->
             <div class="character-search-card">
                     <div class="search-input-group">
                         <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
-                        <button class="character-search-btn" onclick="searchCharacter()">
+                        <button class="character-search-btn" onclick="searchAndDisplayCharacter()">
                             <span>검색</span>
                         </button>
                     </div>
@@ -80,9 +108,9 @@
                     <div class="search-recent" id="recentSearches">
                         <div class="search-recent-title">최근 검색</div>
                         <div class="search-recent-list" id="recentSearchList">
-                            <span class="search-recent-item" onclick="searchCharacter('오지환')">오지환</span>
-                            <span class="search-recent-item" onclick="searchCharacter('메이플유저')">메이플유저</span>
-                            <span class="search-recent-item" onclick="searchCharacter('초보자123')">초보자123</span>
+                            <span class="search-recent-item" onclick="searchFromRecent('오지환')">오지환</span>
+                            <span class="search-recent-item" onclick="searchFromRecent('메이플유저')">메이플유저</span>
+                            <span class="search-recent-item" onclick="searchFromRecent('초보자123')">초보자123</span>
                         </div>
                     </div>
             </div>
@@ -355,15 +383,127 @@
         </div>
     </div>
 
+    <!-- Profile Popup Modal -->
+    <div class="profile-popup-overlay hidden" id="profilePopupOverlay">
+        <div class="profile-popup-modal" id="profilePopupModal">
+            <div class="profile-popup-header">
+                <h3>사용자 프로필</h3>
+                <button class="profile-popup-close" onclick="hideProfilePopup()">×</button>
+            </div>
+            <div class="profile-popup-content">
+                <div class="profile-popup-avatar">👤</div>
+                <div class="profile-popup-info">
+                    <div class="profile-popup-name" id="profilePopupName">사용자</div>
+                    <div class="profile-popup-status">온라인</div>
+                </div>
+                <div class="profile-popup-details">
+                    <div class="profile-detail-row">
+                        <span class="profile-detail-label">로그인 시간</span>
+                        <span class="profile-detail-value" id="profileLoginTime">방금 전</span>
+                    </div>
+                    <div class="profile-detail-row">
+                        <span class="profile-detail-label">세션 시간</span>
+                        <span class="profile-detail-value" id="profileSessionTime">0분</span>
+                    </div>
+                </div>
+                <div class="profile-popup-actions">
+                    <button class="profile-action-btn" onclick="performLogout()">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Popup Modal -->
+    <div class="login-popup-overlay hidden" id="loginPopupOverlay">
+        <div class="login-popup-modal" id="loginPopupModal">
+            <div class="login-popup-header">
+                <h3>로그인</h3>
+                <button class="login-popup-close" onclick="hideLoginPopup()">×</button>
+            </div>
+            <div class="login-popup-content">
+                <div class="login-popup-form">
+                    <div class="login-input-group">
+                        <label for="popupUsernameInput">아이디</label>
+                        <input type="text" class="login-popup-input" id="popupUsernameInput" placeholder="아이디를 입력하세요">
+                    </div>
+                    <div class="login-input-group">
+                        <label for="popupPasswordInput">비밀번호</label>
+                        <input type="password" class="login-popup-input" id="popupPasswordInput" placeholder="비밀번호를 입력하세요">
+                    </div>
+                    <div class="login-popup-options">
+                        <label class="login-checkbox">
+                            <input type="checkbox" id="rememberMe">
+                            <span>로그인 상태 유지</span>
+                        </label>
+                    </div>
+                    <button class="login-popup-btn" onclick="performPopupLogin()">로그인</button>
+                    <div class="login-popup-links">
+                        <a href="#" class="login-link">비밀번호 찾기</a>
+                        <span>|</span>
+                        <a href="#" class="login-link">회원가입</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Profile Popup Modal -->
+    <div class="account-popup-overlay hidden" id="accountPopupOverlay">
+        <div class="account-popup-modal" id="accountPopupModal">
+            <div class="account-popup-header">
+                <h3>내 계정</h3>
+                <button class="account-popup-close" onclick="hideAccountPopup()">×</button>
+            </div>
+            <div class="account-popup-content">
+                <div class="account-section">
+                    <div class="account-avatar">👤</div>
+                    <div class="account-info">
+                        <div class="account-name" id="accountName">사용자</div>
+                        <div class="account-email">user@example.com</div>
+                        <div class="account-status">온라인</div>
+                    </div>
+                </div>
+                <div class="account-details">
+                    <div class="account-detail-row">
+                        <span class="account-detail-label">가입일</span>
+                        <span class="account-detail-value">2024년 1월 15일</span>
+                    </div>
+                    <div class="account-detail-row">
+                        <span class="account-detail-label">최근 로그인</span>
+                        <span class="account-detail-value" id="accountLastLogin">방금 전</span>
+                    </div>
+                    <div class="account-detail-row">
+                        <span class="account-detail-label">총 접속 시간</span>
+                        <span class="account-detail-value">24시간 30분</span>
+                    </div>
+                    <div class="account-detail-row">
+                        <span class="account-detail-label">검색 기록</span>
+                        <span class="account-detail-value">157회</span>
+                    </div>
+                </div>
+                <div class="account-actions">
+                    <button class="account-action-btn primary">설정 변경</button>
+                    <button class="account-action-btn secondary" onclick="performLogout()">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../static/js/common.js"></script>
     <script>
         // Search example function
         function searchExample(query) {
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput) {
-                searchInput.value = query;
-                // Trigger search
-                window.MapleStoryChatBot.performSearch(query);
+            const mainSearchInput = document.getElementById('mainSearchInput');
+            if (mainSearchInput) {
+                mainSearchInput.value = query;
+                // Trigger main search
+                if (window.performMainSearch) {
+                    window.performMainSearch();
+                } else {
+                    // Fallback to redirect
+                    sessionStorage.setItem('pendingChatQuery', query);
+                    window.location.href = 'chatbot_page.html';
+                }
             }
         }
 
@@ -452,6 +592,66 @@
                 }
             }
         }
+
+        // Profile Popup Functions
+        function showProfilePopup() {
+            const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
+            if (!loginData || !loginData.isLoggedIn) {
+                window.MapleStoryChatBot.showNotification('로그인이 필요합니다.', 'warning');
+                return;
+            }
+            
+            const overlay = document.getElementById('profilePopupOverlay');
+            const nameElement = document.getElementById('profilePopupName');
+            const loginTimeElement = document.getElementById('profileLoginTime');
+            
+            if (overlay) {
+                // Update profile info
+                if (nameElement) nameElement.textContent = loginData.username;
+                if (loginTimeElement) {
+                    const loginTime = new Date(loginData.loginTime);
+                    const timeDiff = new Date() - loginTime;
+                    const minutes = Math.floor(timeDiff / (1000 * 60));
+                    if (minutes < 1) {
+                        loginTimeElement.textContent = '방금 전';
+                    } else if (minutes < 60) {
+                        loginTimeElement.textContent = `${minutes}분 전`;
+                    } else {
+                        const hours = Math.floor(minutes / 60);
+                        loginTimeElement.textContent = `${hours}시간 전`;
+                    }
+                }
+                
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function hideProfilePopup() {
+            const overlay = document.getElementById('profilePopupOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Keyboard event listeners
+        document.addEventListener('keydown', function(e) {
+            // ESC key to hide profile popup
+            if (e.key === 'Escape') {
+                hideProfilePopup();
+            }
+        });
+
+        // Click outside to close popup
+        document.addEventListener('click', function(e) {
+            const overlay = document.getElementById('profilePopupOverlay');
+            const modal = document.getElementById('profilePopupModal');
+            if (overlay && !overlay.classList.contains('hidden') && 
+                !modal.contains(e.target)) {
+                hideProfilePopup();
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
