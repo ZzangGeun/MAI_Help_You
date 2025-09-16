@@ -379,34 +379,22 @@ function performLogout() {
 }
 
 function updateLoginUI(loginData) {
-    // Common elements
-    const loginForm = document.getElementById('loginForm');
-    const userProfile = document.getElementById('userProfile'); // Old style (for home page)
-    const integratedProfileCard = document.getElementById('integratedProfileCard'); // Integrated profile card
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loggedInUser = document.getElementById('loggedInUser');
-    const loggedInUserName = document.getElementById('loggedInUserName');
+    // Navigation elements
+    const navLoginSection = document.getElementById('navLoginSection');
+    const navUserProfile = document.getElementById('navUserProfile');
+    const navLoggedInUser = document.getElementById('navLoggedInUser');
     
     // Chat page specific elements
     const chatHistoryContainer = document.getElementById('chatHistoryContainer');
-    const rightSidebar = document.getElementById('rightSidebar');
     
     if (loginData && loginData.isLoggedIn) {
         // User is logged in
-        if (loginForm) loginForm.classList.add('hidden');
+        if (navLoginSection) navLoginSection.classList.add('hidden');
         
-        // Show user profile (old style for home page)
-        if (userProfile) {
-            userProfile.classList.remove('hidden');
-            if (loggedInUser) loggedInUser.textContent = loginData.username;
-        }
-        
-        // Show integrated profile card
-        if (integratedProfileCard) {
-            integratedProfileCard.classList.remove('hidden');
-            // Set default character name (could be updated with real data later)
-            const characterName = document.getElementById('characterName');
-            if (characterName) characterName.textContent = '오지환';
+        // Show navigation user profile
+        if (navUserProfile) {
+            navUserProfile.classList.remove('hidden');
+            if (navLoggedInUser) navLoggedInUser.textContent = loginData.username;
         }
         
         // Show chat history on chat page
@@ -414,30 +402,17 @@ function updateLoginUI(loginData) {
             chatHistoryContainer.classList.remove('hidden');
         }
         
-        
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
-        
     } else {
         // User is not logged in
-        if (loginForm) loginForm.classList.remove('hidden');
+        if (navLoginSection) navLoginSection.classList.remove('hidden');
         
-        // Hide user profiles
-        if (userProfile) userProfile.classList.add('hidden');
-        if (integratedProfileCard) integratedProfileCard.classList.add('hidden');
+        // Hide navigation user profile
+        if (navUserProfile) navUserProfile.classList.add('hidden');
         
         // Hide chat history
         if (chatHistoryContainer) {
             chatHistoryContainer.classList.add('hidden');
         }
-        
-        
-        if (logoutBtn) logoutBtn.classList.add('hidden');
-        
-        // Clear form inputs
-        const usernameInput = document.getElementById('usernameInput');
-        const passwordInput = document.getElementById('passwordInput');
-        if (usernameInput) usernameInput.value = '';
-        if (passwordInput) passwordInput.value = '';
     }
 }
 
@@ -446,6 +421,171 @@ function initializeLoginState() {
     const loginData = loadFromStorage('loginState');
     updateLoginUI(loginData);
 }
+
+/**
+ * Show login popup
+ */
+function showLoginPopup() {
+    console.log('showLoginPopup called'); // Debug log
+    const overlay = document.getElementById('loginPopupOverlay');
+    console.log('overlay element:', overlay); // Debug log
+    
+    if (overlay) {
+        console.log('Removing hidden class'); // Debug log
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex'; // Force display
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on username input
+        setTimeout(() => {
+            const usernameInput = document.getElementById('popupUsernameInput');
+            if (usernameInput) usernameInput.focus();
+        }, 100);
+    } else {
+        console.log('Login popup overlay not found!'); // Debug log
+        // Try to find all elements with loginPopup in their ID
+        const allElements = document.querySelectorAll('[id*="loginPopup"]');
+        console.log('Found elements:', allElements);
+    }
+}
+
+/**
+ * Hide login popup
+ */
+function hideLoginPopup() {
+    const overlay = document.getElementById('loginPopupOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none'; // Force hide
+        document.body.style.overflow = 'auto';
+        
+        // Clear form inputs
+        const usernameInput = document.getElementById('popupUsernameInput');
+        const passwordInput = document.getElementById('popupPasswordInput');
+        if (usernameInput) usernameInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+    }
+}
+
+/**
+ * Popup login functionality
+ */
+function performPopupLogin() {
+    const usernameInput = document.getElementById('popupUsernameInput');
+    const passwordInput = document.getElementById('popupPasswordInput');
+    
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+    
+    if (!username || !password) {
+        showNotification('아이디와 비밀번호를 모두 입력해주세요.', 'warning');
+        return;
+    }
+    
+    showLoading('로그인 중...');
+    
+    // Simulate login API call
+    setTimeout(() => {
+        if (username.length >= 3) {
+            const loginData = {
+                isLoggedIn: true,
+                username: username,
+                loginTime: new Date().toISOString()
+            };
+            saveToStorage('loginState', loginData);
+            
+            // Update UI and hide popup
+            updateLoginUI(loginData);
+            hideLoginPopup();
+            hideLoading();
+            showNotification(`${username}님, 환영합니다!`, 'success');
+        } else {
+            hideLoading();
+            showNotification('올바른 아이디를 입력해주세요.', 'error');
+        }
+    }, 1000);
+}
+
+/**
+ * Show account profile popup
+ */
+function showAccountPopup() {
+    const loginData = loadFromStorage('loginState');
+    if (!loginData || !loginData.isLoggedIn) {
+        showNotification('로그인이 필요합니다.', 'warning');
+        return;
+    }
+    
+    const overlay = document.getElementById('accountPopupOverlay');
+    const nameElement = document.getElementById('accountName');
+    const lastLoginElement = document.getElementById('accountLastLogin');
+    
+    if (overlay) {
+        // Update account info
+        if (nameElement) nameElement.textContent = loginData.username;
+        if (lastLoginElement) {
+            const loginTime = new Date(loginData.loginTime);
+            const timeDiff = new Date() - loginTime;
+            const minutes = Math.floor(timeDiff / (1000 * 60));
+            if (minutes < 1) {
+                lastLoginElement.textContent = '방금 전';
+            } else if (minutes < 60) {
+                lastLoginElement.textContent = `${minutes}분 전`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                lastLoginElement.textContent = `${hours}시간 전`;
+            }
+        }
+        
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Hide account profile popup
+ */
+function hideAccountPopup() {
+    const overlay = document.getElementById('accountPopupOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Keyboard event listeners for popups
+document.addEventListener('keydown', function(e) {
+    // ESC key to hide popups
+    if (e.key === 'Escape') {
+        hideLoginPopup();
+        hideAccountPopup();
+    }
+    
+    // Enter key in login popup to submit
+    const loginOverlay = document.getElementById('loginPopupOverlay');
+    if (loginOverlay && !loginOverlay.classList.contains('hidden') && e.key === 'Enter') {
+        performPopupLogin();
+    }
+});
+
+// Click outside to close popups
+document.addEventListener('click', function(e) {
+    // Login popup
+    const loginOverlay = document.getElementById('loginPopupOverlay');
+    const loginModal = document.getElementById('loginPopupModal');
+    if (loginOverlay && !loginOverlay.classList.contains('hidden') && 
+        !loginModal.contains(e.target)) {
+        hideLoginPopup();
+    }
+    
+    // Account popup
+    const accountOverlay = document.getElementById('accountPopupOverlay');
+    const accountModal = document.getElementById('accountPopupModal');
+    if (accountOverlay && !accountOverlay.classList.contains('hidden') && 
+        !accountModal.contains(e.target)) {
+        hideAccountPopup();
+    }
+});
 
 /**
  * Character search functionality
@@ -539,6 +679,27 @@ function searchAndDisplayCharacter(characterName) {
             searchInput.value = '';
         }
     }, 1500);
+}
+
+/**
+ * Search character from recent searches (fills input and searches)
+ */
+function searchFromRecent(characterName) {
+    const searchInput = document.getElementById('characterSearchInput');
+    
+    // Fill the search input with the character name
+    if (searchInput) {
+        searchInput.value = characterName;
+        
+        // Add visual focus effect
+        searchInput.focus();
+        setTimeout(() => {
+            searchInput.blur();
+        }, 200);
+    }
+    
+    // Execute the search
+    searchAndDisplayCharacter(characterName);
 }
 
 /**
