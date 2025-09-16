@@ -40,7 +40,7 @@ def load_model():
         base_model_name = os.getenv("HF_BASE_MODEL", "Qwen/Qwen3-8B")
 
         # 토크나이저 로드
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, auth_token=HUGGINGFACE_TOKEN, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(base_model_name, auth_token=HUGGINGFACE_TOKEN, trust_remote_code=True)
         if getattr(tokenizer, "pad_token", None) is None:
             tokenizer.pad_token = getattr(tokenizer, "eos_token", None)
 

@@ -1,31 +1,42 @@
 import os
 import logging
 from typing import List, Dict, Any, Optional
-import requests
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from huggingface_hub import login
+import sys
 
-# LangChain RAG 엔진
-from .rag_engine import RagEngine
+# services 폴더를 Python 경로에 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+services_dir = os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'services')
+if services_dir not in sys.path:
+    sys.path.append(services_dir)
 
-
-logger = logging.getLogger(__name__)
-HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
-# 원격 FastAPI 모델 사용 여부 (기본: FASTAPI_MODEL_URL 존재 시 True)
-FASTAPI_MODEL_URL = os.getenv("FASTAPI_MODEL_URL", "http://127.0.0.1:8001/api/chat")
-USE_REMOTE_LLM = os.getenv("USE_REMOTE_LLM", "auto").lower()
-if USE_REMOTE_LLM not in {"true", "false"}:
-    # auto 모드: 환경 변수 FASTAPI_MODEL_URL 이 지정되어 있으면 원격 사용
-    REMOTE_MODE = bool(FASTAPI_MODEL_URL)
-else:
-    REMOTE_MODE = USE_REMOTE_LLM == "true"
-# 로그인 토큰이 있을 때만 허브 로그인 시도
-if HUGGINGFACE_TOKEN:
-    try:
-        login(HUGGINGFACE_TOKEN)
-    except Exception as _e:
-        logger.warning("Hugging Face Hub 로그인 실패: %s", str(_e))
+# 통합 챗봇 서비스 import
+try:
+    from ai_models.chatbot_service import ChatbotAPIService
+    logger = logging.getLogger(__name__)
+    logger.info("통합 챗봇 서비스를 로드했습니다.")
+except ImportError as e:
+    logger = logging.getLogger(__name__)
+    logger.error(f"통합 챗봇 서비스 로드 실패: {e}")
+    # 폴백: 기존 서비스 사용
+    from .rag_engine import RagEngine
+    import requests
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from huggingface_hub import login
+    
+    HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+    FASTAPI_MODEL_URL = os.getenv("FASTAPI_MODEL_URL", "http://127.0.0.1:8001/api/chat")
+    USE_REMOTE_LLM = os.getenv("USE_REMOTE_LLM", "auto").lower()
+    if USE_REMOTE_LLM not in {"true", "false"}:
+        REMOTE_MODE = bool(FASTAPI_MODEL_URL)
+    else:
+        REMOTE_MODE = USE_REMOTE_LLM == "true"
+    
+    if HUGGINGFACE_TOKEN:
+        try:
+            login(HUGGINGFACE_TOKEN)
+        except Exception as _e:
+            logger.warning("Hugging Face Hub 로그인 실패: %s", str(_e))
 
 class CustomLLM:
     """간단한 로컬 HF 모델 래퍼 (LangChain 의존 제거).
@@ -221,5 +232,10 @@ class ChatbotService:
             logger.error(f"히스토리 초기화 중 오류 발생: {str(e)}")
             return False
 
-# 전역 서비스 인스턴스
-chatbot_service = ChatbotService() 
+# 전역 서비스 인스턴스 - 통합 서비스 우선 사용
+try:
+    chatbot_service = ChatbotAPIService()
+    logger.info("통합 챗봇 서비스가 초기화되었습니다.")
+except Exception as e:
+    logger.error(f"통합 챗봇 서비스 초기화 실패, 기존 서비스 사용: {e}")
+    chatbot_service = ChatbotService() 
