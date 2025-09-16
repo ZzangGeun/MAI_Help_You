@@ -3,7 +3,7 @@
 메이플스토리 AI 챗봇 프로젝트의 모든 API 문서를 한눈에 볼 수 있는 가이드입니다.
 
 ## 🎯 프로젝트 개요
-**MAI (Maplestory AI) 챗봇**은 Django + LlamaIndex RAG + PostgreSQL pgvector + Fine-tuned LLM을 활용한 메이플스토리 전문 AI 챗봇 서비스입니다.
+**MAI (Maplestory AI) 챗봇**은 Django + LangChain RAG + PostgreSQL pgvector + Fine-tuned LLM을 활용한 메이플스토리 전문 AI 챗봇 서비스입니다.
 
 ## 📋 API 문서 목록
 
@@ -44,7 +44,7 @@ POST /api/character/search/                    # 캐릭터 검색
 
 ### 3. 🤖 [챗봇 페이지 API](./chatbot_page_api_docs.md) ⭐
 - **서비스**: AI 챗봇 대화 시스템 (핵심 기능)
-- **기술 스택**: LlamaIndex RAG + Fine-tuned LLM + pgvector
+- **기술 스택**: LangChain RAG + Fine-tuned LLM + pgvector
 - **주요 기능**:
   - AI 질문 답변 처리
   - 채팅 히스토리 관리
@@ -173,7 +173,7 @@ async function getNotices() {
 
 **주요 구성 요소**:
 - **Django**: 웹 프레임워크 및 API 서버
-- **LlamaIndex**: RAG(검색증강생성) 엔진
+- **LangChain**: RAG(검색증강생성) 엔진
 - **PostgreSQL + pgvector**: 벡터 데이터베이스
 - **Fine-tuned LLM**: 메이플스토리 특화 언어모델
 - **Nexon OpenAPI**: 공식 게임 데이터
@@ -198,7 +198,7 @@ async function getNotices() {
 
 ### 외부 문서
 - [넥슨 오픈 API](https://openapi.nexon.com/)
-- [LlamaIndex 문서](https://docs.llamaindex.ai/)
+- [LangChain 문서](https://python.langchain.com/)
 - [pgvector GitHub](https://github.com/pgvector/pgvector)
 
 ### 프로젝트 내부 문서

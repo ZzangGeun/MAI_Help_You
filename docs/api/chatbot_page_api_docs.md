@@ -6,13 +6,13 @@
 - **서비스명**: MAI 챗봇 (Maplestory AI Chatbot)
 - **Base URL**: `http://localhost:8000`
 - **버전**: v1.0.0
-- **AI 엔진**: LlamaIndex RAG + Fine-tuned LLM
+- **AI 엔진**: LangChain RAG + Fine-tuned LLM
 - **벡터 DB**: PostgreSQL with pgvector
 - **최종 업데이트**: 2025-08-31
 
 ## 🧠 AI 시스템 구조
 ```
-사용자 질문 → Django Views → ChatbotService → RagEngine → 
+사용자 질문 → Django Views → ChatbotService → LangChain RAG → 
 PostgreSQL Vector DB → LLM 모델 → 답변 생성 → 사용자
 ```
 
@@ -482,7 +482,7 @@ chatbot_service = ChatbotService()  # 전역 인스턴스
 
 ## 🔗 관련 링크
 
-- [LlamaIndex 공식 문서](https://docs.llamaindex.ai/)
+- [LangChain 공식 문서](https://python.langchain.com/)
 - [pgvector GitHub](https://github.com/pgvector/pgvector)
 - [Hugging Face Model Hub](https://huggingface.co/models)
 - [메인 페이지 API](./main_page_api_docs.md)

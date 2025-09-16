@@ -6,4 +6,4 @@ class id(models.Model):
     password = models.CharField(max_length=100)
     nick_name = models.CharField(max_length=100)
     email = models.CharField(max_length=100)
-    nexon_api_key = models.CharField(max_lensssgth=200)
+    nexon_api_key = models.CharField(max_length=200)
