@@ -33,7 +33,7 @@
     </nav>
 
     <!-- Main Container -->
-    <div class="main-container chatbot-layout">
+    <div class="main-container">
         <!-- Left Advertisement Banner -->
         <div class="left-ad-banner">
             <div class="side-ad-content">
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <!-- Right Sidebar (오른쪽에 표시되지만 클래스명은 유지) -->
+        <!-- Left Sidebar -->
         <aside class="left-sidebar">
             <!-- Chat History (shown only when logged in) -->
             <div class="chat-history-container hidden" id="chatHistoryContainer">
@@ -67,61 +67,10 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Integrated User & Character Profile Card -->
-            <div class="login-status-card" id="loginStatusCard">
-                <!-- Login Form (shown when not logged in) -->
-                <div class="login-form" id="loginForm">
-                    <div class="login-header">
-                        <h3>로그인</h3>
-                        <p>채팅 히스토리와 개인화된 서비스를 이용하려면 로그인하세요.</p>
-                    </div>
-                    <input type="text" class="login-input" id="usernameInput" placeholder="아이디">
-                    <input type="password" class="login-input" id="passwordInput" placeholder="비밀번호">
-                    <button class="login-btn" onclick="performLogin()">로그인</button>
-                </div>
-                
-                <!-- Integrated Profile (shown when logged in) -->
-                <div class="integrated-profile-card hidden" id="integratedProfileCard">
-                    <!-- Character Header (Avatar + Name) -->
-                    <div class="character-header">
-                        <div class="profile-avatar-medium">🧙‍♂️</div>
-                        <div class="character-info">
-                            <div class="character-name-row">
-                                <span class="character-name-primary" id="characterName">오지환</span>
-                                <span class="character-server" id="serverName">루나</span>
-                            </div>
-                            <div class="character-status-row">
-                                <span class="login-status-badge">온라인</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Character Stats -->
-                    <div class="character-stats-vertical">
-                        <div class="stat-row-vertical">
-                            <span class="stat-label-vertical">레벨</span>
-                            <span class="stat-value-vertical" id="characterLevel">299</span>
-                        </div>
-                        <div class="stat-row-vertical">
-                            <span class="stat-label-vertical">직업</span>
-                            <span class="stat-value-vertical" id="characterJob">키네시스</span>
-                        </div>
-                        <div class="stat-row-vertical">
-                            <span class="stat-label-vertical">전투력</span>
-                            <span class="stat-value-vertical" id="characterPower">25억 8,254만 3,542</span>
-                        </div>
-                    </div>
-                    
-                    
-                    <button class="logout-btn" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
-
         </aside>
 
-        <!-- Main Chat Area -->
-        <main class="chat-main">
+        <!-- Main Content (Chat Area) -->
+        <main class="main-content">
             <!-- Chat Header -->
             <div class="chat-header">
                 <div class="chat-title">메이플스토리 정보탐색 ChatBot</div>
@@ -172,8 +121,35 @@
             </div>
         </main>
 
-        <!-- Left Sidebar (왼쪽에 표시되지만 클래스명은 유지) -->
+        <!-- Right Sidebar -->
         <aside class="right-sidebar" id="rightSidebar">
+            <!-- Integrated User & Character Profile Card -->
+            <div class="login-status-card" id="loginStatusCard">
+                <!-- Login Form (shown when not logged in) -->
+                <div class="login-form" id="loginForm">
+                    <div class="login-header">
+                        <h3>로그인</h3>
+                        <p>채팅 히스토리와 개인화된 서비스를 이용하려면 로그인하세요.</p>
+                    </div>
+                    <input type="text" class="login-input" id="usernameInput" placeholder="아이디">
+                    <input type="password" class="login-input" id="passwordInput" placeholder="비밀번호">
+                    <button class="login-btn" onclick="performLogin()">로그인</button>
+                </div>
+                
+                <!-- Simple Profile Display (shown when logged in) -->
+                <div class="simple-profile-display hidden" id="simpleProfileDisplay" onclick="openProfileModal()">
+                    <div class="profile-avatar-medium">🧙‍♂️</div>
+                    <div class="simple-profile-info">
+                        <div class="simple-profile-name-row">
+                            <span class="character-name-primary" id="profileCharacterName">오지환</span>
+                            <span class="simple-profile-server" id="profileServerName">루나</span>
+                        </div>
+                        <span class="login-status-badge">온라인</span>
+                    </div>
+                    <button class="logout-btn" onclick="event.stopPropagation(); performLogout();">로그아웃</button>
+                </div>
+            </div>
+            
             <!-- Character Search Card -->
             <div class="character-search-card">
                 <div class="search-input-group">
@@ -235,6 +211,45 @@
                 <div class="ad-rotation">
                     <div class="ad-item">
                         <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%2334a853'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 B%3C/text%3E%3C/svg%3E" alt="Advertisement B">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="profile-modal-overlay hidden" id="profileModal">
+        <div class="profile-modal-content">
+            <span class="modal-close-btn" onclick="closeProfileModal()">&times;</span>
+            <!-- Integrated Profile (shown in modal) -->
+            <div class="integrated-profile-card" id="integratedProfileCard">
+                <!-- Character Header (Avatar + Name) -->
+                <div class="character-header">
+                    <div class="profile-avatar-medium">🧙‍♂️</div>
+                    <div class="character-info">
+                        <div class="character-name-row">
+                            <span class="character-name-primary" id="characterName">오지환</span>
+                            <span class="character-server" id="serverName">루나</span>
+                        </div>
+                        <div class="character-status-row">
+                            <span class="login-status-badge">온라인</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Character Stats -->
+                <div class="character-stats-vertical">
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">레벨</span>
+                        <span class="stat-value-vertical" id="characterLevel">299</span>
+                    </div>
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">직업</span>
+                        <span class="stat-value-vertical" id="characterJob">키네시스</span>
+                    </div>
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">전투력</span>
+                        <span class="stat-value-vertical" id="characterPower">25억 8,254만 3,542</span>
                     </div>
                 </div>
             </div>

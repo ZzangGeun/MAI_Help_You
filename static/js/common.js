@@ -381,30 +381,30 @@ function performLogout() {
 function updateLoginUI(loginData) {
     // Common elements
     const loginForm = document.getElementById('loginForm');
-    const userProfile = document.getElementById('userProfile'); // Old style (for home page)
+    const simpleProfileDisplay = document.getElementById('simpleProfileDisplay');
     const integratedProfileCard = document.getElementById('integratedProfileCard'); // Integrated profile card
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loggedInUser = document.getElementById('loggedInUser');
     const loggedInUserName = document.getElementById('loggedInUserName');
     
     // Chat page specific elements
     const chatHistoryContainer = document.getElementById('chatHistoryContainer');
-    const rightSidebar = document.getElementById('rightSidebar');
+
+    // Home page specific elements for character list
+    const myCharactersCard = document.getElementById('myCharactersCard');
+    const sidebarAd = document.getElementById('leftSidebarAd');
     
     if (loginData && loginData.isLoggedIn) {
         // User is logged in
         if (loginForm) loginForm.classList.add('hidden');
         
-        // Show user profile (old style for home page)
-        if (userProfile) {
-            userProfile.classList.remove('hidden');
-            if (loggedInUser) loggedInUser.textContent = loginData.username;
+        // Show simple profile
+        if (simpleProfileDisplay) {
+            simpleProfileDisplay.classList.remove('hidden');
+            const profileCharacterName = document.getElementById('profileCharacterName');
+            if (profileCharacterName) profileCharacterName.textContent = '오지환';
         }
-        
-        // Show integrated profile card
-        if (integratedProfileCard) {
-            integratedProfileCard.classList.remove('hidden');
-            // Set default character name (could be updated with real data later)
+
+        // Populate detailed profile in modal (but keep modal hidden)
+        if (integratedProfileCard) { 
             const characterName = document.getElementById('characterName');
             if (characterName) characterName.textContent = '오지환';
         }
@@ -413,25 +413,39 @@ function updateLoginUI(loginData) {
         if (chatHistoryContainer) {
             chatHistoryContainer.classList.remove('hidden');
         }
-        
-        
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
-        
+
+        // Show My Characters card and hide the ad on the main page
+        if (myCharactersCard) {
+            myCharactersCard.classList.remove('hidden');
+            populateMyCharactersList();
+        }
+        if (sidebarAd) {
+            sidebarAd.classList.add('hidden');
+        }
     } else {
         // User is not logged in
         if (loginForm) loginForm.classList.remove('hidden');
         
-        // Hide user profiles
-        if (userProfile) userProfile.classList.add('hidden');
-        if (integratedProfileCard) integratedProfileCard.classList.add('hidden');
+        // Hide simple profile
+        if (simpleProfileDisplay) {
+            simpleProfileDisplay.classList.add('hidden');
+        }
+
+        // Ensure modal is also hidden
+        closeProfileModal();
         
         // Hide chat history
         if (chatHistoryContainer) {
             chatHistoryContainer.classList.add('hidden');
         }
-        
-        
-        if (logoutBtn) logoutBtn.classList.add('hidden');
+
+        // Hide My Characters card and show the ad on the main page
+        if (myCharactersCard) {
+            myCharactersCard.classList.add('hidden');
+        }
+        if (sidebarAd) {
+            sidebarAd.classList.remove('hidden');
+        }
         
         // Clear form inputs
         const usernameInput = document.getElementById('usernameInput');
@@ -440,6 +454,60 @@ function updateLoginUI(loginData) {
         if (passwordInput) passwordInput.value = '';
     }
 }
+
+/**
+ * Profile Modal functions
+ */
+function openProfileModal() {
+    const modal = document.getElementById('profileModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeProfileModal() {
+    const modal = document.getElementById('profileModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+/**
+ * Populates the 'My Characters' list in the left sidebar.
+ */
+function populateMyCharactersList() {
+    const listContainer = document.getElementById('myCharactersList');
+    if (!listContainer) return;
+
+    // Mock data for user's characters, sorted by combat power (desc)
+    const myCharacters = [
+        { rank: 1, name: '본캐전사', server: '루나', level: 285, power: '35억 1234만' },
+        { rank: 2, name: '부캐법사', server: '루나', level: 261, power: '12억 5678만' },
+        { rank: 3, name: '유니온궁수', server: '스카니아', level: 250, power: '5억 9012만' },
+        { rank: 4, name: '링크도적', server: '루나', level: 235, power: '1억 3456만' },
+        { rank: 5, name: '창고캐릭1', server: '루나', level: 220, power: '5821만' },
+        { rank: 6, name: '메소벌이용', server: '엘리시움', level: 245, power: '3570만' },
+        { rank: 7, name: '코인돌이', server: '루나', level: 210, power: '1234만' },
+    ];
+
+    let html = '';
+    myCharacters.forEach(char => {
+        const rankClass = char.rank <= 3 ? `top-${char.rank}` : 'other';
+        html += `
+            <div class="my-character-item">
+                <div class="ranking-badge ${rankClass}">${char.rank}</div>
+                <div class="my-character-info">
+                    <div class="ranking-name">${char.name}</div>
+                    <div class="ranking-details">${char.server} · Lv.${char.level}</div>
+                </div>
+                <div class="my-character-power">${char.power}</div>
+            </div>
+        `;
+    });
+
+    listContainer.innerHTML = html;
+}
+
 
 
 function initializeLoginState() {
@@ -657,6 +725,13 @@ function initializeCommon() {
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.navigation') && navContent) {
             navContent.classList.remove('nav-open');
+        }
+
+        // Close profile modal when clicking outside
+        const profileModal = document.getElementById('profileModal');
+        const profileModalContent = document.querySelector('.profile-modal-content');
+        if (profileModal && !profileModal.classList.contains('hidden') && !profileModalContent.contains(e.target)) {
+            closeProfileModal();
         }
     });
 }
