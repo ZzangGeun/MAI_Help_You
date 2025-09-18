@@ -576,6 +576,35 @@
     background: transparent;
 }
 
+/* Carousel Styles for Event/Cash */
+.carousel-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    min-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.event-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-decoration: none;
+}
 /* Rankings */
 .ranking-scroll-container {
     display: flex;
@@ -894,4 +923,74 @@
         font-size: 11px;
         padding: 3px 6px;
     }
+}
+
+/* Character Info Display */
+.character-info-display {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius-large);
+    padding: 15px;
+    margin-top: 15px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.character-info-display.hidden {
+    display: none;
+}
+
+.character-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.character-info-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.character-info-server {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background-color: #e9ecef;
+    padding: 3px 6px;
+    border-radius: var(--border-radius-small);
+}
+
+.character-info-body .info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.character-info-body .info-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.character-info-body .info-row span:last-child {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.details-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 600;
+}
+
+.details-btn:hover {
+    background-color: var(--primary-dark);
 }
