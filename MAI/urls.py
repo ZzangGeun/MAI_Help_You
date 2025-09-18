@@ -1,22 +1,20 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.conf import settings # settings.DEBUG를 사용하기 위해 필요
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    
-    # 기존 웹페이지 URLs (Django 템플릿)
+    path('admin/', admin.site.urls),
+    # 각 앱의 URL을 포함합니다.
     path('', include('apps.main_page.urls')),
-    path('character_info/', include('apps.character_info.urls')),
-    # path('chatbot/', include('apps.chatbot.urls')),  # 임시 비활성화
-    path('auth/', include('apps.signup.urls')),  # signup으로 변경됨
-    
-    # 새로운 API URLs (DRF) - 버전 관리
-    path('api/v1/', include('apps.api.urls')),  # API v1
+    path('character-info/', include('apps.character_info.urls')),
+    path('chatbot/', include('apps.chatbot.urls')),
+    path('api/', include('apps.api.urls')),
+    # 여기에 다른 앱의 URL을 추가할 수 있습니다.
 ]
 
-# 개발 환경에서 미디어 파일 서빙
+# 개발 환경에서만 Django Debug Toolbar를 활성화합니다.
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

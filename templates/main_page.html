@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -13,7 +14,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="main_page.html" class="logo">
+            <a href="{% url 'main_page' %}" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -23,9 +24,9 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <a href="main_page.html" class="nav-item active">홈</a>
-            <a href="chatbot_page.html" class="nav-item">CHAT BOT</a>
-            <a href="#" class="nav-item">캐릭터 검색</a>
+            <a href="{% url 'main_page' %}" class="nav-item active">홈</a>
+            <a href="{% url 'chatbot' %}" class="nav-item">CHAT BOT</a>
+            <a href="{% url 'character_info' %}" class="nav-item">캐릭터 검색</a>
             <a href="#" class="nav-item">큐브</a>
             <a href="#" class="nav-item">스타포스</a>
             <a href="#" class="nav-item">(API 연동)</a>
@@ -139,21 +140,21 @@
 
             <!-- Character Search Card -->
             <div class="character-search-card">
-                    <div class="search-input-group">
-                        <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
-                        <button class="character-search-btn" onclick="searchCharacter()">
-                            <span>검색</span>
-                        </button>
+                <div class="search-input-group">
+                    <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
+                    <button class="character-search-btn" onclick="searchAndDisplayCharacter()">
+                        <span>검색</span>
+                    </button>
+                </div>
+                
+                <div class="search-recent" id="recentSearches">
+                    <div class="search-recent-title">최근 검색</div>
+                    <div class="search-recent-list" id="recentSearchList">
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('오지환')">오지환</span>
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('메이플유저')">메이플유저</span>
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('초보자123')">초보자123</span>
                     </div>
-                    
-                    <div class="search-recent" id="recentSearches">
-                        <div class="search-recent-title">최근 검색</div>
-                        <div class="search-recent-list" id="recentSearchList">
-                            <span class="search-recent-item" onclick="searchCharacter('오지환')">오지환</span>
-                            <span class="search-recent-item" onclick="searchCharacter('메이플유저')">메이플유저</span>
-                            <span class="search-recent-item" onclick="searchCharacter('초보자123')">초보자123</span>
-                        </div>
-                    </div>
+                </div>
             </div>
         </aside>
 
@@ -220,12 +221,26 @@
                 </div>
             </div>
             <div class="section-content">
-                <div class="event-display" id="eventDisplay">
-                    <div class="event-icon">🎮</div>
-                    <div class="event-title-modern">윈터 스페셜 이벤트</div>
-                    <div class="event-description">12월 한정 특별 이벤트가 진행중입니다</div>
-                    <div class="event-date-modern">📅 2024.12.01 ~ 2024.12.31</div>
-                </div>
+                {% if notice_event and notice_event.notice %}
+                    <div class="carousel-container">
+                        <div class="carousel-wrapper" id="eventCarouselWrapper">
+                            {% for event in notice_event.notice %}
+                                <div class="carousel-item">
+                                    <a href="{{ event.url }}" target="_blank" class="event-link">
+                                        <div class="event-icon">🎉</div>
+                                        <div class="event-title-modern">{{ event.title }}</div>
+                                        <div class="event-date-modern">📅 {{ event.date|slice:":10" }}</div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="event-display" id="eventDisplay">
+                        <div class="event-icon">😅</div>
+                        <div class="event-title-modern">진행중인 이벤트가 없습니다.</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -255,76 +270,21 @@
             </div>
             <div class="section-content">
                 <div class="ranking-scroll-container">
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-1">1</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">오징어괴물</div>
-                            <div class="ranking-details">루나 · Lv.299</div>
+                    {% if overall_ranking and overall_ranking.ranking %}
+                        {% for player in overall_ranking.ranking|slice:":10" %}
+                            <div class="ranking-item-modern">
+                                <div class="ranking-badge {% if player.ranking <= 3 %}top-{{ player.ranking }}{% else %}other{% endif %}">{{ player.ranking }}</div>
+                                <div class="ranking-player-info">
+                                    <div class="ranking-name">{{ player.character_name }}</div>
+                                    <div class="ranking-details">{{ player.world_name }} · Lv.{{ player.character_level }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="ranking-placeholder">
+                            <p>랭킹 정보를 불러오는 데 실패했습니다.<br>잠시 후 다시 시도해주세요.</p>
                         </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-2">2</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">안녕하세요</div>
-                            <div class="ranking-details">스카니아 · Lv.299</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-3">3</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">오징어물괴</div>
-                            <div class="ranking-details">베라 · Lv.298</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">4</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">메이플러버</div>
-                            <div class="ranking-details">크로아 · Lv.298</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">5</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최강전사</div>
-                            <div class="ranking-details">유니온 · Lv.297</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">6</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">파이터킹</div>
-                            <div class="ranking-details">엘리시움 · Lv.297</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">7</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">던전마스터</div>
-                            <div class="ranking-details">아케인 · Lv.296</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">8</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">마법사왕</div>
-                            <div class="ranking-details">노바 · Lv.296</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">9</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">궁수전설</div>
-                            <div class="ranking-details">제니스 · Lv.295</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">10</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">도적황제</div>
-                            <div class="ranking-details">오로라 · Lv.295</div>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -336,82 +296,15 @@
             </div>
             <div class="section-content">
                 <div class="ranking-scroll-container">
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-1">1</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">전설의파워</div>
-                            <div class="ranking-details">루나 · 25억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-2">2</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최강무자비</div>
-                            <div class="ranking-details">스카니아 · 24억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-3">3</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">파워킹덤</div>
-                            <div class="ranking-details">베라 · 23억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">4</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">무적전사</div>
-                            <div class="ranking-details">크로아 · 22억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">5</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">데미지킹</div>
-                            <div class="ranking-details">유니온 · 21억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">6</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">폭딜마스터</div>
-                            <div class="ranking-details">엘리시움 · 20억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">7</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">극딜전문가</div>
-                            <div class="ranking-details">아케인 · 19억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">8</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">원펀치맨</div>
-                            <div class="ranking-details">노바 · 18억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">9</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">절대강자</div>
-                            <div class="ranking-details">제니스 · 17억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">10</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최종병기</div>
-                            <div class="ranking-details">오로라 · 16억</div>
-                        </div>
+                    <div class="ranking-placeholder">
+                        <p>전투력 랭킹 정보는<br>현재 제공되지 않습니다.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="../static/js/common.js"></script>
+    <script src="{% static 'js/common.js' %}"></script> 
     <script>
         // Search example function
         function searchExample(query) {
@@ -443,46 +336,6 @@
                 setTimeout(() => {
                     window.open('https://maplestory.nexon.com/Event', '_blank');
                 }, 1000);
-            }
-        }
-
-        // Carousel functionality
-        let currentEventIndex = 0;
-        let currentCashIndex = 0;
-
-        function nextEvent() {
-            const eventItems = document.getElementById('eventItems');
-            if (eventItems) {
-                const totalItems = eventItems.children.length;
-                currentEventIndex = (currentEventIndex + 1) % totalItems;
-                eventItems.style.transform = `translateX(-${currentEventIndex * 100}%)`;
-            }
-        }
-
-        function prevEvent() {
-            const eventItems = document.getElementById('eventItems');
-            if (eventItems) {
-                const totalItems = eventItems.children.length;
-                currentEventIndex = (currentEventIndex - 1 + totalItems) % totalItems;
-                eventItems.style.transform = `translateX(-${currentEventIndex * 100}%)`;
-            }
-        }
-
-        function nextCash() {
-            const cashItems = document.getElementById('cashItems');
-            if (cashItems) {
-                const totalItems = cashItems.children.length;
-                currentCashIndex = (currentCashIndex + 1) % totalItems;
-                cashItems.style.transform = `translateX(-${currentCashIndex * 100}%)`;
-            }
-        }
-
-        function prevCash() {
-            const cashItems = document.getElementById('cashItems');
-            if (cashItems) {
-                const totalItems = cashItems.children.length;
-                currentCashIndex = (currentCashIndex - 1 + totalItems) % totalItems;
-                cashItems.style.transform = `translateX(-${currentCashIndex * 100}%)`;
             }
         }
 
@@ -529,14 +382,32 @@
 
             setInterval(changeMascotMessage, 10000);
             
-            // Auto-rotate carousels
-            setInterval(() => {
-                if (Math.random() > 0.5) {
-                    nextEvent();
-                } else {
-                    nextCash();
-                }
-            }, 5000);
+            // Event Carousel
+            const eventWrapper = document.getElementById('eventCarouselWrapper');
+            if (eventWrapper) {
+                let currentEventIndex = 0;
+                const eventItems = eventWrapper.children;
+                const totalEvents = eventItems.length;
+
+                window.changeEvent = function(direction) {
+                    if (totalEvents <= 1) return;
+                    currentEventIndex = (currentEventIndex + direction + totalEvents) % totalEvents;
+                    eventWrapper.style.transform = `translateX(-${currentEventIndex * 100}%)`;
+                };
+
+                // Auto-rotate
+                setInterval(() => changeEvent(1), 5000);
+            } else {
+                // Fallback if carousel is not present
+                window.changeEvent = function() {
+                    window.MapleStoryChatBot.showNotification('표시할 다른 이벤트가 없습니다.', 'info');
+                };
+            }
+
+            // Placeholder for cash item change
+            window.changeCashItem = function() {
+                 window.MapleStoryChatBot.showNotification('캐시샵 아이템 정보는 준비중입니다.', 'info');
+            }
         });
     </script>
 </body>

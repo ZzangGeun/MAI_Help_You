@@ -86,7 +86,8 @@ function redirectToChatWithQuery(query) {
     
     // Redirect after a short delay for better UX
     setTimeout(() => {
-        window.location.href = 'chatbot_page.html';
+        const chatBotUrl = document.body.dataset.chatbotUrl || '/chatbot/'; // Fallback
+        window.location.href = chatBotUrl;
     }, 500);
 }
 
@@ -414,13 +415,13 @@ function updateLoginUI(loginData) {
             chatHistoryContainer.classList.remove('hidden');
         }
 
-        // Show My Characters card and hide the ad on the main page
+        // Show My Characters card and show the ad on the main page
         if (myCharactersCard) {
             myCharactersCard.classList.remove('hidden');
             populateMyCharactersList();
         }
         if (sidebarAd) {
-            sidebarAd.classList.add('hidden');
+            sidebarAd.classList.remove('hidden');
         }
     } else {
         // User is not logged in
@@ -559,54 +560,32 @@ function searchCharacter(characterName) {
     }, 1500);
 }
 
+let currentCharacterName = ''; // Store the current character name
+
 /**
  * Search and display character info in right sidebar
  */
 function searchAndDisplayCharacter(characterName) {
-    const searchInput = document.getElementById('characterSearchInput');
-    
-    // Use provided name or get from input
-    const name = characterName || (searchInput ? searchInput.value.trim() : '');
-    
-    if (!name) {
-        showNotification('캐릭터 닉네임을 입력해주세요.', 'warning');
-        return;
-    }
-    
-    // Disable search button
-    const searchBtn = document.querySelector('.character-search-btn');
-    if (searchBtn) {
-        searchBtn.disabled = true;
-        searchBtn.innerHTML = '<span>검색중...</span>';
-    }
-    
-    showLoading(`${name} 캐릭터 검색 중...`);
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Add to recent searches
-        addToRecentSearches(name);
-        
-        // Generate mock character data
-        const mockCharacterData = generateMockCharacterData(name);
-        
-        // Display character info
-        displayCharacterInfo(mockCharacterData);
-        
-        // Enable search button
-        if (searchBtn) {
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = '<span>검색</span>';
-        }
-        
-        hideLoading();
-        showNotification(`${name} 캐릭터 정보를 찾았습니다!`, 'success');
-        
-        // Clear input
-        if (searchInput && !characterName) {
-            searchInput.value = '';
-        }
-    }, 1500);
+  const searchInput = document.getElementById('characterSearchInput');
+
+  // Use provided name or get from input
+  const name = characterName || (searchInput ? searchInput.value.trim() : '');
+
+  if (!name) {
+    showNotification('캐릭터 닉네임을 입력해주세요.', 'warning');
+    return;
+  }
+
+  // Add to recent searches
+  addToRecentSearches(name);
+
+  // Show loading indicator
+  showLoading(`'${name}' 캐릭터 정보 페이지로 이동합니다...`);
+
+  // Redirect to the character info page with the character name as a query parameter
+  setTimeout(() => {
+    window.location.href = `/character-info/?character_name=${encodeURIComponent(name)}`;
+  }, 500); // Short delay for UX
 }
 
 /**
@@ -633,6 +612,8 @@ function generateMockCharacterData(name) {
 function displayCharacterInfo(data) {
     const infoDisplay = document.getElementById('characterInfoDisplay');
     if (!infoDisplay) return;
+
+    currentCharacterName = data.name;
     
     // Update character info
     const nameElement = document.getElementById('displayCharacterName');
@@ -640,20 +621,24 @@ function displayCharacterInfo(data) {
     const levelElement = document.getElementById('displayCharacterLevel');
     const jobElement = document.getElementById('displayCharacterJob');
     const fameElement = document.getElementById('displayCharacterFame');
-    const powerElement = document.getElementById('displayCharacterPower');
-    const unionElement = document.getElementById('displayUnionLevel');
     
     if (nameElement) nameElement.textContent = data.name;
     if (serverElement) serverElement.textContent = data.server;
     if (levelElement) levelElement.textContent = data.level;
     if (jobElement) jobElement.textContent = data.job;
     if (fameElement) fameElement.textContent = data.fame.toLocaleString();
-    if (powerElement) powerElement.textContent = `${data.power}억`;
-    if (unionElement) unionElement.textContent = data.unionLevel.toLocaleString();
     
     // Show the character info display
     infoDisplay.classList.remove('hidden');
 }
+
+function goToCharacterDetails() {
+    if (currentCharacterName) {
+        window.location.href = `character_search.html?name=${encodeURIComponent(currentCharacterName)}`;
+    }
+}
+
+window.goToCharacterDetails = goToCharacterDetails;
 
 function addToRecentSearches(characterName) {
     let recentSearches = loadFromStorage('recentCharacterSearches', []);
