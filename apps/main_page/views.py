@@ -254,6 +254,41 @@ def ranking_overall_api(request):
         }, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def character_search_api(request):
+    """캐릭터 검색 API"""
+    try:
+        character_name = request.GET.get('name')
+        
+        if not character_name:
+            return JsonResponse({
+                'error': '캐릭터 이름을 입력해주세요.',
+                'status': 'error'
+            }, status=400)
+        
+        # Nexon API를 통한 캐릭터 정보 조회
+        character_data = get_api_data("/character/basic", {"character_name": character_name})
+        
+        if not character_data:
+            return JsonResponse({
+                'error': '캐릭터를 찾을 수 없습니다.',
+                'status': 'error'
+            }, status=404)
+        
+        return JsonResponse({
+            'character': character_data,
+            'status': 'success'
+        }, status=200)
+        
+    except Exception as e:
+        logger.error(f"캐릭터 검색 오류: {e}")
+        return JsonResponse({
+            'error': f'캐릭터 검색 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=500)
+
+
 @require_http_methods(["GET"])
 def health_check_api(request):
     """헬스 체크 API (기본 Django 뷰)"""
