@@ -4,7 +4,6 @@ import requests
 import json
 from datetime import datetime, timedelta
 import logging
-import os
 import aiohttp
 from django.core.cache import cache
 from pathlib import Path
@@ -14,6 +13,7 @@ from .extract import (
     extract_hyper_stat, extract_pet_equipment, extract_hexamatrix,
     extract_hexamatrix_stat, extract_other_stat
 )
+import os
 
 from dotenv import load_dotenv
 load_dotenv()
