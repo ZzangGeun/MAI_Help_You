@@ -7,10 +7,6 @@ from .get_character_info import *
 from .extract import *
 from django.core.cache import cache
 
-# async def character_info_view(request):
-#     return render(request, 'character_info/character_info.html')
-
-
 
 async def character_info_view(request):
 
