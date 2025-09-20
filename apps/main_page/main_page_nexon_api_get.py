@@ -19,16 +19,31 @@ def get_api_data(endpoint, params=None):
     headers = {'x-nxopen-api-key': NEXON_API_KEY}
     url = f'{BASE_URL}{endpoint}'
 
+    # API 요청에 필요한 파라미터 설정
+    if params is None:
+        params = {}
+
+    # 날짜 파라미터가 필요한 엔드포인트 목록
+    date_required_endpoints = [
+        "/ranking/overall"  # 공지 관련 API는 date 파라미터를 사용하지 않습니다.
+    ]
+
+    # 해당 엔드포인트에 'date' 파라미터가 없으면 어제 날짜를 추가
+    if endpoint in date_required_endpoints and 'date' not in params:
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        params['date'] = yesterday
+
     try: 
         response = requests.get(url, headers = headers , params=params)
 
         if response.status_code == 200:
             return response.json()
         else:
-            logger.error(f'API 요청 실패: {url}, 상태 코드: {response.status_code}')
+            logger.error(f'API 요청 실패: {url}, 상태 코드: {response.status_code}, 파라미터: {params}, 응답: {response.text}')
             return None
     
     except requests.RequestException as e:
+        logger.error(f'API 요청 중 예외 발생: {url}, 오류: {e}')
         return None
 
 def get_notice_list():

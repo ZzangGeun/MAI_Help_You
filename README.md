@@ -1,7 +1,7 @@
 # 메이플스토리 AI 챗봇 (Django + LangChain + PostgreSQL/pgvector)
 
 ## 개요
-메이플스토리 게임 정보를 제공하는 AI 챗봇입니다. LangChain 기반 RAG(Retrieval-Augmented Generation)와 PostgreSQL(pgvector), Django REST Framework를 활용해 안정적인 검색/추론 및 RESTful API를 제공합니다. 대화 히스토리를 유지하면서, 관련 문서를 근거로 한 답변을 반환합니다.
+메이플스토리 게임 정보를 제공하는 AI 챗봇입니다. LangChain 기반 RAG(Retrieval-Augmented Generation)와 PostgreSQL(pgvector),  대화 히스토리를 유지하면서, 관련 문서를 근거로 한 답변을 반환합니다.
 
 ## 주요 기능
 
