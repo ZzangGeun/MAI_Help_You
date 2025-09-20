@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/common.css">
-    <link rel="stylesheet" href="../static/css/chat.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
 </head>
-<body>
+<body data-chatbot-url="{% url 'chatbot' %}">
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="main_page.html" class="logo">
+            <a href="{% url 'main_page' %}" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -23,31 +23,17 @@
     <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
-            <div class="nav-left">
-                <a href="main_page.html" class="nav-item">홈</a>
-                <a href="chatbot_page.html" class="nav-item active">CHAT BOT</a>
-                <a href="#" class="nav-item">캐릭터 검색</a>
-                <a href="#" class="nav-item">큐브</a>
-                <a href="#" class="nav-item">스타포스</a>
-                <a href="#" class="nav-item">(API 연동)</a>
-            </div>
-            <div class="nav-right">
-                <!-- Login Button (shown when not logged in) -->
-                <div class="nav-login-section" id="navLoginSection">
-                    <button class="nav-login-btn" onclick="console.log('Login button clicked'); showLoginPopup();">로그인</button>
-                </div>
-                <!-- User Profile (shown when logged in) -->
-                <div class="nav-user-profile hidden" id="navUserProfile">
-                    <span class="nav-user-name" id="navLoggedInUser">사용자</span>
-                    <button class="nav-profile-btn" onclick="showAccountPopup()">프로필</button>
-                    <button class="nav-logout-btn" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
+            <a href="{% url 'main_page' %}" class="nav-item">홈</a>
+            <a href="{% url 'chatbot' %}" class="nav-item active">CHAT BOT</a>
+            <a href="{% url 'character_info' %}" class="nav-item">캐릭터 검색</a>
+            <a href="#" class="nav-item">큐브</a>
+            <a href="#" class="nav-item">스타포스</a>
+            <a href="#" class="nav-item">(API 연동)</a>
         </div>
     </nav>
 
     <!-- Main Container -->
-    <div class="main-container chatbot-layout">
+    <div class="main-container">
         <!-- Left Advertisement Banner -->
         <div class="left-ad-banner">
             <div class="side-ad-content">
@@ -59,7 +45,7 @@
             </div>
         </div>
 
-        <!-- Right Sidebar (오른쪽에 표시되지만 클래스명은 유지) -->
+        <!-- Left Sidebar -->
         <aside class="left-sidebar">
 
             <!-- Character Info Display -->
@@ -95,30 +81,10 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Character Search Card -->
-            <div class="character-search-card">
-                    <div class="search-input-group">
-                        <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
-                        <button class="character-search-btn" onclick="searchAndDisplayCharacter()">
-                            <span>검색</span>
-                        </button>
-                    </div>
-                    
-                    <div class="search-recent" id="recentSearches">
-                        <div class="search-recent-title">최근 검색</div>
-                        <div class="search-recent-list" id="recentSearchList">
-                            <span class="search-recent-item" onclick="searchFromRecent('오지환')">오지환</span>
-                            <span class="search-recent-item" onclick="searchFromRecent('메이플유저')">메이플유저</span>
-                            <span class="search-recent-item" onclick="searchFromRecent('초보자123')">초보자123</span>
-                        </div>
-                    </div>
-            </div>
-
         </aside>
 
-        <!-- Main Chat Area -->
-        <main class="chat-main">
+        <!-- Main Content (Chat Area) -->
+        <main class="main-content">
             <!-- Chat Header -->
             <div class="chat-header">
                 <div class="chat-title">메이플스토리 정보탐색 ChatBot</div>
@@ -169,25 +135,50 @@
             </div>
         </main>
 
-        <!-- Left Sidebar (왼쪽에 표시되지만 클래스명은 유지) -->
+        <!-- Right Sidebar -->
         <aside class="right-sidebar" id="rightSidebar">
-            <!-- Chat History (shown only when logged in) -->
-            <div class="chat-history-container hidden" id="chatHistoryContainer">
-                <div class="chat-history-header">CHAT BOT HISTORY</div>
-                <div class="chat-history-content" id="chatHistoryContent">
-                    <div class="history-item">
-                        <div class="history-date">최근</div>
-                        <div class="history-text">메르세데스 4차 스킬트리에 대해 질문했습니다. 이슈타르의 링과 스피릿 인퓨전 등의 주요 스킬들을 확인했어요.</div>
+            <!-- Integrated User & Character Profile Card -->
+            <div class="login-status-card" id="loginStatusCard">
+                <!-- Login Form (shown when not logged in) -->
+                <div class="login-form" id="loginForm">
+                    <div class="login-header">
+                        <h3>로그인</h3>
+                        <p>채팅 히스토리와 개인화된 서비스를 이용하려면 로그인하세요.</p>
                     </div>
-                    <div class="history-item">
-                        <div class="history-date">7일전</div>
-                        <div class="history-text">180렙 신궁 사냥터 추천을 받았습니다. 츄츄 아일랜드가 좋다고 하더라구요.</div>
-                        <div class="history-text">아케인 심볼도 함께 얻을 수 있어서 효율적이에요.</div>
+                    <input type="text" class="login-input" id="usernameInput" placeholder="아이디">
+                    <input type="password" class="login-input" id="passwordInput" placeholder="비밀번호">
+                    <button class="login-btn" onclick="performLogin()">로그인</button>
+                </div>
+                
+                <!-- Simple Profile Display (shown when logged in) -->
+                <div class="simple-profile-display hidden" id="simpleProfileDisplay" onclick="openProfileModal()">
+                    <div class="profile-avatar-medium">🧙‍♂️</div>
+                    <div class="simple-profile-info">
+                        <div class="simple-profile-name-row">
+                            <span class="character-name-primary" id="profileCharacterName">오지환</span>
+                            <span class="simple-profile-server" id="profileServerName">루나</span>
+                        </div>
+                        <span class="login-status-badge">온라인</span>
                     </div>
-                    <div class="history-item">
-                        <div class="history-date">30일전</div>
-                        <div class="history-text">뇌전 드랍 장소에 대해 문의했습니다.</div>
-                        <div class="history-text">자쿠무에서 가장 높은 확률로 드랍된다고 했어요.</div>
+                    <button class="logout-btn" onclick="event.stopPropagation(); performLogout();">로그아웃</button>
+                </div>
+            </div>
+            
+            <!-- Character Search Card -->
+            <div class="character-search-card">
+                <div class="search-input-group">
+                    <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
+                    <button class="character-search-btn" onclick="searchAndDisplayCharacter()">
+                        <span>검색</span>
+                    </button>
+                </div>
+                
+                <div class="search-recent" id="recentSearches">
+                    <div class="search-recent-title">최근 검색</div>
+                    <div class="search-recent-list" id="recentSearchList">
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('오지환')">오지환</span>
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('메이플유저')">메이플유저</span>
+                        <span class="search-recent-item" onclick="searchAndDisplayCharacter('초보자123')">초보자123</span>
                     </div>
                 </div>
             </div>
@@ -207,177 +198,49 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div class="profile-modal-overlay hidden" id="profileModal">
+        <div class="profile-modal-content">
+            <span class="modal-close-btn" onclick="closeProfileModal()">&times;</span>
+            <!-- Integrated Profile (shown in modal) -->
+            <div class="integrated-profile-card" id="integratedProfileCard">
+                <!-- Character Header (Avatar + Name) -->
+                <div class="character-header">
+                    <div class="profile-avatar-medium">🧙‍♂️</div>
+                    <div class="character-info">
+                        <div class="character-name-row">
+                            <span class="character-name-primary" id="characterName">오지환</span>
+                            <span class="character-server" id="serverName">루나</span>
+                        </div>
+                        <div class="character-status-row">
+                            <span class="login-status-badge">온라인</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Character Stats -->
+                <div class="character-stats-vertical">
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">레벨</span>
+                        <span class="stat-value-vertical" id="characterLevel">299</span>
+                    </div>
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">직업</span>
+                        <span class="stat-value-vertical" id="characterJob">키네시스</span>
+                    </div>
+                    <div class="stat-row-vertical">
+                        <span class="stat-label-vertical">전투력</span>
+                        <span class="stat-value-vertical" id="characterPower">25억 8,254만 3,542</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating Send Button -->
     <div class="floating-send-btn" onclick="scrollToChat()">💬</div>
 
-    <!-- Profile Popup Modal -->
-    <div class="profile-popup-overlay hidden" id="profilePopupOverlay">
-        <div class="profile-popup-modal" id="profilePopupModal">
-            <div class="profile-popup-header">
-                <h3>사용자 프로필</h3>
-                <button class="profile-popup-close" onclick="hideProfilePopup()">×</button>
-            </div>
-            <div class="profile-popup-content">
-                <div class="profile-popup-avatar">👤</div>
-                <div class="profile-popup-info">
-                    <div class="profile-popup-name" id="profilePopupName">사용자</div>
-                    <div class="profile-popup-status">온라인</div>
-                </div>
-                <div class="profile-popup-details">
-                    <div class="profile-detail-row">
-                        <span class="profile-detail-label">로그인 시간</span>
-                        <span class="profile-detail-value" id="profileLoginTime">방금 전</span>
-                    </div>
-                    <div class="profile-detail-row">
-                        <span class="profile-detail-label">세션 시간</span>
-                        <span class="profile-detail-value" id="profileSessionTime">0분</span>
-                    </div>
-                </div>
-                <div class="profile-popup-actions">
-                    <button class="profile-action-btn" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Login Popup Modal -->
-    <div class="login-popup-overlay hidden" id="loginPopupOverlay">
-        <div class="login-popup-modal" id="loginPopupModal">
-            <div class="login-popup-header">
-                <h3>로그인</h3>
-                <button class="login-popup-close" onclick="hideLoginPopup()">×</button>
-            </div>
-            <div class="login-popup-content">
-                <div class="login-popup-form">
-                    <div class="login-input-group">
-                        <label for="popupUsernameInput">아이디</label>
-                        <input type="text" class="login-popup-input" id="popupUsernameInput" placeholder="아이디를 입력하세요">
-                    </div>
-                    <div class="login-input-group">
-                        <label for="popupPasswordInput">비밀번호</label>
-                        <input type="password" class="login-popup-input" id="popupPasswordInput" placeholder="비밀번호를 입력하세요">
-                    </div>
-                    <div class="login-popup-options">
-                        <label class="login-checkbox">
-                            <input type="checkbox" id="rememberMe">
-                            <span>로그인 상태 유지</span>
-                        </label>
-                    </div>
-                    <button class="login-popup-btn" onclick="performPopupLogin()">로그인</button>
-                    <div class="login-popup-links">
-                        <a href="#" class="login-link">비밀번호 찾기</a>
-                        <span>|</span>
-                        <a href="#" class="login-link">회원가입</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Account Profile Popup Modal -->
-    <div class="account-popup-overlay hidden" id="accountPopupOverlay">
-        <div class="account-popup-modal" id="accountPopupModal">
-            <div class="account-popup-header">
-                <h3>내 계정</h3>
-                <button class="account-popup-close" onclick="hideAccountPopup()">×</button>
-            </div>
-            <div class="account-popup-content">
-                <div class="account-section">
-                    <div class="account-avatar">👤</div>
-                    <div class="account-info">
-                        <div class="account-name" id="accountName">사용자</div>
-                        <div class="account-email">user@example.com</div>
-                        <div class="account-status">온라인</div>
-                    </div>
-                </div>
-                <div class="account-details">
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">가입일</span>
-                        <span class="account-detail-value">2024년 1월 15일</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">최근 로그인</span>
-                        <span class="account-detail-value" id="accountLastLogin">방금 전</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">총 접속 시간</span>
-                        <span class="account-detail-value">24시간 30분</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">검색 기록</span>
-                        <span class="account-detail-value">157회</span>
-                    </div>
-                </div>
-                <div class="account-actions">
-                    <button class="account-action-btn primary">설정 변경</button>
-                    <button class="account-action-btn secondary" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="../static/js/common.js"></script>
-    <script src="../static/js/chat.js"></script>
-    <script>
-        // Profile Popup Functions (for chatbot page)
-        function showProfilePopup() {
-            const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
-            if (!loginData || !loginData.isLoggedIn) {
-                window.MapleStoryChatBot.showNotification('로그인이 필요합니다.', 'warning');
-                return;
-            }
-            
-            const overlay = document.getElementById('profilePopupOverlay');
-            const nameElement = document.getElementById('profilePopupName');
-            const loginTimeElement = document.getElementById('profileLoginTime');
-            
-            if (overlay) {
-                // Update profile info
-                if (nameElement) nameElement.textContent = loginData.username;
-                if (loginTimeElement) {
-                    const loginTime = new Date(loginData.loginTime);
-                    const timeDiff = new Date() - loginTime;
-                    const minutes = Math.floor(timeDiff / (1000 * 60));
-                    if (minutes < 1) {
-                        loginTimeElement.textContent = '방금 전';
-                    } else if (minutes < 60) {
-                        loginTimeElement.textContent = `${minutes}분 전`;
-                    } else {
-                        const hours = Math.floor(minutes / 60);
-                        loginTimeElement.textContent = `${hours}시간 전`;
-                    }
-                }
-                
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function hideProfilePopup() {
-            const overlay = document.getElementById('profilePopupOverlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        // Keyboard event listeners for chatbot page
-        document.addEventListener('keydown', function(e) {
-            // ESC key to hide profile popup
-            if (e.key === 'Escape') {
-                hideProfilePopup();
-            }
-        });
-
-        // Click outside to close popup
-        document.addEventListener('click', function(e) {
-            const overlay = document.getElementById('profilePopupOverlay');
-            const modal = document.getElementById('profilePopupModal');
-            if (overlay && !overlay.classList.contains('hidden') && 
-                !modal.contains(e.target)) {
-                hideProfilePopup();
-            }
-        });
-    </script>
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/chat.js' %}"></script>
 </body>
 </html>

@@ -214,8 +214,8 @@ body {
     max-width: 95%;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(200px, 300px) 1fr minmax(200px, 300px);
-    grid-template-areas: "right-sidebar main-content left-sidebar";
+    grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px); /* left-sidebar | main-content | right-sidebar */
+    grid-template-areas: "left-sidebar main-content right-sidebar";
     gap: 20px;
     padding: 15px 15px 0;
     align-items: start;
@@ -224,13 +224,10 @@ body {
 }
 
 /* Chatbot Page Layout - matches main_page */
-.main-container.chatbot-layout {
-    max-width: 95%;
-    grid-template-columns: minmax(200px, 300px) 1fr minmax(200px, 300px);
-    grid-template-areas: "right-sidebar main-content left-sidebar";
-    gap: 20px;
-    padding: 15px 15px 0;
-}
+/* .chatbot-layout is no longer needed as it now shares the same layout as .main-container */
+/*
+    .main-container.chatbot-layout { ... }
+*/
 
 /* Sidebar Styles */
 .left-sidebar {
@@ -365,20 +362,12 @@ body {
 @media (max-width: 1024px) {
     .main-container {
         grid-template-columns: 1fr;
-        grid-template-areas: 
-            "right-sidebar"
-            "main-content" 
-            "left-sidebar";
+        grid-template-areas:
+            "left-sidebar"
+            "main-content"
+            "right-sidebar";
         gap: 20px;
         padding: 15px;
-    }
-    
-    .main-container.chatbot-layout {
-        grid-template-columns: 1fr;
-        grid-template-areas: 
-            "right-sidebar"
-            "main-content" 
-            "left-sidebar";
     }
 }
 
@@ -1075,6 +1064,25 @@ body {
     color: white;
 }
 
+.simple-profile-display .logout-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    background: #dc3545;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color var(--transition-fast);
+}
+
+.simple-profile-display .logout-btn:hover {
+    background: #c82333;
+}
+
 @keyframes popupSlideIn {
     from {
         opacity: 0;
@@ -1085,7 +1093,6 @@ body {
         transform: scale(1) translateY(0);
     }
 }
-
 /* Enhanced User Profile Card */
 .user-profile-card {
     padding: 20px;
@@ -1342,6 +1349,49 @@ body {
     line-height: 1.4;
 }
 
+/* Simple Profile Display */
+.simple-profile-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: var(--border-radius-large);
+    transition: background-color var(--transition-fast);
+    position: relative;
+    padding-bottom: 30px; /* Space for logout button */
+}
+
+.simple-profile-display:hover {
+    background-color: var(--background-light);
+}
+
+.simple-profile-display .profile-avatar-medium {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+}
+
+.simple-profile-info {
+    text-align: left;
+    flex-grow: 1;
+    min-width: 0; /* Prevents flex item from overflowing */
+}
+
+.simple-profile-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+    max-width: 100%;
+}
+
+.simple-profile-server {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
 /* Character Profile Display */
 .character-profile-display {
     display: flex;
@@ -1399,279 +1449,54 @@ body {
 .p-large { padding: 24px; }
 .hidden { display: none !important; }
 
-/* Profile Popup Styles */
-.profile-popup-overlay {
+/* Profile Modal Styles */
+.profile-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.3s ease;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    pointer-events: none;
 }
 
-.profile-popup-modal {
+.profile-modal-overlay:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.profile-modal-content {
     background: white;
+    padding: 25px;
     border-radius: var(--border-radius-large);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    position: relative;
     width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    animation: slideInUp 0.3s ease;
+    max-width: 320px;
+    transform: scale(0.95);
+    transition: transform var(--transition-fast);
 }
 
-.profile-popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-gray);
-    background: var(--nav-gradient);
-    border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+.profile-modal-overlay:not(.hidden) .profile-modal-content {
+    transform: scale(1);
 }
 
-.profile-popup-header h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.profile-popup-close {
-    background: none;
-    border: none;
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
     font-size: 24px;
-    cursor: pointer;
     color: var(--text-muted);
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius-round);
-    transition: var(--transition-fast);
-}
-
-.profile-popup-close:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--text-primary);
-}
-
-.profile-popup-content {
-    padding: 20px;
-}
-
-.profile-popup-avatar {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 3px solid var(--primary-color);
-    border-radius: var(--border-radius-round);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 15px;
-}
-
-.profile-popup-info {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.profile-popup-name {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 5px;
-}
-
-.profile-popup-status {
-    font-size: 14px;
-    color: #27ae60;
-    background: #d5f4e6;
-    padding: 4px 12px;
-    border-radius: 12px;
-    display: inline-block;
-}
-
-.profile-popup-details {
-    margin-bottom: 20px;
-}
-
-.profile-detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.profile-detail-row:last-child {
-    border-bottom: none;
-}
-
-.profile-detail-label {
-    font-size: 14px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.profile-detail-value {
-    font-size: 14px;
-    color: var(--text-primary);
-    font-weight: 600;
-}
-
-.profile-popup-actions {
-    text-align: center;
-}
-
-.profile-action-btn {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: var(--border-radius-small);
-    font-size: 14px;
-    font-weight: 500;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: color var(--transition-fast);
 }
 
-.profile-action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-}
-
-/* Profile Actions */
-.profile-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.profile-btn {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: var(--border-radius-small);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    flex: 1;
-}
-
-.profile-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 183, 197, 0.4);
-}
-
-.logout-btn {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: var(--border-radius-small);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    flex: 1;
-}
-
-.logout-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-}
-
-/* Ad Panel Spacing for Large Screens */
-@media (min-width: 1800px) {
-    .main-container {
-        margin: 0 auto; /* Keep center alignment */
-        max-width: calc(100vw - 480px); /* Viewport width minus ad space */
-        width: 95%;
-    }
-    
-    .main-container.chatbot-layout {
-        margin: 0 auto;
-        max-width: calc(100vw - 480px);
-        width: 95%;
-    }
-}
-
-/* Large Screen Optimizations (4K and above) */
-@media (min-width: 2560px) {
-    .main-container {
-        margin: 0 auto; /* Keep center alignment */
-        max-width: calc(100vw - 520px); /* Viewport width minus ad space */
-        width: 90%;
-        grid-template-columns: minmax(250px, 350px) 1fr minmax(250px, 350px);
-        gap: 30px;
-        padding: 20px 20px 0;
-    }
-    
-    .main-container.chatbot-layout {
-        margin: 0 auto;
-        max-width: calc(100vw - 520px);
-        width: 90%;
-        grid-template-columns: minmax(250px, 350px) 1fr minmax(250px, 350px);
-        gap: 30px;
-        padding: 20px 20px 0;
-    }
-    
-    .login-status-card {
-        padding: 12px; /* Reduced padding for large screens */
-        min-height: 90px; /* Smaller height for large screens */
-    }
-}
-
-@media (min-width: 3840px) {
-    .main-container {
-        margin: 0 auto; /* Keep center alignment */
-        max-width: calc(100vw - 560px); /* Viewport width minus ad space */
-        width: 85%;
-        grid-template-columns: minmax(300px, 400px) 1fr minmax(300px, 400px);
-        gap: 40px;
-        padding: 25px 25px 0;
-    }
-    
-    .main-container.chatbot-layout {
-        margin: 0 auto;
-        max-width: calc(100vw - 560px);
-        width: 85%;
-        grid-template-columns: minmax(300px, 400px) 1fr minmax(300px, 400px);
-        gap: 40px;
-        padding: 25px 25px 0;
-    }
-    
-    .login-status-card {
-        padding: 15px; /* Reduced padding for ultra-wide screens */
-        min-height: 100px; /* Smaller height for ultra-wide screens */
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.modal-close-btn:hover {
+    color: var(--text-primary);
 }

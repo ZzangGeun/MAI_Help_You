@@ -33,6 +33,9 @@ def main_page(request):
 def character_info_view(request):
     return render(request, "character_info.html")
 
+# 회원가입 페이지 뷰
+def signup_view(request):
+    return render(request, "signup.html")
 
 # 로그인 페이지 뷰
 def login_view(request):
@@ -142,41 +145,6 @@ def chatbot_request_api(request):
             'error': f'챗봇 요청 중 오류가 발생했습니다: {str(e)}',
             'status': 'error'
         }, status=500)
-
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def character_search_api(request):
-    """캐릭터 검색 API - character_info 페이지로 리다이렉트"""
-    try:
-        data = json.loads(request.body)
-        character_name = data.get('character_name')
-        
-        if not character_name:
-            return JsonResponse({
-                'error': '캐릭터 닉네임을 입력해주세요.',
-                'status': 'error'
-            }, status=400)
-        
-        # character_info 페이지로 리다이렉트
-        from django.shortcuts import redirect
-        from urllib.parse import quote
-        encoded_character_name = quote(character_name)
-        return redirect(f'/character-info/?character_name={encoded_character_name}')
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'error': '잘못된 JSON 형식입니다.',
-            'status': 'error'
-        }, status=400)
-    except Exception as e:
-        logger.error(f"캐릭터 검색 오류: {e}")
-        return JsonResponse({
-            'error': f'캐릭터 검색 중 오류가 발생했습니다: {str(e)}',
-            'status': 'error'
-        }, status=500)
-    
 
 
 
@@ -306,5 +274,3 @@ def health_check_api(request):
             'error': str(e),
             'timestamp': time.time()
         }, status=500)
-
-
