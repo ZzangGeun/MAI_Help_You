@@ -15,6 +15,9 @@ from langchain.schema import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_postgres.vectorstores import PGVector
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
@@ -31,6 +34,7 @@ class RagEngine:
     """
 
     def __init__(self) -> None:
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
         pg = get_pg_config()
         rag = get_rag_config()
@@ -53,6 +57,13 @@ class RagEngine:
         self.top_k = int(os.getenv("RAG_TOP_K", 3))
 
         # Postgres 접속 정보
+=======
+        # LangChain에서는 collection_name 사용
+        self.collection_name = os.getenv("PG_COLLECTION_NAME", "maple_docs")
+        self.top_k = int(os.getenv("RAG_TOP_K", 3))
+
+        # Postgres 접속 정보
+>>>>>>> Stashed changes
         self.host = os.getenv("PGHOST", "localhost")
         self.port = os.getenv("PGPORT", "5432")
         self.db = os.getenv("PGDATABASE", "mai")
@@ -115,6 +126,7 @@ class RagEngine:
             engine = create_engine(self._sqlalchemy_url())
             with engine.connect() as conn:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {self.table_name}"))
                 row = result.fetchone()
                 return int(row[0]) if row else 0
@@ -137,6 +149,20 @@ class RagEngine:
                 count = result.scalar_one_or_none()
                 return count or 0
         except Exception as e:
+=======
+                # langchain-postgres는 langchain_pg_collection, langchain_pg_embedding 테이블을 사용합니다.
+                # 컬렉션 이름으로 필터링하여 문서 수를 확인합니다.
+                query = text("""
+                    SELECT count(*)
+                    FROM langchain_pg_embedding e
+                    JOIN langchain_pg_collection c ON e.collection_id = c.uuid
+                    WHERE c.name = :collection_name
+                """)
+                result = conn.execute(query, {"collection_name": self.collection_name})
+                count = result.scalar_one_or_none()
+                return count or 0
+        except Exception as e:
+>>>>>>> Stashed changes
             # 테이블이 아직 존재하지 않을 경우 OperationalError 등이 발생할 수 있습니다.
             # 이 경우 0을 반환하여 인덱싱을 진행하도록 합니다.
             logger.info("행 수 확인 실패(테이블이 없을 수 있음): %s", e)
@@ -145,6 +171,9 @@ class RagEngine:
     def _ingest_from_dir(self) -> None:
         """디렉토리에서 JSON 파일들을 로드하여 벡터 스토어에 인덱싱"""
         data_path = os.getenv("RAG_DATA_PATH", "MAI_db/json_data")
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         if not os.path.exists(data_path):
             logger.warning("RAG 데이터 경로를 찾을 수 없습니다: %s", data_path)

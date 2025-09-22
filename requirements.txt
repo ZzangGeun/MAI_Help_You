@@ -13,6 +13,7 @@ bitsandbytes==0.41.3
 numpy<2.0.0
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 # LlamaIndex + Postgres (pgvector)
 llama-index>=0.10.0
@@ -21,12 +22,17 @@ llama-index-embeddings-huggingface>=0.2.0
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
 =======
+=======
+>>>>>>> Stashed changes
 langchain>=0.1.0
 langchain-community>=0.0.10
 langchain-postgres>=0.0.6
 sentence-transformers>=2.2.2
 sqlalchemy>=2.0.0 # langchain-postgres가 의존하므로 유지
 psycopg-binary>=3.1.0
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 pgvector>=0.2.5
 
@@ -36,13 +42,19 @@ httpx==0.25.2
 python-dotenv==1.0.0
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # Development
 =======
+=======
+>>>>>>> Stashed changes
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
 django-filter==23.5
 drf-spectacular==0.27.0
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 pytest==7.4.3
 pytest-django==4.7.0
