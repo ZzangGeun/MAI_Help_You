@@ -6,10 +6,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .services import chatbot_service
 from django.utils.crypto import get_random_string
+from django.conf import settings
 
 # Create your views here.
 
-FASTAPI_URL = "http://localhost:8000/api/fastapi/ask"
+FASTAPI_URL = getattr(settings, "FASTAPI_URL", "http://localhost:8001/ask")
 
 def chatbot_view(request):
     """챗봇 메인 페이지 뷰"""

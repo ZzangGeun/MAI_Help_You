@@ -1,13 +1,10 @@
-# Django
 Django==5.1.7
 python-decouple==3.8
-django-debug-toolbar==4.2.0  # 개발 환경용 (선택사항)
+django-debug-toolbar==4.2.0
 
-# FastAPI
 fastapi==0.104.1
 uvicorn==0.24.0
 
-# AI/ML
 torch==2.3
 transformers
 peft==0.7.1
@@ -15,6 +12,7 @@ accelerate==0.25.0
 bitsandbytes==0.41.3
 numpy<2.0.0
 
+<<<<<<< Updated upstream
 
 # LlamaIndex + Postgres (pgvector)
 llama-index>=0.10.0
@@ -22,15 +20,29 @@ llama-index-vector-stores-postgres>=0.2.0
 llama-index-embeddings-huggingface>=0.2.0
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
+=======
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-postgres>=0.0.6
+sentence-transformers>=2.2.2
+sqlalchemy>=2.0.0 # langchain-postgres가 의존하므로 유지
+psycopg-binary>=3.1.0
+>>>>>>> Stashed changes
 pgvector>=0.2.5
 
-# HTTP Requests
 requests==2.31.0
 httpx==0.25.2
 
-# Environment
 python-dotenv==1.0.0
 
+<<<<<<< Updated upstream
 # Development
+=======
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+drf-spectacular==0.27.0
+
+>>>>>>> Stashed changes
 pytest==7.4.3
-pytest-django==4.7.0 
+pytest-django==4.7.0
