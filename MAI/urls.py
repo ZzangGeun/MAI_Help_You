@@ -7,9 +7,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include('apps.main_page.urls')),
     path('character_info/', include('apps.character_info.urls')),
-    path('chatbot/', include('apps.chatbot.urls')),
     path('auth/', include('apps.sns_login.urls')),  # SNS 로그인 추가
 ]
+
+# 개발 환경에서는 chatbot 앱을 비활성화할 수 있으므로, INSTALLED_APPS에 있는지 확인 후 URL을 추가합니다.
+if 'apps.chatbot' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('chatbot/', include('apps.chatbot.urls')))
 
 # 개발 환경에서 미디어 파일 및 정적 파일 서빙
 if settings.DEBUG:

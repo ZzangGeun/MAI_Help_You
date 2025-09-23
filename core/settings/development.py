@@ -7,6 +7,10 @@ from decouple import config
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# 개발 환경에서 AI 의존성 없이 UI/문서 작업을 위해 chatbot 앱을 비활성화합니다.
+if 'apps.chatbot' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('apps.chatbot')
+
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Database - 개발 환경에서는 SQLite 사용
