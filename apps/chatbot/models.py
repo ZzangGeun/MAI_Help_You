@@ -10,6 +10,7 @@ class ChatSession(models.Model):
         null=True, blank=True,  # 익명 사용자 허용
         related_name='chat_sessions'
     )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
