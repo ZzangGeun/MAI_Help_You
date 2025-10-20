@@ -9,7 +9,7 @@ urlpatterns = [
     # 기존 웹페이지 URLs (Django 템플릿)
     path('', include('apps.main_page.urls')),
     path('character_info/', include('apps.character_info.urls')),
-    # path('chatbot/', include('apps.chatbot.urls')),  # 임시 비활성화
+    path('chatbot/', include('apps.chatbot.urls')),  # 챗봇 URL 활성화
     # path('auth/', include('apps.signup.urls')),  # signup으로 변경됨   
 ]
 
