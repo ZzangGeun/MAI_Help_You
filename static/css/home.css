@@ -113,6 +113,103 @@
     transform: scale(1.02);
 }
 
+/* Equipment Window Styles */
+.equipment-window {
+    background: white;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 450px; /* 메인 콘텐츠와 높이를 맞춤 */
+    height: fit-content; /* 내용에 따라 높이가 유연하게 조절되도록 설정 */
+}
+
+.equipment-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 2px solid var(--primary-color);
+    flex-shrink: 0;
+}
+
+.equipment-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--primary-color);
+}
+
+.equipment-content {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character-preview {
+    background: var(--background-light);
+    border: 2px solid var(--border-gray);
+    border-radius: var(--border-radius-small);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.character-image-large {
+    font-size: 150px; /* 캐릭터 아이콘 크기 대폭 증가 */
+    opacity: 0.8;
+    transform: translateY(10%); /* 캐릭터 위치 미세 조정 */
+}
+
+.character-name-overlay {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(3px);
+}
+
+.equipment-footer {
+    padding: 15px;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.details-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.details-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 183, 197, 0.4);
+}
+
 /* Right Sidebar Ad */
 .sidebar-ad-long {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -122,8 +219,8 @@
     cursor: pointer;
     transition: var(--transition-fast);
     box-shadow: var(--shadow-medium);
-    margin-bottom: 0;
-    height: 100%;
+    margin-bottom: 20px;
+    height: auto;
     max-height: 600px;
     display: flex;
     flex-direction: column;
@@ -197,7 +294,7 @@
     background: white;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-medium);
-    padding: 20px 25px;
+    padding: 15px 25px; /* 상하 패딩 축소 */
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -206,7 +303,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 450px; /* Increased base height for main content */
+    min-height: 450px;
 }
 
 .main-content::before {
@@ -246,7 +343,7 @@
 .main-description {
     font-size: clamp(14px, 1.4vw, 22px); /* Increased description font size */
     color: var(--text-secondary);
-    margin-bottom: clamp(25px, 4vh, 50px); /* Dynamic margin */
+    margin-bottom: clamp(20px, 3vh, 40px); /* 여백 축소 */
     line-height: 1.4;
     max-width: clamp(300px, 80%, 800px); /* Dynamic max width */
     margin-left: auto;
@@ -260,7 +357,7 @@
 .main-search-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 50px;
+    margin-bottom: 25px; /* 여백 축소 */
     position: relative;
     z-index: 1;
 }
@@ -323,7 +420,7 @@
     background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
     border: 2px dashed var(--primary-color);
     border-radius: var(--border-radius-medium);
-    padding: clamp(10px, 1.5vh, 20px); /* Dynamic padding based on viewport height */
+    padding: clamp(10px, 1.5vh, 15px); /* 패딩 축소 */
     margin: clamp(12px, 2vh, 25px) 0; /* Dynamic margin */
     text-align: center;
     min-height: clamp(120px, 12vh, 180px); /* Dynamic minimum height */
@@ -379,7 +476,7 @@
 
 /* Bottom Section Cards - 메인 컨테이너와 동일한 너비 */
 .bottom-section {
-    max-width: 95%;
+    max-width: 1800px;
     margin: 15px auto 40px; /* Increased bottom margin from 20px to 40px */
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -388,13 +485,6 @@
     padding: 0 15px;
     width: 100%;
     box-sizing: border-box;
-}
-
-/* 카드가 그리드 아이템으로 작동하도록 보장 */
-.bottom-section .section-card {
-    grid-column: span 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
 }
 
 .section-card {
@@ -648,14 +738,8 @@
 /* Extra Large Desktop (1440px+) */
 @media (min-width: 1440px) {
     .main-content {
-        min-height: 70vh; /* Increased height for main content */
+        min-height: 65vh; /* FHD 화면에 맞게 높이 축소 */
         padding: 25px 35px;
-    }
-    
-    .bottom-section {
-        max-width: 95%;
-        gap: 20px;
-        padding: 0 15px;
     }
     
     .section-card {
@@ -668,12 +752,6 @@
     .main-content {
         min-height: 65vh; /* Increased height for main content */
         padding: 22px 30px;
-    }
-    
-    .bottom-section {
-        max-width: 95%;
-        gap: 20px;
-        padding: 0 15px;
     }
     
     .section-card {
@@ -710,10 +788,6 @@
         padding: 20px 25px;
     }
     
-    .main-search-container {
-        margin-bottom: 35px;
-    }
-    
     .bottom-section {
         grid-template-columns: repeat(2, 1fr);
         max-width: 95%;
@@ -731,10 +805,6 @@
     .main-content {
         min-height: 55vh; /* Increased height for main content */
         padding: 18px 20px;
-    }
-    
-    .main-search-container {
-        margin-bottom: 30px;
     }
     
     .bottom-section {
@@ -766,10 +836,6 @@
     .main-content {
         min-height: 50vh; /* Increased height for main content */
         padding: 15px 18px;
-    }
-    
-    .main-search-container {
-        margin-bottom: 25px;
     }
     
     .main-search-input {
@@ -804,11 +870,6 @@
         font-size: 8px;
     }
     
-    .search-hint {
-        padding: 10px;
-        margin: 12px 0;
-    }
-    
     .search-hint-title {
         font-size: 14px;
     }
@@ -820,60 +881,5 @@
     .search-example {
         font-size: 11px;
         padding: 3px 6px;
-    }
-}
-
-/* Ad Panel Spacing for Large Screens */
-@media (min-width: 1800px) {
-    .bottom-section {
-        margin: 15px auto 50px; /* Increased bottom margin for large screens */
-        max-width: calc(100vw - 480px); /* Match main-container */
-        width: 95%;
-    }
-}
-
-/* Large Screen Optimizations (4K and above) */
-@media (min-width: 2560px) {
-    .main-content {
-        min-height: 65vh; /* Increased height for large screens */
-    }
-    
-    .bottom-section {
-        margin: 15px auto 60px; /* Increased bottom margin for 4K screens */
-        max-width: calc(100vw - 520px); /* Match main-container */
-        width: 90%;
-        gap: 30px;
-        padding: 0 20px;
-    }
-    
-    .section-card {
-        height: 280px;
-    }
-}
-
-@media (min-width: 3840px) {
-    .main-content {
-        min-height: 60vh; /* Increased height for 4K displays */
-        max-height: 60vh; /* Prevent it from getting too tall */
-    }
-    
-    .bottom-section {
-        margin: 15px auto 80px; /* Increased bottom margin for ultra-wide screens */
-        max-width: calc(100vw - 560px); /* Match main-container */
-        width: 85%;
-        gap: 40px;
-        padding: 0 25px;
-    }
-    
-    .section-card {
-        height: 320px;
-    }
-    
-    .main-search-box {
-        max-width: 900px; /* Slightly larger for 4K */
-    }
-    
-    .main-search-container {
-        margin-bottom: 40px; /* Reduced margin */
     }
 }

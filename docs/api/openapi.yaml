@@ -89,6 +89,8 @@ paths:
     $ref: './main.yaml#/paths/~1api~1notice~1{notice_id}~1'
   /api/events/:
     $ref: './main.yaml#/paths/~1api~1events~1'
+  /api/rankings/:
+    $ref: './main.yaml#/paths/~1api~1rankings~1'
   /health/:
     $ref: './main.yaml#/paths/~1health~1'
   
@@ -127,13 +129,15 @@ components:
     SourceDocument:
       $ref: '../schemas/models.yaml#/components/schemas/SourceDocument'
     Character:
-      $ref: './character.yaml#/components/schemas/Character'
+      $ref: '../schemas/models.yaml#/components/schemas/Character'
     CharacterStats:
       $ref: './character.yaml#/components/schemas/CharacterStats'
     Notice:
       $ref: './main.yaml#/components/schemas/Notice'
     Event:
       $ref: './main.yaml#/components/schemas/Event'
+    RankingInfo:
+      $ref: './main.yaml#/components/schemas/RankingInfo'
   
   # 공통 파라미터
   parameters:

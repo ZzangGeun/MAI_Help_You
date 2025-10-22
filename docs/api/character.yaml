@@ -171,7 +171,7 @@ components:
           description: 캐릭터 레벨
           minimum: 1
           maximum: 300
-          example: 210
+          example: 275
         job:
           type: string
           description: 직업명
@@ -180,6 +180,18 @@ components:
           type: string
           description: 서버명
           example: "스카니아"
+        fame:
+          type: integer
+          description: 인기도
+          example: 12345
+        power:
+          type: integer
+          description: 전투력
+          example: 250000000
+        union_level:
+          type: integer
+          description: 유니온 레벨
+          example: 8500
         guild:
           type: string
           description: 길드명
