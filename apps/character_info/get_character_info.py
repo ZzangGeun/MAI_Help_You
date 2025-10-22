@@ -65,44 +65,64 @@ def all_info_extract(character_info):
         'hexamatrix_info': hexamatrix_info
     }
 
-def get_character_data():
-    """
-    캐릭터 이름을 받아 해당 캐릭터의 정보를 반환합니다.
-    캐시가 존재하면 캐시에서 데이터를 가져오고, 없으면 API를 호출하여 데이터를 가져옵니다.
-    """
-    async def fetch_character_data(character_name):
-        cache_key = f'character_info_{character_name}'
-        cached_data = cache.get(cache_key)
+async def get_character_data(character_name):
+    cache_key = f'character_info_{character_name}'
+    cached_data = cache.get(cache_key)
 
-        if cached_data:
-            return cached_data
+    if cached_data:
+        return cached_data
 
-        async with aiohttp.ClientSession() as session:
-            character_id_url = get_api_url("get_character_id", characterName=character_name)
-            async with session.get(character_id_url, headers={"Authorization": f"Bearer {NEXON_API_KEY}"}) as response:
-                if response.status != 200:
-                    logger.error(f"Failed to fetch character ID: {response.status}")
+    async with aiohttp.ClientSession() as session:
+        # 1. Get OCID
+        ocid_url = get_api_url("get_character_id", character_name=character_name)
+        headers = {"Authorization": f"Bearer {NEXON_API_KEY}"}
+        
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        try:
+            async with session.get(ocid_url, headers=headers) as response:
+                response.raise_for_status() # Raise an exception for HTTP errors
+                ocid_data = await response.json()
+                ocid = ocid_data.get('ocid')
+                if not ocid:
+                    logger.error(f"OCID not found for character: {character_name}")
                     return None
-                character_id = await response.json()
+        except aiohttp.ClientResponseError as e:
+            logger.error(f"Failed to fetch OCID for {character_name}: {e.status} - {e.message}")
+            return None
+        except aiohttp.ClientError as e:
+            logger.error(f"Network error fetching OCID for {character_name}: {e}")
+            return None
 
-            character_info = {}
-            for endpoint in API_ENDPOINTS.keys():
-                url = get_api_url(endpoint, characterId=character_id)
-                async with session.get(url, headers={"Authorization": f"Bearer {NEXON_API_KEY}"}) as response:
-                    if response.status != 200:
-                        logger.error(f"Failed to fetch {endpoint}: {response.status}")
-                        return None
-                    data = await response.json()
-                    character_info[endpoint] = data
+        character_info = {}
+        # 2. Get basic info using OCID
+        try:
+            basic_info_url = get_api_url("get_character_basic_info", ocid=ocid, date=today)
+            async with session.get(basic_info_url, headers=headers) as response:
+                response.raise_for_status()
+                character_info['basic_info'] = await response.json()
+        except aiohttp.ClientResponseError as e:
+            logger.error(f"Failed to fetch basic info for {character_name}: {e.status} - {e.message}")
+            return None
+        except aiohttp.ClientError as e:
+            logger.error(f"Network error fetching basic info for {character_name}: {e}")
+            return None
 
-            # 모든 정보 추출
-            extracted_info = all_info_extract(character_info)
+        # For now, only fetch basic info. Other endpoints can be added as needed.
+        # Example of fetching other info:
+        # try:
+        #     stat_info_url = get_api_url("get_character_stat_info", ocid=ocid, date=today)
+        #     async with session.get(stat_info_url, headers=headers) as response:
+        #         response.raise_for_status()
+        #         character_info['stat_info'] = await response.json()
+        # except aiohttp.ClientError as e:
+        #     logger.error(f"Failed to fetch stat info for {character_name}: {e}")
+        #     return None
 
-            # 캐시 저장
-            cache.set(cache_key, extracted_info, timeout=CACHE_DURATION.total_seconds())
-            return extracted_info
+        # Extract and process info (assuming extract.py functions are updated for new structure)
+        # For now, just return basic info directly
+        extracted_info = character_info['basic_info'] # Simplified for initial integration
 
-    return fetch_character_data
-
-
-
+        # Cache result
+        cache.set(cache_key, extracted_info, timeout=CACHE_DURATION.total_seconds())
+        return extracted_info

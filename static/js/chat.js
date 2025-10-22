@@ -97,50 +97,31 @@ function hideTypingIndicator() {
 /**
  * Get AI response based on user message
  */
-function getAIResponse(userMessage) {
-    const message = userMessage.toLowerCase();
-    
-    // Enhanced keyword responses
-    if (message.includes('메르세데스')) {
-        return "🏹 **메르세데스 정보**\n\n메르세데스는 궁수 계열 직업으로, 높은 기동성과 아름다운 스킬 이펙트가 특징입니다!\n\n**4차 스킬:**\n• 이슈타르의 링 - 주력 공격 스킬\n• 스피릿 인퓨전 - 데미지 증가\n• 고급 퀴버 - 화살 자동 충전\n• 레전드리 스피어 - 강력한 관통 공격\n\n**특징:**\n• 화려한 스킬 연계\n• 높은 기동성\n• 아름다운 이펙트\n\n궁수 직업 중에서도 가장 우아한 직업이에요! ✨";
+async function getAIResponse(userMessage) {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/chatbot/ask/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: userMessage })
+        });
+        const data = await response.json();
+        if (data.success) {
+            return data.response;
+        } else {
+            return "죄송하지만, AI 응답을 가져오는 데 실패했습니다. 다시 시도해주세요. 😥";
+        }
+    } catch (error) {
+        console.error('Error fetching AI response:', error);
+        return "네트워크 오류로 AI 응답을 가져올 수 없습니다. 인터넷 연결을 확인해주세요. 🌐";
     }
-    
-    if (message.includes('사냥터')) {
-        return "🗺️ **180레벨 신궁 추천 사냥터**\n\n**아케인리버 지역:**\n• 츄츄 아일랜드 - 코코넛 해변 ⭐⭐⭐⭐⭐\n• 츄츄 아일랜드 - 슬라임 언덕 ⭐⭐⭐⭐\n• 꿈의 도시 레헬른 - 꿈의 숲 ⭐⭐⭐⭐\n\n**기타 추천 지역:**\n• 라헬 - 사막 지역 ⭐⭐⭐\n• 루디브리엄 - 시계탑 상층부 ⭐⭐⭐\n\n**💡 팁:**\n경험치 효율과 메소 수급을 고려했을 때 츄츄 아일랜드를 강력 추천드려요! 아케인 심볼도 함께 얻을 수 있어서 일석이조랍니다! 🎯";
-    }
-    
-    if (message.includes('뇌전')) {
-        return "⚡ **뇌전 드랍 정보**\n\n뇌전은 고급 장비로, 다음 보스들에게서 드랍됩니다:\n\n**주요 드랍 보스:**\n• 자쿠무 (노말/카오스) - 높은 확률 ⭐⭐⭐⭐⭐\n• 혼테일 (노말/카오스) - 중간 확률 ⭐⭐⭐⭐\n• 피아누스 - 중간 확률 ⭐⭐⭐\n• 블러디 퀸 - 낮은 확률 ⭐⭐\n\n**드랍률 정보:**\n• 자쿠무에서 가장 높은 확률\n• 카오스 버전에서 더 높은 드랍률\n• 일일 보스 처치 시 누적 확률 증가\n\n**💡 꿀팁:**\n매일 자쿠무를 처치하면서 운을 시험해보세요! 보통 1-2주 내에는 얻을 수 있어요! 🎲";
-    }
-    
-    if (message.includes('보스')) {
-        return "👹 **레벨대별 추천 보스 가이드**\n\n**초보자 (120-150레벨):**\n• 자쿠무 (노말) - 경험치 ⭐⭐⭐\n• 혼테일 (노말) - 경험치 ⭐⭐⭐⭐\n• 매그너스 (이지) - 장비 ⭐⭐⭐\n\n**중급자 (150-200레벨):**\n• 피아누스 - 장비/메소 ⭐⭐⭐⭐\n• 반반 - 경험치 ⭐⭐⭐⭐\n• 카오스 자쿠무 - 장비 ⭐⭐⭐⭐\n\n**고급자 (200레벨 이상):**\n• 카오스 혼테일 - 고급 장비 ⭐⭐⭐⭐⭐\n• 하드 매그너스 - 최고급 장비 ⭐⭐⭐⭐⭐\n• 시그너스 - 스킬북/장비 ⭐⭐⭐⭐\n\n**⚠️ 주의사항:**\n본인의 레벨과 장비 수준에 맞는 보스를 선택하세요! 무리하면 오히려 효율이 떨어져요! 💪";
-    }
-    
-    if (message.includes('치장') || message.includes('핑크')) {
-        return "💗 **핑크색 치장 아이템 컬렉션**\n\n**헤어 스타일:**\n• 핑크 트윈테일 - 귀여운 매력 ✨\n• 러블리 핑크 헤어 - 달콤한 느낌 🍭\n• 분홍 포니테일 - 상큼한 스타일 🌸\n\n**얼굴 장식:**\n• 핑크 하트 안경 - 사랑스러운 포인트 💕\n• 러블리 블러셔 - 볼터치 효과 😊\n• 분홍 리본 - 깜찍한 액세서리 🎀\n\n**전신 의상:**\n• 핑크 원피스 세트 - 우아한 드레스 👗\n• 러블리 핑크 교복 - 학생 스타일 📚\n• 분홍 파티 드레스 - 화려한 파티룩 🎉\n\n**💡 구매 팁:**\n캐시샵에서 세트로 구매하면 더 저렴해요! 이벤트 기간을 노려보세요! ✨";
-    }
-    
-    if (message.includes('파편')) {
-        return "💥 **뒤엉킨 파편 원킬 공격력 가이드**\n\n**메르세데스 기준:**\n\n**필요 스탯:**\n• 최소 공격력: 약 50만\n• 권장 공격력: 70만 이상\n• 크리티컬 확률: 80% 이상\n• 크리티컬 데미지: 200% 이상\n\n**추천 스킬:**\n• 이슈타르의 링 (풀차지)\n• 스피릿 인퓨전 + 고급 퀴버\n• 레인보우 아치 연계\n\n**장비 세팅:**\n• 무기: 17성 이상 활\n• 방어구: 15성 이상 세트\n• 장신구: 고급 펜던트/반지\n\n**💡 실전 팁:**\n버프 스킬을 모두 사용한 후 이슈타르의 링 풀차지로 공격하면 높은 확률로 원킬 가능해요! 🎯";
-    }
-    
-    if (message.includes('스킬')) {
-        return "🎯 **스킬 관련 정보**\n\n어떤 직업의 스킬이 궁금하신가요?\n\n**인기 직업들:**\n• 메르세데스 - 궁수 계열\n• 듀얼블레이드 - 도적 계열  \n• 아란 - 전사 계열\n• 에반 - 마법사 계열\n• 제로 - 특수 계열\n\n구체적인 직업명을 말씀해주시면 더 자세한 스킬 정보를 알려드릴게요! ✨";
-    }
-    
-    if (message.includes('안녕') || message.includes('하이') || message.includes('hello')) {
-        return "안녕하세요! 👋 메이플스토리 정령이에요!\n\n저는 메이플스토리의 모든 정보를 알고 있답니다!\n\n**제가 도움드릴 수 있는 것들:**\n• 스킬 정보 및 가이드 🎯\n• 사냥터 추천 🗺️\n• 보스 공략법 ⚔️\n• 장비 정보 🛡️\n• 아이템 드랍 정보 💎\n\n궁금한 것이 있으시면 언제든 물어보세요! 😊";
-    }
-    
-    // Default response
-    return "안녕하세요! 🧚‍♀️ 메이플스토리 정령이에요!\n\n죄송하지만 해당 내용에 대한 정보를 찾지 못했어요. 😅\n\n**이런 것들을 물어보세요:**\n• \"메르세데스 스킬 알려줘\"\n• \"180렙 사냥터 추천해줘\"\n• \"뇌전 어디서 나와?\"\n• \"보스 추천해줘\"\n• \"핑크 치장 아이템 보여줘\"\n\n더 구체적으로 질문해주시면 정확한 답변을 드릴 수 있어요! ✨";
 }
 
 /**
  * Simulate AI response
  */
-function simulateResponse(userMessage) {
+async function simulateResponse(userMessage) {
     if (isTyping) return;
     
     isTyping = true;
@@ -148,10 +129,10 @@ function simulateResponse(userMessage) {
     
     const responseDelay = 1000 + Math.random() * 2000; // 1-3 seconds
     
-    setTimeout(() => {
+    setTimeout(async () => {
         hideTypingIndicator();
         
-        const response = getAIResponse(userMessage);
+        const response = await getAIResponse(userMessage);
         addMessage(response, false);
         
         // Save to chat history only if logged in
@@ -188,7 +169,7 @@ function simulateResponse(userMessage) {
 /**
  * Send message
  */
-function sendMainMessage() {
+async function sendMainMessage() {
     const input = document.getElementById('mainChatInput');
     const message = input.value.trim();
     const sendButton = document.getElementById('sendButton');
@@ -208,20 +189,18 @@ function sendMainMessage() {
     }
     
     // Simulate AI response
-    simulateResponse(message);
+    await simulateResponse(message);
     
     // Re-enable send button after response
-    setTimeout(() => {
-        if (sendButton) {
-            sendButton.disabled = false;
-        }
-    }, 3000);
+    if (sendButton) {
+        sendButton.disabled = false;
+    }
 }
 
 /**
  * Handle input events
  */
-function handleInput(event) {
+async function handleInput(event) {
     const input = event.target;
     const sendButton = document.getElementById('sendButton');
     
@@ -236,7 +215,7 @@ function handleInput(event) {
     // Handle Enter key
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
-        sendMainMessage();
+        await sendMainMessage();
     }
 }
 
@@ -368,7 +347,7 @@ function clearChatHistory() {
 /**
  * Handle pending search query from home page
  */
-function handlePendingQuery() {
+async function handlePendingQuery() {
     const pendingQuery = sessionStorage.getItem('pendingChatQuery');
     if (pendingQuery) {
         // Clear the stored query
@@ -378,14 +357,14 @@ function handlePendingQuery() {
         window.MapleStoryChatBot.showNotification(`"${pendingQuery}"에 대해 질문드릴게요!`, 'info', 2000);
         
         // Fill input and focus
-        setTimeout(() => {
+        setTimeout(async () => {
             const input = document.getElementById('mainChatInput');
             if (input) {
                 fillInput(pendingQuery);
                 
                 // Auto-send after a short delay for better UX
-                setTimeout(() => {
-                    sendMainMessage();
+                setTimeout(async () => {
+                    await sendMainMessage();
                 }, 1000);
             }
         }, 500);
@@ -430,6 +409,9 @@ function initializeChatPage() {
     handlePendingQuery();
     
     // Add context menu for clearing history
+    document.querySelector('.nav-profile-btn')?.addEventListener('click', () => {
+        window.MapleStoryChatBot.showProfilePopup();
+    });
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
         chatMessages.addEventListener('contextmenu', function(e) {
@@ -440,16 +422,3 @@ function initializeChatPage() {
         });
     }
 }
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeChatPage);
-
-// Export functions for global use
-window.ChatPage = {
-    sendMainMessage,
-    fillInput,
-    scrollToChat,
-    clearChatHistory,
-    addMessage,
-    simulateResponse
-};

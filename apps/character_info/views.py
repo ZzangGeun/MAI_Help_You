@@ -1,26 +1,22 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.http import JsonResponse
 import json
 import os
 from django.conf import settings
 from django.urls import reverse
-from .get_character_info import *
+from .get_character_info import get_character_data
 from .extract import *
 from django.core.cache import cache
 
-# async def character_info_view(request):
-#     return render(request, 'character_info/character_info.html')
-
-
-
 async def character_info_view(request):
-
     character_name = request.GET.get('character_name', None)
-    print(f"Character Name: {character_name}")  # 디버깅을 위한 출력
 
+    if not character_name:
+        return JsonResponse({'success': False, 'message': '캐릭터 이름을 입력해주세요.'}, status=400)
 
     character_info = await get_character_data(character_name)
-    if not character_info:
-        return render(request, 'character_info/character_info.html', {'error': '캐릭터 정보를 가져오는 데 실패했습니다.'})
 
-    
-
+    if character_info:
+        return JsonResponse({'success': True, 'data': character_info})
+    else:
+        return JsonResponse({'success': False, 'message': '캐릭터 정보를 찾을 수 없습니다.'}, status=404)
