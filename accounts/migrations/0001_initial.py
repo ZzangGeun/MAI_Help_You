@@ -29,23 +29,29 @@ class Migration(migrations.Migration):
                 (
                     "maple_nickname",
                     models.CharField(
-                        blank=True,
-                        max_length=50,
-                        null=True,
-                        verbose_name="메이플 캐릭터 닉네임",
+                        max_length=12, unique=True, verbose_name="메이플 닉네임"
                     ),
                 ),
                 (
-                    "nexon_api_key",
-                    models.CharField(blank=True, max_length=200, null=True),
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="생성일"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="수정일"),
                 ),
                 (
                     "user",
                     models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile",
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
+            options={
+                "verbose_name": "사용자 프로필",
+                "verbose_name_plural": "사용자 프로필들",
+            },
         ),
     ]

@@ -1,84 +1,66 @@
-from django.shortcuts import render
+import json
+import re
+
+
+# Django 내장 사용자 모델을 가져옵니다.
+from django.contrib.auth.models import User
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password, check_password
-from core.models import User as UserModel
-import json
-import logging
-import re
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import get_object_or_404
 
+from .models import UserProfile
+
+import logging
 logger = logging.getLogger(__name__)
 
-def signup_page(request):
-    """회원가입 페이지 뷰"""
-    return render(request, 'signup.html')
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def signup_api(request):
     """
-    회원가입 API
-    POST /signup/api/signup/
+    회원가입 API (Django 표준 User & UserProfile 사용)
+    POST /accounts/api/signup/
     """
     try:
+        # 데이터 파싱, 정리
         data = json.loads(request.body)
-        user_id = data.get('user_id','').strip()
-        email = data.get('email','').strip()
-        password = data.get('password','').strip()  # ⚠️ 중복 제거
-        nickname = data.get('nickname','').strip()
+        user_id = data.get('user_id', '').strip()
+        password = data.get('password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
 
-        # 전체 필수 입력 검증
-        if not all([user_id, password, email, nickname]):
-            return JsonResponse({
-                'error': '모든 필드를 채워주세요.',
-                'status': 'error'
-                 }, status=400)
+        nexon_api_key = data.get('nexon_api_key', '').strip()  # 선택사항
 
-        # 아이디 형식 검증
-        if not re.match(r'^[a-zA-Z0-9]{4,20}$', user_id):
-            return JsonResponse({
-                'error': '아이디는 4~20자의 영문 대소문자와 숫자만 사용할 수 있습니다.',
-                'status': 'error'
-                 }, status=400)
-
-        # 이메일 형식 검증
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-            return JsonResponse({
-                'error': '유효한 이메일 주소를 입력해주세요.',
-                'status': 'error'
-                 }, status=400)
+        # 유효성 검사
+        if not all ([user_id, password, confirm_password]):
+            return JsonResponse({'error': '필수 필드를 모두 채워주세요.'}, status=400)
         
-        # 비밀번호 길이 검증
+        if not re.match(r'^[a-zA-Z0-9_]{4,20}$', user_id):
+            return JsonResponse({'error': '아이디는 4~20자의 영문자, 숫자, 밑줄(_)만 사용할 수 있습니다.'}, status=400)
+        
         if len(password) < 8:
-            return JsonResponse({
-                'error': '비밀번호는 최소 8자 이상이어야 합니다.',
-                'status': 'error'
-                 }, status=400)
+            return JsonResponse({'error': '비밀번호는 최소 8자 이상이어야 합니다.'}, status=400)
         
-        # 중복 확인 - ⚠️ 필드명 수정
-        if UserModel.objects.filter(user_id=user_id).exists():  # id → user_id
-            return JsonResponse({
-                'error': '이미 존재하는 아이디입니다.',
-                'status': 'error'
-                 }, status=400)
+        if password != confirm_password:
+            return JsonResponse({'error': '비밀번호와 비밀번호 확인이 일치하지 않습니다.'}, status=400)
         
-        if UserModel.objects.filter(email=email).exists():
-            return JsonResponse({
-                'error': '이미 사용 중인 이메일입니다.',
-                'status': 'error'
-            }, status=400)
+        # 중복 검사
+        if User.objects.filter(username=user_id).exists():
+            return JsonResponse({'error': '이미 존재하는 아이디입니다.'}, status=400)
         
-        # 사용자 비밀번호 해싱
-        hashed_password = make_password(password)
 
-        # 사용자 생성 - ⚠️ 필드명 수정
-        user = UserModel.objects.create(
-            user_id=user_id,
-            password=hashed_password,
-            email=email,
-            nick_name=nickname,  # nickname → nick_name
-            nexon_api_key='',
+        # 사용자 생성
+        user = User.objects.create_user(
+            username=user_id, 
+            password=password, 
+        )
+        
+        # 5. UserProfile 생성 및 연결
+        UserProfile.objects.create(
+            user=user,
+            nexon_api_key=nexon_api_key if nexon_api_key else None
         )
 
         logger.info(f"새 사용자 생성: {user_id}")
@@ -86,77 +68,99 @@ def signup_api(request):
         return JsonResponse({
             'message': '회원가입이 완료되었습니다.',
             'user': {
-                'user_id': user.user_id,
-                'nickname': user.nick_name,
-                'email': user.email
+                'user_id': user.username,
             },
             'status': 'success'
         }, status=201)
     
     except json.JSONDecodeError:
-        return JsonResponse({
-            'error': '잘못된 JSON 형식입니다.',
-            'status': 'error'
-        }, status=400)
+        return JsonResponse({'error': '잘못된 JSON 형식입니다.', 'status': 'error'}, status=400)
     
     except Exception as e:
         logger.error(f"회원가입 오류: {e}")
-        return JsonResponse({
-            'error': '회원가입 중 오류가 발생했습니다.',
-            'status': 'error'
-        }, status=500)
-
+        return JsonResponse({'error': '회원가입 중 서버 오류가 발생했습니다.', 'status': 'error'}, status=500)
+    
 @csrf_exempt
 @require_http_methods(["POST"])
 def login_api(request):
     """
-    로그인 API
+    로그인 API (Django 표준 User 사용)
     POST /accounts/api/login/
     """
     try:
+        # 1. 요청 데이터 파싱 (JSON 형식으로 변경해야 함)
+        # 회원가입과 마찬가지로, 프론트엔드는 JSON을 보낼 가능성이 높습니다.
         data = json.loads(request.body)
-        user_id = data.get('user_id')
-        password = data.get('password')
+        user_id = data.get('user_id', '').strip()
+        password = data.get('password', '').strip()
 
         if not user_id or not password:
+            return JsonResponse({'error': '아이디와 비밀번호를 모두 입력해주세요.'}, status=400)
+
+        # 2. 사용자 인증 (Authenticate)
+        # DB에 저장된 암호화된 비밀번호와 입력된 비밀번호를 비교하여 User 객체를 반환하거나 None 반환
+        user = authenticate(request, username=user_id, password=password)
+
+        if user is not None:
+            # 3. 인증 성공: 세션 생성 및 유지 (Login)
+            # request 객체에 사용자 정보를 담아 세션을 시작합니다.
+            login(request, user)
+            
+            # 4. UserProfile에서 메이플 닉네임 가져오기
+            try:
+                profile = get_object_or_404(UserProfile, user=user)
+                maple_nickname = profile.maple_nickname
+            except:
+                # UserProfile이 없을 경우 (예외 처리)
+                maple_nickname = None 
+
+            logger.info(f"로그인 성공: {user_id}")
+
             return JsonResponse({
-                'error': '사용자 ID와 비밀번호를 입력해주세요.',
-                'status': 'error'
-            }, status=400)
-
-        # 사용자 찾기
-        try:
-            user = UserModel.objects.get(user_id=user_id)
-        except UserModel.DoesNotExist:
-            return JsonResponse({
-                'error': '존재하지 않는 아이디입니다.',
-                'status': 'error'
-            }, status=404)
-
-        # 비밀번호 확인
-        if not check_password(password, user.password):
-            return JsonResponse({
-                'error': '비밀번호가 일치하지 않습니다.',
-                'status': 'error'
-            }, status=400)
-
-        # TODO: JWT 토큰 생성 및 세션 처리
-        
-        logger.info(f"사용자 로그인 성공: {user_id}")
-
-        return JsonResponse({
-            'message': '로그인 성공',
-            'token': f'jwt_token_for_{user_id}',  # 임시 토큰
-            'user': {
-                'user_id': user.user_id,
-                'nickname': user.nick_name,
-                'email': user.email,
-            },
-            'status': 'success'
-        }, status=200)
+                'message': f'{user_id}님, 환영합니다!',
+                'user': {
+                    'user_id': user.username,
+                    'email': user.email,
+                    'maple_nickname': maple_nickname,
+                },
+                'status': 'success'
+            }, status=200)
+            
+        else:
+            # 5. 인증 실패
+            return JsonResponse({'error': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=401)
 
     except json.JSONDecodeError:
-        return JsonResponse({'error': '잘못된 JSON 형식입니다.', 'status': 'error'}, status=400)
+        return JsonResponse({'error': '잘못된 JSON 형식입니다.'}, status=400)
     except Exception as e:
         logger.error(f"로그인 오류: {e}")
-        return JsonResponse({'error': f'로그인 중 오류가 발생했습니다: {str(e)}', 'status': 'error'}, status=500)
+        return JsonResponse({'error': '로그인 중 서버 오류가 발생했습니다.'}, status=500)
+
+    
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def logout_api(request):
+    """
+    로그아웃 API
+    POST /accounts/api/logout/
+    """
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': '로그인 상태가 아닙니다.'}, status=401)
+        
+        user_id = request.user.username
+        
+        # 세션 삭제 및 로그아웃 처리
+        logout(request)
+        
+        logger.info(f"로그아웃 성공: {user_id}")
+        
+        return JsonResponse({
+            'message': '로그아웃되었습니다.',
+            'status': 'success'
+        }, status=200)
+    
+    except Exception as e:
+        logger.error(f"로그아웃 오류: {e}")
+        return JsonResponse({'error': '로그아웃 중 서버 오류가 발생했습니다.'}, status=500)

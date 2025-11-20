@@ -3,8 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 import json
-from .chat_session import ChatSessionManager
-from .models import ChatSession, ChatMessage
+# from .chat_session import ChatSessionManager
+# from .models import ChatSession, ChatMessage
 
 @csrf_exempt
 @require_POST
