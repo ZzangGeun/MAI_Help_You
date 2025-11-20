@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Django
 Django==5.1.7
 python-decouple==3.8
@@ -42,3 +43,48 @@ drf-spectacular==0.27.0  # API 문서화
 # Development
 pytest==7.4.3
 pytest-django==4.7.0 
+=======
+# Django
+Django==5.1.7
+python-decouple==3.8
+django-debug-toolbar==4.2.0  # 개발 환경용 (선택사항)
+
+# FastAPI
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# AI/ML
+torch==2.3
+transformers
+peft==0.7.1
+accelerate==0.25.0
+bitsandbytes==0.41.3
+numpy<2.0.0
+
+
+# LangChain + Postgres (pgvector)
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-postgres>=0.0.6
+sentence-transformers>=2.2.2
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
+
+# HTTP Requests
+requests==2.31.0
+httpx==0.25.2
+
+# Environment
+python-dotenv==1.0.0
+
+# Django REST Framework
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+drf-spectacular==0.27.0  # API 문서화
+
+# Development
+pytest==7.4.3
+pytest-django==4.7.0 
+>>>>>>> feature/chatbot
