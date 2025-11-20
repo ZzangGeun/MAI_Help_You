@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAI - 메이플스토리 정보탐색 CHAT BOT</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/common.css">
-    <link rel="stylesheet" href="../static/css/home.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
 <body>
 
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="main_page.html" class="logo">
+            <a href="{% url 'main_page:main_page' %}" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -24,23 +25,23 @@
     <nav class="navigation">
         <div class="nav-content">
             <div class="nav-left">
-                <a href="main_page.html" class="nav-item active">홈</a>
-                <a href="chatbot_page.html" class="nav-item">CHAT BOT</a>
-                <a href="#" class="nav-item">캐릭터 검색</a>
-                <a href="#" class="nav-item">큐브</a>
-                <a href="#" class="nav-item">스타포스</a>
-                <a href="#" class="nav-item">(API 연동)</a>
+                <a href="{% url 'main_page:main_page' %}" class="nav-item active">홈</a>
+                <a href="{% url 'main_page:chatbot_page' %}" class="nav-item">CHAT BOT</a>
+                <a href="{% url 'character_info:character_search' %}" class="nav-item">캐릭터 검색</a>
+                <a href="#cube" class="nav-item">큐브</a>
+                <a href="#starforce" class="nav-item">스타포스</a>
+                <a href="#api-integration" class="nav-item">(API 연동)</a> <!-- TODO: Update with actual API integration page URL -->
             </div>
-            <div class="nav-right">
-                <!-- Login Button (shown when not logged in) -->
-                <div class="nav-login-section" id="navLoginSection">
-                    <button class="nav-login-btn" onclick="console.log('Login button clicked'); showLoginPopup();">로그인</button>
+                            <div class="nav-right">
+                                <button class="theme-toggle-btn" id="themeToggleBtn">🌙</button>
+                                <!-- Login Button (shown when not logged in) -->                <div class="nav-login-section" id="navLoginSection">
+                    <button class="nav-login-btn">로그인</button>
                 </div>
                 <!-- User Profile (shown when logged in) -->
                 <div class="nav-user-profile hidden" id="navUserProfile">
                     <span class="nav-user-name" id="navLoggedInUser">사용자</span>
-                    <button class="nav-profile-btn" onclick="showAccountPopup()">프로필</button>
-                    <button class="nav-logout-btn" onclick="performLogout()">로그아웃</button>
+                    <button class="nav-profile-btn">프로필</button>
+                    <button class="nav-logout-btn">로그아웃</button>
                 </div>
             </div>
         </div>
@@ -53,7 +54,7 @@
             <div class="side-ad-content">
                 <div class="ad-rotation">
                     <div class="ad-item">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%234285f4'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 A%3C/text%3E%3C/svg%3E" alt="Advertisement A">
+                        <img src="{% static 'img/ad_placeholder_a.png' %}" alt="Advertisement A"> <!-- TODO: Replace with dynamic ad image -->
                     </div>
                 </div>
             </div>
@@ -100,7 +101,7 @@
             <div class="character-search-card">
                     <div class="search-input-group">
                         <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
-                        <button class="character-search-btn" onclick="searchAndDisplayCharacter()">
+                        <button class="character-search-btn">
                             <span>검색</span>
                         </button>
                     </div>
@@ -108,9 +109,6 @@
                     <div class="search-recent" id="recentSearches">
                         <div class="search-recent-title">최근 검색</div>
                         <div class="search-recent-list" id="recentSearchList">
-                            <span class="search-recent-item" onclick="searchFromRecent('오지환')">오지환</span>
-                            <span class="search-recent-item" onclick="searchFromRecent('메이플유저')">메이플유저</span>
-                            <span class="search-recent-item" onclick="searchFromRecent('초보자123')">초보자123</span>
                         </div>
                     </div>
             </div>
@@ -129,7 +127,7 @@
             <div class="main-search-container">
                 <div class="main-search-box">
                     <input type="text" class="main-search-input" id="mainSearchInput" placeholder="메이플스토리에 관해 무엇이든 물어보세요...">
-                    <button class="main-search-btn" onclick="performMainSearch()">
+                    <button class="main-search-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
@@ -142,11 +140,11 @@
                 <div class="search-hint-title">💡 위 검색창에서 바로 질문해보세요!</div>
                 <div class="search-hint-text">질문하면 ChatBot 페이지로 이동하면서 자동으로 질문이 전송됩니다</div>
                 <div class="search-examples">
-                    <span class="search-example" onclick="searchExample('메르세데스 스킬 알려줘')">메르세데스 스킬 알려줘</span>
-                    <span class="search-example" onclick="searchExample('180렙 사냥터 추천')">180렙 사냥터 추천</span>
-                    <span class="search-example" onclick="searchExample('뇌전 드랍 장소')">뇌전 드랍 장소</span>
-                    <span class="search-example" onclick="searchExample('보스 공략법')">보스 공략법</span>
-                </div>
+                    <span class="search-example">메르세데스 스킬 알려줘</span>
+                    <span class="search-example">180렙 사냥터 추천</span>
+                    <span class="search-example">뇌전 드랍 장소</span>
+                    <span class="search-example">보스 공략법</span>
+                </div> <!-- TODO: These example questions could be made dynamic by fetching from an API or Django context. -->
             </div>
 
 
@@ -166,6 +164,22 @@
                 </div>
                 <div class="ad-button">자세히 보기 →</div>
             </div>
+
+            <!-- Equipment Window -->
+            <div class="equipment-window hidden" id="equipmentWindow">
+                <div class="equipment-header">
+                    <span class="equipment-title">내 캐릭터</span>
+                </div>
+                <div class="equipment-content">
+                    <div class="character-preview">
+                        <div class="character-image-large">🧍</div>
+                        <div class="character-name-overlay" id="equipmentCharacterName">캐릭터</div>
+                    </div>
+                </div>
+                <div class="equipment-footer">
+                    <button class="details-btn">상세보기</button>
+                </div>
+            </div>
         </aside>
 
         <!-- Right Advertisement Banner -->
@@ -173,7 +187,7 @@
             <div class="side-ad-content">
                 <div class="ad-rotation">
                     <div class="ad-item">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='600' viewBox='0 0 160 600'%3E%3Crect width='160' height='600' fill='%2334a853'/%3E%3Ctext x='80' y='300' text-anchor='middle' fill='white' font-size='18' font-weight='bold'%3E광고 B%3C/text%3E%3C/svg%3E" alt="Advertisement B">
+                        <img src="{% static 'img/ad_placeholder_b.png' %}" alt="Advertisement B"> <!-- TODO: Replace with dynamic ad image -->
                     </div>
                 </div>
             </div>
@@ -187,8 +201,8 @@
             <div class="section-header event-header">
                 🎯 EVENT
                 <div class="nav-arrows">
-                    <button class="nav-arrow" onclick="changeEvent(-1)">◀</button>
-                    <button class="nav-arrow" onclick="changeEvent(1)">▶</button>
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
@@ -206,8 +220,8 @@
             <div class="section-header cash-header">
                 💎 CASH SHOP
                 <div class="nav-arrows">
-                    <button class="nav-arrow" onclick="changeCashItem(-1)">◀</button>
-                    <button class="nav-arrow" onclick="changeCashItem(1)">▶</button>
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
@@ -227,76 +241,7 @@
             </div>
             <div class="section-content">
                 <div class="ranking-scroll-container">
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-1">1</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">오징어괴물</div>
-                            <div class="ranking-details">루나 · Lv.299</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-2">2</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">안녕하세요</div>
-                            <div class="ranking-details">스카니아 · Lv.299</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-3">3</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">오징어물괴</div>
-                            <div class="ranking-details">베라 · Lv.298</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">4</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">메이플러버</div>
-                            <div class="ranking-details">크로아 · Lv.298</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">5</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최강전사</div>
-                            <div class="ranking-details">유니온 · Lv.297</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">6</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">파이터킹</div>
-                            <div class="ranking-details">엘리시움 · Lv.297</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">7</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">던전마스터</div>
-                            <div class="ranking-details">아케인 · Lv.296</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">8</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">마법사왕</div>
-                            <div class="ranking-details">노바 · Lv.296</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">9</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">궁수전설</div>
-                            <div class="ranking-details">제니스 · Lv.295</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">10</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">도적황제</div>
-                            <div class="ranking-details">오로라 · Lv.295</div>
-                        </div>
-                    </div>
+                    <!-- 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
@@ -308,374 +253,17 @@
             </div>
             <div class="section-content">
                 <div class="ranking-scroll-container">
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-1">1</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">전설의파워</div>
-                            <div class="ranking-details">루나 · 25억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-2">2</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최강무자비</div>
-                            <div class="ranking-details">스카니아 · 24억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge top-3">3</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">파워킹덤</div>
-                            <div class="ranking-details">베라 · 23억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">4</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">무적전사</div>
-                            <div class="ranking-details">크로아 · 22억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">5</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">데미지킹</div>
-                            <div class="ranking-details">유니온 · 21억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">6</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">폭딜마스터</div>
-                            <div class="ranking-details">엘리시움 · 20억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">7</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">극딜전문가</div>
-                            <div class="ranking-details">아케인 · 19억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">8</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">원펀치맨</div>
-                            <div class="ranking-details">노바 · 18억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">9</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">절대강자</div>
-                            <div class="ranking-details">제니스 · 17억</div>
-                        </div>
-                    </div>
-                    <div class="ranking-item-modern">
-                        <div class="ranking-badge other">10</div>
-                        <div class="ranking-player-info">
-                            <div class="ranking-name">최종병기</div>
-                            <div class="ranking-details">오로라 · 16억</div>
-                        </div>
-                    </div>
+                    <!-- 전투력 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Profile Popup Modal -->
-    <div class="profile-popup-overlay hidden" id="profilePopupOverlay">
-        <div class="profile-popup-modal" id="profilePopupModal">
-            <div class="profile-popup-header">
-                <h3>사용자 프로필</h3>
-                <button class="profile-popup-close" onclick="hideProfilePopup()">×</button>
-            </div>
-            <div class="profile-popup-content">
-                <div class="profile-popup-avatar">👤</div>
-                <div class="profile-popup-info">
-                    <div class="profile-popup-name" id="profilePopupName">사용자</div>
-                    <div class="profile-popup-status">온라인</div>
-                </div>
-                <div class="profile-popup-details">
-                    <div class="profile-detail-row">
-                        <span class="profile-detail-label">로그인 시간</span>
-                        <span class="profile-detail-value" id="profileLoginTime">방금 전</span>
-                    </div>
-                    <div class="profile-detail-row">
-                        <span class="profile-detail-label">세션 시간</span>
-                        <span class="profile-detail-value" id="profileSessionTime">0분</span>
-                    </div>
-                </div>
-                <div class="profile-popup-actions">
-                    <button class="profile-action-btn" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include '_profile_popup.html' %}
+    {% include '_login_popup.html' %}
+    {% include '_account_popup.html' %}
 
-    <!-- Login Popup Modal -->
-    <div class="login-popup-overlay hidden" id="loginPopupOverlay">
-        <div class="login-popup-modal" id="loginPopupModal">
-            <div class="login-popup-header">
-                <h3>로그인</h3>
-                <button class="login-popup-close" onclick="hideLoginPopup()">×</button>
-            </div>
-            <div class="login-popup-content">
-                <div class="login-popup-form">
-                    <div class="login-input-group">
-                        <label for="popupUsernameInput">아이디</label>
-                        <input type="text" class="login-popup-input" id="popupUsernameInput" placeholder="아이디를 입력하세요">
-                    </div>
-                    <div class="login-input-group">
-                        <label for="popupPasswordInput">비밀번호</label>
-                        <input type="password" class="login-popup-input" id="popupPasswordInput" placeholder="비밀번호를 입력하세요">
-                    </div>
-                    <div class="login-popup-options">
-                        <label class="login-checkbox">
-                            <input type="checkbox" id="rememberMe">
-                            <span>로그인 상태 유지</span>
-                        </label>
-                    </div>
-                    <button class="login-popup-btn" onclick="performPopupLogin()">로그인</button>
-                    <div class="login-popup-links">
-                        <a href="#" class="login-link">비밀번호 찾기</a>
-                        <span>|</span>
-                        <a href="#" class="login-link">회원가입</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Account Profile Popup Modal -->
-    <div class="account-popup-overlay hidden" id="accountPopupOverlay">
-        <div class="account-popup-modal" id="accountPopupModal">
-            <div class="account-popup-header">
-                <h3>내 계정</h3>
-                <button class="account-popup-close" onclick="hideAccountPopup()">×</button>
-            </div>
-            <div class="account-popup-content">
-                <div class="account-section">
-                    <div class="account-avatar">👤</div>
-                    <div class="account-info">
-                        <div class="account-name" id="accountName">사용자</div>
-                        <div class="account-email">user@example.com</div>
-                        <div class="account-status">온라인</div>
-                    </div>
-                </div>
-                <div class="account-details">
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">가입일</span>
-                        <span class="account-detail-value">2024년 1월 15일</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">최근 로그인</span>
-                        <span class="account-detail-value" id="accountLastLogin">방금 전</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">총 접속 시간</span>
-                        <span class="account-detail-value">24시간 30분</span>
-                    </div>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label">검색 기록</span>
-                        <span class="account-detail-value">157회</span>
-                    </div>
-                </div>
-                <div class="account-actions">
-                    <button class="account-action-btn primary">설정 변경</button>
-                    <button class="account-action-btn secondary" onclick="performLogout()">로그아웃</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="../static/js/common.js"></script>
-    <script>
-        // Search example function
-        function searchExample(query) {
-            const mainSearchInput = document.getElementById('mainSearchInput');
-            if (mainSearchInput) {
-                mainSearchInput.value = query;
-                // Trigger main search
-                if (window.performMainSearch) {
-                    window.performMainSearch();
-                } else {
-                    // Fallback to redirect
-                    sessionStorage.setItem('pendingChatQuery', query);
-                    window.location.href = 'chatbot_page.html';
-                }
-            }
-        }
-
-        // Advertisement banner click handler
-        function openAdBanner(type) {
-            if (type === 'update') {
-                window.MapleStoryChatBot.showNotification('메이플스토리 신규 업데이트 정보를 확인하세요! 🎮', 'info', 3000);
-                // 실제로는 업데이트 페이지로 이동하거나 모달을 띄울 수 있음
-                setTimeout(() => {
-                    window.open('https://maplestory.nexon.com', '_blank');
-                }, 1000);
-            } else if (type === 'event') {
-                window.MapleStoryChatBot.showNotification('윈터 이벤트에 참여해보세요! ❄️', 'success', 3000);
-                // 실제로는 이벤트 페이지로 이동
-                setTimeout(() => {
-                    window.open('https://maplestory.nexon.com/Event', '_blank');
-                }, 1000);
-            }
-        }
-
-        // Carousel functionality
-        let currentEventIndex = 0;
-        let currentCashIndex = 0;
-
-        function nextEvent() {
-            const eventItems = document.getElementById('eventItems');
-            if (eventItems) {
-                const totalItems = eventItems.children.length;
-                currentEventIndex = (currentEventIndex + 1) % totalItems;
-                eventItems.style.transform = `translateX(-${currentEventIndex * 100}%)`;
-            }
-        }
-
-        function prevEvent() {
-            const eventItems = document.getElementById('eventItems');
-            if (eventItems) {
-                const totalItems = eventItems.children.length;
-                currentEventIndex = (currentEventIndex - 1 + totalItems) % totalItems;
-                eventItems.style.transform = `translateX(-${currentEventIndex * 100}%)`;
-            }
-        }
-
-        function nextCash() {
-            const cashItems = document.getElementById('cashItems');
-            if (cashItems) {
-                const totalItems = cashItems.children.length;
-                currentCashIndex = (currentCashIndex + 1) % totalItems;
-                cashItems.style.transform = `translateX(-${currentCashIndex * 100}%)`;
-            }
-        }
-
-        function prevCash() {
-            const cashItems = document.getElementById('cashItems');
-            if (cashItems) {
-                const totalItems = cashItems.children.length;
-                currentCashIndex = (currentCashIndex - 1 + totalItems) % totalItems;
-                cashItems.style.transform = `translateX(-${currentCashIndex * 100}%)`;
-            }
-        }
-
-        // Home page specific JavaScript
-        function changeMascotMessage() {
-            const bubbleText = document.querySelector('.bubble-text');
-            if (bubbleText) {
-                const messages = [
-                    '아무거나 물어봐욤!',
-                    '메이플스토리가 궁금해?',
-                    '스킬이나 사냥터 알려줄게!',
-                    '뭐든 물어보세요~ ✨',
-                    '보스 공략법도 알려드려요!',
-                    '캐릭터 육성 팁이 궁금하시나요?'
-                ];
-                
-                const currentText = bubbleText.textContent.trim();
-                let currentIndex = messages.indexOf(currentText);
-                let nextIndex = currentIndex !== -1 ? (currentIndex + 1) % messages.length : Math.floor(Math.random() * messages.length);
-                
-                bubbleText.textContent = messages[nextIndex];
-                
-                const mascotElement = document.querySelector('.mascot');
-                if (mascotElement) {
-                    mascotElement.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        mascotElement.style.transform = 'scale(1)';
-                    }, 150);
-                }
-            }
-        }
-
-        // Profile Popup Functions
-        function showProfilePopup() {
-            const loginData = window.MapleStoryChatBot.loadFromStorage('loginState');
-            if (!loginData || !loginData.isLoggedIn) {
-                window.MapleStoryChatBot.showNotification('로그인이 필요합니다.', 'warning');
-                return;
-            }
-            
-            const overlay = document.getElementById('profilePopupOverlay');
-            const nameElement = document.getElementById('profilePopupName');
-            const loginTimeElement = document.getElementById('profileLoginTime');
-            
-            if (overlay) {
-                // Update profile info
-                if (nameElement) nameElement.textContent = loginData.username;
-                if (loginTimeElement) {
-                    const loginTime = new Date(loginData.loginTime);
-                    const timeDiff = new Date() - loginTime;
-                    const minutes = Math.floor(timeDiff / (1000 * 60));
-                    if (minutes < 1) {
-                        loginTimeElement.textContent = '방금 전';
-                    } else if (minutes < 60) {
-                        loginTimeElement.textContent = `${minutes}분 전`;
-                    } else {
-                        const hours = Math.floor(minutes / 60);
-                        loginTimeElement.textContent = `${hours}시간 전`;
-                    }
-                }
-                
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function hideProfilePopup() {
-            const overlay = document.getElementById('profilePopupOverlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        // Keyboard event listeners
-        document.addEventListener('keydown', function(e) {
-            // ESC key to hide profile popup
-            if (e.key === 'Escape') {
-                hideProfilePopup();
-            }
-        });
-
-        // Click outside to close popup
-        document.addEventListener('click', function(e) {
-            const overlay = document.getElementById('profilePopupOverlay');
-            const modal = document.getElementById('profilePopupModal');
-            if (overlay && !overlay.classList.contains('hidden') && 
-                !modal.contains(e.target)) {
-                hideProfilePopup();
-            }
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setActiveNavItem('홈');
-            
-            const mascot = document.querySelector('.mascot');
-            if (mascot) {
-                mascot.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    changeMascotMessage();
-                });
-            }
-
-            setInterval(changeMascotMessage, 10000);
-            
-            // Auto-rotate carousels
-            setInterval(() => {
-                if (Math.random() > 0.5) {
-                    nextEvent();
-                } else {
-                    nextCash();
-                }
-            }, 5000);
-        });
-    </script>
+    <script src="{% static 'js/common.js' %}" defer></script>
+    <script src="{% static 'js/home.js' %}" defer></script>
 </body>
 </html>
