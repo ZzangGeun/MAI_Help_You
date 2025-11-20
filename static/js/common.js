@@ -86,7 +86,7 @@ function redirectToChatWithQuery(query) {
     
     // Redirect after a short delay for better UX
     setTimeout(() => {
-        window.location.href = 'chatbot_page.html';
+        window.location.href = '/chatbot/';
     }, 500);
 }
 
@@ -386,6 +386,8 @@ function updateLoginUI(loginData) {
     
     // Chat page specific elements
     const chatHistoryContainer = document.getElementById('chatHistoryContainer');
+    const equipmentWindow = document.getElementById('equipmentWindow');
+    const equipmentCharacterName = document.getElementById('equipmentCharacterName');
     
     if (loginData && loginData.isLoggedIn) {
         // User is logged in
@@ -401,6 +403,14 @@ function updateLoginUI(loginData) {
         if (chatHistoryContainer) {
             chatHistoryContainer.classList.remove('hidden');
         }
+
+        // Show equipment window on home page
+        if (equipmentWindow) {
+            equipmentWindow.classList.remove('hidden');
+            if (equipmentCharacterName) {
+                equipmentCharacterName.textContent = loginData.username;
+            }
+        }
         
     } else {
         // User is not logged in
@@ -412,6 +422,11 @@ function updateLoginUI(loginData) {
         // Hide chat history
         if (chatHistoryContainer) {
             chatHistoryContainer.classList.add('hidden');
+        }
+
+        // Hide equipment window
+        if (equipmentWindow) {
+            equipmentWindow.classList.add('hidden');
         }
     }
 }
@@ -553,44 +568,57 @@ function hideAccountPopup() {
     }
 }
 
-// Keyboard event listeners for popups
-document.addEventListener('keydown', function(e) {
-    // ESC key to hide popups
-    if (e.key === 'Escape') {
-        hideLoginPopup();
-        hideAccountPopup();
+/**
+ * Show profile popup
+ */
+function showProfilePopup() {
+    const loginData = loadFromStorage('loginState');
+    if (!loginData || !loginData.isLoggedIn) {
+        showNotification('로그인이 필요합니다.', 'warning');
+        return;
     }
     
-    // Enter key in login popup to submit
-    const loginOverlay = document.getElementById('loginPopupOverlay');
-    if (loginOverlay && !loginOverlay.classList.contains('hidden') && e.key === 'Enter') {
-        performPopupLogin();
+    const overlay = document.getElementById('profilePopupOverlay');
+    const nameElement = document.getElementById('profilePopupName');
+    const loginTimeElement = document.getElementById('profileLoginTime');
+    
+    if (overlay) {
+        // Update profile info
+        if (nameElement) nameElement.textContent = loginData.username;
+        if (loginTimeElement) {
+            const loginTime = new Date(loginData.loginTime);
+            const timeDiff = new Date() - loginTime;
+            const minutes = Math.floor(timeDiff / (1000 * 60));
+            if (minutes < 1) {
+                loginTimeElement.textContent = '방금 전';
+            } else if (minutes < 60) {
+                loginTimeElement.textContent = `${minutes}분 전`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                loginTimeElement.textContent = `${hours}시간 전`;
+            }
+        }
+        
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
-});
+}
 
-// Click outside to close popups
-document.addEventListener('click', function(e) {
-    // Login popup
-    const loginOverlay = document.getElementById('loginPopupOverlay');
-    const loginModal = document.getElementById('loginPopupModal');
-    if (loginOverlay && !loginOverlay.classList.contains('hidden') && 
-        !loginModal.contains(e.target)) {
-        hideLoginPopup();
+/**
+ * Hide profile popup
+ */
+function hideProfilePopup() {
+    const overlay = document.getElementById('profilePopupOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto';
     }
-    
-    // Account popup
-    const accountOverlay = document.getElementById('accountPopupOverlay');
-    const accountModal = document.getElementById('accountPopupModal');
-    if (accountOverlay && !accountOverlay.classList.contains('hidden') && 
-        !accountModal.contains(e.target)) {
-        hideAccountPopup();
-    }
-});
+}
 
 /**
  * Character search functionality
  */
-function searchCharacter(characterName) {
+async function searchCharacter(characterName) {
     const searchInput = document.getElementById('characterSearchInput');
     
     // Use provided name or get from input
@@ -610,31 +638,34 @@ function searchCharacter(characterName) {
     
     showLoading(`${name} 캐릭터 검색 중...`);
     
-    // Simulate API call
-    setTimeout(() => {
-        // Add to recent searches
+    const characterData = await fetchCharacterData(name);
+    
+    // Add to recent searches only if data is successfully fetched
+    if (characterData) {
         addToRecentSearches(name);
-        
-        // Enable search button
-        if (searchBtn) {
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = '<span>검색</span>';
-        }
-        
-        hideLoading();
         showNotification(`${name} 캐릭터 정보를 찾았습니다!`, 'success');
-        
-        // Clear input
-        if (searchInput && !characterName) {
-            searchInput.value = '';
-        }
-    }, 1500);
+    } else {
+        showNotification(`${name} 캐릭터 정보를 찾을 수 없습니다.`, 'error');
+    }
+    
+    // Enable search button
+    if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<span>검색</span>';
+    }
+    
+    hideLoading();
+    
+    // Clear input
+    if (searchInput && !characterName) {
+        searchInput.value = '';
+    }
 }
 
 /**
  * Search and display character info in right sidebar
  */
-function searchAndDisplayCharacter(characterName) {
+async function searchAndDisplayCharacter(characterName) {
     const searchInput = document.getElementById('characterSearchInput');
     
     // Use provided name or get from input
@@ -654,31 +685,29 @@ function searchAndDisplayCharacter(characterName) {
     
     showLoading(`${name} 캐릭터 검색 중...`);
     
-    // Simulate API call
-    setTimeout(() => {
-        // Add to recent searches
+    const characterData = await fetchCharacterData(name);
+    
+    // Add to recent searches only if data is successfully fetched
+    if (characterData) {
         addToRecentSearches(name);
-        
-        // Generate mock character data
-        const mockCharacterData = generateMockCharacterData(name);
-        
-        // Display character info
-        displayCharacterInfo(mockCharacterData);
-        
-        // Enable search button
-        if (searchBtn) {
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = '<span>검색</span>';
-        }
-        
-        hideLoading();
+        displayCharacterInfo(characterData);
         showNotification(`${name} 캐릭터 정보를 찾았습니다!`, 'success');
-        
-        // Clear input
-        if (searchInput && !characterName) {
-            searchInput.value = '';
-        }
-    }, 1500);
+    } else {
+        showNotification(`${name} 캐릭터 정보를 찾을 수 없습니다.`, 'error');
+    }
+    
+    // Enable search button
+    if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<span>검색</span>';
+    }
+    
+    hideLoading();
+    
+    // Clear input
+    if (searchInput && !characterName) {
+        searchInput.value = '';
+    }
 }
 
 /**
@@ -705,19 +734,21 @@ function searchFromRecent(characterName) {
 /**
  * Generate mock character data
  */
-function generateMockCharacterData(name) {
-    const servers = ['루나', '스카니아', '베라', '크로아', '유니온', '엘리시움'];
-    const jobs = ['키네시스', '아델', '카인', '라라', '제로', '메르세데스', '팬텀', '루미너스', '미하일'];
-    
-    return {
-        name: name,
-        server: servers[Math.floor(Math.random() * servers.length)],
-        level: Math.floor(Math.random() * 50) + 250, // 250-299
-        job: jobs[Math.floor(Math.random() * jobs.length)],
-        fame: Math.floor(Math.random() * 50000) + 10000, // 10k-60k
-        power: Math.floor(Math.random() * 30) + 15, // 15억-45억
-        unionLevel: Math.floor(Math.random() * 3000) + 6000 // 6k-9k
-    };
+async function fetchCharacterData(name) {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/character_info/search/?character_name=${encodeURIComponent(name)}`);
+        const data = await response.json();
+        if (data.success) {
+            return data.data;
+        } else {
+            showNotification(`캐릭터 정보를 가져오는 데 실패했습니다: ${data.message || '알 수 없는 오류'}`, 'error');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        showNotification('네트워크 오류로 캐릭터 정보를 가져올 수 없습니다.', 'error');
+        return null;
+    }
 }
 
 /**
@@ -736,16 +767,27 @@ function displayCharacterInfo(data) {
     const powerElement = document.getElementById('displayCharacterPower');
     const unionElement = document.getElementById('displayUnionLevel');
     
-    if (nameElement) nameElement.textContent = data.name;
-    if (serverElement) serverElement.textContent = data.server;
-    if (levelElement) levelElement.textContent = data.level;
-    if (jobElement) jobElement.textContent = data.job;
-    if (fameElement) fameElement.textContent = data.fame.toLocaleString();
-    if (powerElement) powerElement.textContent = `${data.power}억`;
-    if (unionElement) unionElement.textContent = data.unionLevel.toLocaleString();
+    if (nameElement) nameElement.textContent = data.character_name;
+    if (serverElement) serverElement.textContent = data.world_name;
+    if (levelElement) levelElement.textContent = data.character_level;
+    if (jobElement) jobElement.textContent = data.character_class;
+    if (fameElement) fameElement.textContent = data.character_popularity.toLocaleString();
+    if (powerElement) powerElement.textContent = data.combat_power.toLocaleString();
+    if (unionElement) unionElement.textContent = data.union_level.toLocaleString();
     
     // Show the character info display
     infoDisplay.classList.remove('hidden');
+}
+
+/**
+ * Search character from recent searches (fills input and searches)
+ */
+function searchFromRecent(characterName) {
+    const searchInput = document.getElementById('characterSearchInput');
+    if (searchInput) {
+        searchInput.value = characterName;
+    }
+    searchAndDisplayCharacter(characterName);
 }
 
 function addToRecentSearches(characterName) {
@@ -778,7 +820,7 @@ function updateRecentSearchesUI() {
         const item = document.createElement('span');
         item.className = 'search-recent-item';
         item.textContent = name;
-        item.onclick = () => searchCharacter(name);
+        item.onclick = () => searchFromRecent(name);
         recentList.appendChild(item);
     });
 }
@@ -818,6 +860,81 @@ function initializeCommon() {
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.navigation') && navContent) {
             navContent.classList.remove('nav-open');
+        }
+    });
+    
+    // --- Popup Event Listeners ---
+
+    // Open popups
+    document.querySelector('.nav-login-btn')?.addEventListener('click', () => {
+        showLoginPopup();
+    });
+    document.querySelector('.nav-profile-btn')?.addEventListener('click', () => {
+        showAccountPopup();
+    });
+    document.querySelector('.nav-logout-btn')?.addEventListener('click', () => {
+        performLogout();
+    });
+
+    // Theme toggle
+    document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
+
+    // Close popups with close buttons
+    document.querySelector('.login-popup-close')?.addEventListener('click', hideLoginPopup);
+    document.querySelector('.account-popup-close')?.addEventListener('click', hideAccountPopup);
+    document.querySelector('.profile-popup-close')?.addEventListener('click', hideProfilePopup);
+
+    // Popup actions
+    document.querySelector('.login-popup-btn')?.addEventListener('click', performPopupLogin);
+    
+    // Account popup buttons
+    document.querySelector('#myInfoBtn')?.addEventListener('click', () => {
+        const loginData = loadFromStorage('loginState');
+        if (loginData && loginData.isLoggedIn) {
+            hideAccountPopup();
+            // Assuming the main character name is the username for this simulation
+            searchAndDisplayCharacter(loginData.username);
+            showNotification(`${loginData.username}님의 캐릭터 정보를 표시합니다.`, 'info');
+        }
+    });
+    document.querySelector('#accountLogoutBtn')?.addEventListener('click', performLogout);
+    document.querySelector('.profile-popup-actions .profile-action-btn')?.addEventListener('click', performLogout);
+
+    // --- Global Event Listeners for Popups ---
+
+    // ESC key to close all popups
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideLoginPopup();
+            hideAccountPopup();
+            hideProfilePopup();
+        }
+    });
+
+    // Click outside to close popups
+    document.addEventListener('click', function(e) {
+        const loginPopupOverlay = document.getElementById('loginPopupOverlay');
+        if (loginPopupOverlay && !loginPopupOverlay.classList.contains('hidden')) {
+            const loginModal = document.getElementById('loginPopupModal');
+            if (loginModal && !loginModal.contains(e.target) && !e.target.closest('.nav-login-btn')) {
+                hideLoginPopup();
+            }
+        }
+
+        const accountPopupOverlay = document.getElementById('accountPopupOverlay');
+        if (accountPopupOverlay && !accountPopupOverlay.classList.contains('hidden')) {
+            const accountModal = document.getElementById('accountPopupModal');
+            if (accountModal && !accountModal.contains(e.target) && !e.target.closest('.nav-profile-btn')) {
+                hideAccountPopup();
+            }
+        }
+
+        const profilePopupOverlay = document.getElementById('profilePopupOverlay');
+        if (profilePopupOverlay && !profilePopupOverlay.classList.contains('hidden')) {
+            const profileModal = document.getElementById('profilePopupModal');
+            if (profileModal && !profileModal.contains(e.target) && !e.target.closest('.nav-profile-btn')) {
+                hideProfilePopup();
+            }
         }
     });
 }
@@ -867,7 +984,9 @@ window.MapleStoryChatBot = {
     performLogout,
     searchCharacter,
     updateLoginUI,
-    initializeLoginState
+    initializeLoginState,
+    showProfilePopup,
+    hideProfilePopup
 };
 
 // Make functions globally available
@@ -875,6 +994,7 @@ window.performLogin = performLogin;
 window.performLogout = performLogout;
 window.searchCharacter = searchCharacter;
 window.searchAndDisplayCharacter = searchAndDisplayCharacter;
+window.searchFromRecent = searchFromRecent;
 
 /**
  * Main search functionality for home page
