@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* =============================================================================
    Home Page Specific Styles
    홈페이지 전용 스타일 - 리팩토링 완료
@@ -254,76 +255,6 @@
     position: relative;
     z-index: 1;
     transition: font-size 0.3s ease;
-}
-
-/* My Characters Card */
-.my-characters-card {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.my-characters-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.my-characters-card .section-header {
-    background: var(--primary-color);
-    color: white;
-    padding: 8px 12px;
-    font-weight: 600;
-    font-size: 13px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 32px;
-    flex-shrink: 0;
-}
-
-.my-characters-card .section-content {
-    flex: 1;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.my-character-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    transition: var(--transition-fast);
-    flex-shrink: 0;
-    min-height: 40px;
-}
-
-.my-character-item:hover {
-    background: #e9ecef;
-    transform: translateX(4px);
-}
-
-.my-character-info {
-    flex-grow: 1;
-    min-width: 0;
-}
-
-.my-character-power {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--primary-dark);
-    flex-shrink: 0;
-    white-space: nowrap;
 }
 
 /* Main Search Box */
@@ -630,35 +561,6 @@
     background: transparent;
 }
 
-/* Carousel Styles for Event/Cash */
-.carousel-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-.carousel-wrapper {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.5s ease-in-out;
-}
-
-.carousel-item {
-    min-width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-.event-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-decoration: none;
-}
 /* Rankings */
 .ranking-scroll-container {
     display: flex;
@@ -975,6 +877,1046 @@
     .main-search-container {
         margin-bottom: 40px; /* Reduced margin */
     }
+=======
+/* =============================================================================
+   Home Page Specific Styles
+   홈페이지 전용 스타일 - 리팩토링 완료
+============================================================================= */
+
+/* Side Advertisement Banners */
+.left-ad-banner,
+.right-ad-banner {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 600px;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+    display: none;
+}
+
+@media (min-width: 1800px) {
+    .left-ad-banner,
+    .right-ad-banner {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+.left-ad-banner {
+    left: 20px;
+}
+
+/* Adjust left ad banner positioning for different screen sizes */
+@media (min-width: 1800px) {
+    .left-ad-banner {
+        left: 60px; /* Closer to main content */
+    }
+}
+
+@media (min-width: 2560px) {
+    .left-ad-banner {
+        left: 80px; /* Slightly more space on larger screens */
+    }
+}
+
+@media (min-width: 3840px) {
+    .left-ad-banner {
+        left: 100px; /* More space on 4K screens */
+    }
+}
+
+.right-ad-banner {
+    right: 20px;
+}
+
+/* Adjust right ad banner positioning for different screen sizes */
+@media (min-width: 1800px) {
+    .right-ad-banner {
+        right: 60px; /* Closer to main content */
+    }
+}
+
+@media (min-width: 2560px) {
+    .right-ad-banner {
+        right: 80px; /* Slightly more space on larger screens */
+    }
+}
+
+@media (min-width: 3840px) {
+    .right-ad-banner {
+        right: 100px; /* More space on 4K screens */
+    }
+}
+
+.side-ad-content {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ad-rotation {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ad-item {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.ad-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.ad-item img:hover {
+    transform: scale(1.02);
+}
+
+/* Equipment Window Styles */
+.equipment-window {
+    background: white;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 450px; /* 메인 콘텐츠와 높이를 맞춤 */
+    height: fit-content; /* 내용에 따라 높이가 유연하게 조절되도록 설정 */
+}
+
+.equipment-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 2px solid var(--primary-color);
+    flex-shrink: 0;
+}
+
+.equipment-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--primary-color);
+}
+
+.equipment-content {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character-preview {
+    background: var(--background-light);
+    border: 2px solid var(--border-gray);
+    border-radius: var(--border-radius-small);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.character-image-large {
+    font-size: 150px; /* 캐릭터 아이콘 크기 대폭 증가 */
+    opacity: 0.8;
+    transform: translateY(10%); /* 캐릭터 위치 미세 조정 */
+}
+
+.character-name-overlay {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(3px);
+}
+
+.equipment-footer {
+    padding: 15px;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.details-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.details-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 183, 197, 0.4);
+}
+
+/* Right Sidebar Ad */
+.sidebar-ad-long {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: var(--border-radius-large);
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 20px;
+    height: auto;
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-ad-long:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+}
+
+.ad-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.ad-content {
+    padding: 20px 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.ad-image {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.ad-text {
+    flex: 1;
+}
+
+.ad-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.ad-subtitle {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.ad-description {
+    font-size: 12px;
+    opacity: 0.8;
+    line-height: 1.3;
+}
+
+.ad-button {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.sidebar-ad-long:hover .ad-button {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Main Content Area */
+.main-content {
+    background: white;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-medium);
+    padding: 15px 25px; /* 상하 패딩 축소 */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 450px;
+}
+
+.main-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(232, 150, 17, 0.03) 0%, rgba(230, 161, 44, 0.03) 100%);
+    pointer-events: none;
+}
+
+.main-title {
+    font-size: clamp(32px, 4.5vw, 80px); /* Dynamic scaling based on viewport width */
+    font-weight: bold;
+    background: linear-gradient(135deg, #ff69b4 0%, #ffb6c1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
+    transition: font-size 0.3s ease;
+}
+
+.main-subtitle {
+    font-size: clamp(22px, 2.7vw, 50px); /* Increased subtitle font size */
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: clamp(20px, 3vh, 30px); /* Dynamic margin */
+    position: relative;
+    z-index: 1;
+    transition: font-size 0.3s ease;
+}
+
+.main-description {
+    font-size: clamp(14px, 1.4vw, 22px); /* Increased description font size */
+    color: var(--text-secondary);
+    margin-bottom: clamp(20px, 3vh, 40px); /* 여백 축소 */
+    line-height: 1.4;
+    max-width: clamp(300px, 80%, 800px); /* Dynamic max width */
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+    transition: font-size 0.3s ease;
+}
+
+/* My Characters Card */
+.my-characters-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.my-characters-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.my-characters-card .section-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.my-characters-card .section-content {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.my-character-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+    min-height: 40px;
+}
+
+.my-character-item:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+
+.my-character-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.my-character-power {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Main Search Box */
+.main-search-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px; /* 여백 축소 */
+    position: relative;
+    z-index: 1;
+}
+
+.main-search-box {
+    display: flex;
+    align-items: stretch;
+    background: white;
+    border: 3px solid var(--primary-color);
+    border-radius: 50px;
+    box-shadow: 0 8px 25px rgba(255, 183, 197, 0.3);
+    overflow: hidden;
+    max-width: 800px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.main-search-box:hover {
+    box-shadow: 0 12px 35px rgba(255, 183, 197, 0.4);
+    transform: translateY(-2px);
+}
+
+.main-search-input {
+    flex: 1;
+    padding: clamp(12px, 1.5vh, 18px) clamp(18px, 2.5vw, 25px); /* Dynamic padding */
+    border: none;
+    outline: none;
+    font-size: clamp(16px, 1.4vw, 20px); /* Increased search input font size */
+    font-family: 'Pretendard', sans-serif;
+    background: transparent;
+    color: var(--text-primary);
+    transition: font-size 0.3s ease, padding 0.3s ease;
+}
+
+.main-search-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.main-search-btn {
+    padding: clamp(12px, 1.5vh, 18px) clamp(18px, 2.5vw, 25px); /* Dynamic padding */
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    min-width: clamp(50px, 4vw, 70px); /* Dynamic min width */
+}
+
+.main-search-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+/* Search Hint */
+.search-hint {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
+    border: 2px dashed var(--primary-color);
+    border-radius: var(--border-radius-medium);
+    padding: clamp(10px, 1.5vh, 15px); /* 패딩 축소 */
+    margin: clamp(12px, 2vh, 25px) 0; /* Dynamic margin */
+    text-align: center;
+    min-height: clamp(120px, 12vh, 180px); /* Dynamic minimum height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.search-hint-title {
+    font-size: clamp(16px, 1.4vw, 20px); /* Increased hint title font size */
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: clamp(6px, 1vh, 10px); /* Dynamic margin */
+    transition: font-size 0.3s ease;
+}
+
+.search-hint-text {
+    font-size: clamp(13px, 1.2vw, 17px); /* Increased hint text font size */
+    color: var(--text-secondary);
+    margin-bottom: clamp(10px, 1.5vh, 15px); /* Dynamic margin */
+    transition: font-size 0.3s ease;
+}
+
+.search-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(6px, 1vw, 12px); /* Dynamic gap based on viewport width */
+    justify-content: center;
+    padding: clamp(5px, 1vh, 10px) 0; /* Dynamic vertical padding */
+}
+
+.search-example {
+    background: white;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: clamp(4px, 0.6vh, 8px) clamp(8px, 1.2vw, 16px); /* Dynamic padding */
+    border-radius: clamp(8px, 1vw, 15px); /* Dynamic border radius */
+    font-size: clamp(12px, 1vw, 16px); /* Increased example button font size */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: clamp(28px, 3.5vh, 40px); /* Dynamic minimum height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-example:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Bottom Section Cards - 메인 컨테이너와 동일한 너비 */
+.bottom-section {
+    max-width: 1800px;
+    margin: 15px auto 40px; /* Increased bottom margin from 20px to 40px */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    gap: 20px;
+    padding: 0 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: var(--transition-fast);
+}
+
+.section-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px;
+}
+
+.section-header.event-header,
+.section-header.cash-header {
+    justify-content: space-between;
+}
+
+.nav-arrows {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-arrow {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 10px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-arrow:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+.section-content {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Event Display */
+.event-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 8px;
+    min-height: 80px;
+    background: transparent;
+}
+
+.event-icon {
+    font-size: clamp(17px, 2vw, 25px);
+    margin-bottom: clamp(6px, 0.7vh, 8px);
+}
+
+.event-title-modern {
+    font-size: clamp(18px, 1.5vw, 24px);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: clamp(8px, 1vh, 12px);
+    line-height: 1.2;
+}
+
+.event-description {
+    font-size: clamp(14px, 1.2vw, 18px);
+    color: var(--text-muted);
+    margin-bottom: clamp(15px, 2vh, 25px);
+    line-height: 1.4;
+}
+
+.event-date-modern {
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 500;
+    background: transparent;
+}
+
+/* Cash Shop Display */
+.cash-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 8px;
+    background: transparent;
+    height: 100%;
+    min-height: 80px;
+}
+
+.cash-banner-image {
+    font-size: 24px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.cash-banner-title {
+    font-weight: 700;
+    font-size: clamp(18px, 1.5vw, 24px);
+    color: var(--text-primary);
+}
+
+.cash-banner-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    background: transparent;
+}
+
+.cash-banner-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: transparent;
+}
+
+/* Carousel Styles for Event/Cash */
+.carousel-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    min-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.event-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-decoration: none;
+}
+/* Rankings */
+.ranking-scroll-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+    box-sizing: border-box;
+}
+
+.ranking-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ranking-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.ranking-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+.ranking-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+    min-height: 36px;
+}
+
+.ranking-item-modern:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+
+.ranking-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 10px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.ranking-badge.top-1 { background: #ffd700; }
+.ranking-badge.top-2 { background: #c0c0c0; }
+.ranking-badge.top-3 { background: #cd7f32; }
+.ranking-badge.other { background: var(--text-muted); }
+
+.ranking-player-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ranking-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ranking-details {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN - Mobile First Approach
+   표준 브레이크포인트: 480px, 768px, 1024px, 1200px, 1440px
+============================================================================= */
+
+/* Extra Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+    .main-content {
+        min-height: 65vh; /* FHD 화면에 맞게 높이 축소 */
+        padding: 25px 35px;
+    }
+    
+    .section-card {
+        height: 210px;
+    }
+}
+
+/* Large Desktop (1200px - 1439px) */
+@media (min-width: 1200px) and (max-width: 1439px) {
+    .main-content {
+        min-height: 65vh; /* Increased height for main content */
+        padding: 22px 30px;
+    }
+    
+    .section-card {
+        height: 195px;
+    }
+}
+
+/* Desktop (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .bottom-section {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 95%;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 180px;
+    }
+    
+    .main-title {
+        font-size: 70px;
+    }
+    
+    .main-subtitle {
+        font-size: 40px;
+    }
+}
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .main-content {
+        min-height: 60vh; /* Increased height for main content */
+        padding: 20px 25px;
+    }
+    
+    .bottom-section {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 95%;
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .section-card {
+        height: 165px;
+    }
+}
+
+/* Mobile Large (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    .main-content {
+        min-height: 55vh; /* Increased height for main content */
+        padding: 18px 20px;
+    }
+    
+    .bottom-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+        max-width: 95%;
+    }
+    
+    .section-card {
+        height: 150px;
+    }
+    
+    .section-header {
+        height: 28px;
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    .nav-arrow {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Mobile Small (0 - 479px) */
+@media (max-width: 479px) {
+    .main-content {
+        min-height: 50vh; /* Increased height for main content */
+        padding: 15px 18px;
+    }
+    
+    .main-search-input {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+    
+    .main-search-btn {
+        padding: 10px 15px;
+    }
+    
+    .bottom-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+        max-width: 95%;
+    }
+    
+    .section-card {
+        height: 135px;
+    }
+    
+    .section-header {
+        height: 26px;
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+    
+    .nav-arrow {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+    }
+    
+    .search-hint-title {
+        font-size: 14px;
+    }
+    
+    .search-hint-text {
+        font-size: 11px;
+    }
+    
+    .search-example {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+<<<<<<< HEAD
+}
+
+/* Ad Panel Spacing for Large Screens */
+@media (min-width: 1800px) {
+    .bottom-section {
+        margin: 15px auto 50px; /* Increased bottom margin for large screens */
+        max-width: calc(100vw - 480px); /* Match main-container */
+        width: 95%;
+    }
+}
+
+/* Large Screen Optimizations (4K and above) */
+@media (min-width: 2560px) {
+    .main-content {
+        min-height: 65vh; /* Increased height for large screens */
+    }
+    
+    .bottom-section {
+        margin: 15px auto 60px; /* Increased bottom margin for 4K screens */
+        max-width: calc(100vw - 520px); /* Match main-container */
+        width: 90%;
+        gap: 30px;
+        padding: 0 20px;
+    }
+    
+    .section-card {
+        height: 280px;
+    }
+}
+
+@media (min-width: 3840px) {
+    .main-content {
+        min-height: 60vh; /* Increased height for 4K displays */
+        max-height: 60vh; /* Prevent it from getting too tall */
+    }
+    
+    .bottom-section {
+        margin: 15px auto 80px; /* Increased bottom margin for ultra-wide screens */
+        max-width: calc(100vw - 560px); /* Match main-container */
+        width: 85%;
+        gap: 40px;
+        padding: 0 25px;
+    }
+    
+    .section-card {
+        height: 320px;
+    }
+    
+    .main-search-box {
+        max-width: 900px; /* Slightly larger for 4K */
+    }
+    
+    .main-search-container {
+        margin-bottom: 40px; /* Reduced margin */
+    }
 }
 
 /* Character Info Display */
@@ -1046,3 +1988,7 @@
 .details-btn:hover {
     background-color: var(--primary-dark);
 }
+=======
+>>>>>>> origin/feature/Design
+}
+>>>>>>> feature/chatbot

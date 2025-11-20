@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% load static %}
 <!DOCTYPE html>
 <html lang="ko">
@@ -472,3 +473,274 @@
     </script>
 </body>
 </html>
+=======
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAI - 메이플스토리 정보탐색 CHAT BOT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="{% url 'main_page:main_page' %}" class="logo">
+                <div class="logo-icon">MAI</div>
+                Maple Story Chatbot
+            </a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <div class="nav-left">
+                <a href="{% url 'main_page:main_page' %}" class="nav-item active">홈</a>
+                <a href="{% url 'main_page:chatbot_page' %}" class="nav-item">CHAT BOT</a>
+                <a href="{% url 'character_info:character_search' %}" class="nav-item">캐릭터 검색</a>
+                <a href="#cube" class="nav-item">큐브</a>
+                <a href="#starforce" class="nav-item">스타포스</a>
+                <a href="#api-integration" class="nav-item">(API 연동)</a> <!-- TODO: Update with actual API integration page URL -->
+            </div>
+                            <div class="nav-right">
+                                <button class="theme-toggle-btn" id="themeToggleBtn">🌙</button>
+                                <!-- Login Button (shown when not logged in) -->                <div class="nav-login-section" id="navLoginSection">
+                    <button class="nav-login-btn">로그인</button>
+                </div>
+                <!-- User Profile (shown when logged in) -->
+                <div class="nav-user-profile hidden" id="navUserProfile">
+                    <span class="nav-user-name" id="navLoggedInUser">사용자</span>
+                    <button class="nav-profile-btn">프로필</button>
+                    <button class="nav-logout-btn">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Advertisement Banner -->
+        <div class="left-ad-banner">
+            <div class="side-ad-content">
+                <div class="ad-rotation">
+                    <div class="ad-item">
+                        <img src="{% static 'img/ad_placeholder_a.png' %}" alt="Advertisement A"> <!-- TODO: Replace with dynamic ad image -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+
+            <!-- Character Info Display -->
+            <div class="character-info-display" id="characterInfoDisplay">
+                <div class="character-info-header">
+                    <div class="character-profile-avatar">🧙‍♂️</div>
+                    <div class="character-profile-info">
+                        <div class="character-profile-name" id="displayCharacterName">검색 결과가 여기에 표시됩니다</div>
+                        <div class="character-profile-server" id="displayServerName">-</div>
+                    </div>
+                </div>
+                
+                <div class="character-detailed-stats">
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">레벨</span>
+                        <span class="detail-stat-value" id="displayCharacterLevel">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">직업</span>
+                        <span class="detail-stat-value" id="displayCharacterJob">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">인기도</span>
+                        <span class="detail-stat-value" id="displayCharacterFame">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">전투력</span>
+                        <span class="detail-stat-value" id="displayCharacterPower">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">유니온</span>
+                        <span class="detail-stat-value" id="displayUnionLevel">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Search Card -->
+            <div class="character-search-card">
+                    <div class="search-input-group">
+                        <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
+                        <button class="character-search-btn">
+                            <span>검색</span>
+                        </button>
+                    </div>
+                    
+                    <div class="search-recent" id="recentSearches">
+                        <div class="search-recent-title">최근 검색</div>
+                        <div class="search-recent-list" id="recentSearchList">
+                        </div>
+                    </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="main-title">메이플 스토리</h1>
+            <h2 class="main-subtitle">정보탐색 CHAT BOT</h2>
+            <p class="main-description">
+                메이플스토리의 모든 정보를 AI와 함께 탐색하세요.<br>
+                스킬, 아이템, 사냥터, 보스 공략까지 궁금한 모든 것을 물어보세요!
+            </p>
+            
+            <!-- Main Search Box -->
+            <div class="main-search-container">
+                <div class="main-search-box">
+                    <input type="text" class="main-search-input" id="mainSearchInput" placeholder="메이플스토리에 관해 무엇이든 물어보세요...">
+                    <button class="main-search-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Hint Section -->
+            <div class="search-hint">
+                <div class="search-hint-title">💡 위 검색창에서 바로 질문해보세요!</div>
+                <div class="search-hint-text">질문하면 ChatBot 페이지로 이동하면서 자동으로 질문이 전송됩니다</div>
+                <div class="search-examples">
+                    <span class="search-example">메르세데스 스킬 알려줘</span>
+                    <span class="search-example">180렙 사냥터 추천</span>
+                    <span class="search-example">뇌전 드랍 장소</span>
+                    <span class="search-example">보스 공략법</span>
+                </div> <!-- TODO: These example questions could be made dynamic by fetching from an API or Django context. -->
+            </div>
+
+
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="sidebar-ad-long">
+                <div class="ad-header">🎮 메이플스토리 신규 업데이트</div>
+                <div class="ad-content">
+                    <div class="ad-image">🌟</div>
+                    <div class="ad-text">
+                        <div class="ad-title">윈터 스페셜 이벤트</div>
+                        <div class="ad-subtitle">12월 31일까지 진행중!</div>
+                        <div class="ad-description">새로운 직업과 컨텐츠를 지금 확인해보세요</div>
+                    </div>
+                </div>
+                <div class="ad-button">자세히 보기 →</div>
+            </div>
+
+            <!-- Equipment Window -->
+            <div class="equipment-window hidden" id="equipmentWindow">
+                <div class="equipment-header">
+                    <span class="equipment-title">내 캐릭터</span>
+                </div>
+                <div class="equipment-content">
+                    <div class="character-preview">
+                        <div class="character-image-large">🧍</div>
+                        <div class="character-name-overlay" id="equipmentCharacterName">캐릭터</div>
+                    </div>
+                </div>
+                <div class="equipment-footer">
+                    <button class="details-btn">상세보기</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Advertisement Banner -->
+        <div class="right-ad-banner">
+            <div class="side-ad-content">
+                <div class="ad-rotation">
+                    <div class="ad-item">
+                        <img src="{% static 'img/ad_placeholder_b.png' %}" alt="Advertisement B"> <!-- TODO: Replace with dynamic ad image -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern 4-Grid Bottom Section -->
+    <div class="bottom-section">
+        <!-- Event Card -->
+        <div class="section-card">
+            <div class="section-header event-header">
+                🎯 EVENT
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="event-display" id="eventDisplay">
+                    <div class="event-icon">🎮</div>
+                    <div class="event-title-modern">윈터 스페셜 이벤트</div>
+                    <div class="event-description">12월 한정 특별 이벤트가 진행중입니다</div>
+                    <div class="event-date-modern">📅 2024.12.01 ~ 2024.12.31</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash Shop Card -->
+        <div class="section-card">
+            <div class="section-header cash-header">
+                💎 CASH SHOP
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="cash-display" id="cashDisplay">
+                    <div class="cash-banner-image">🎭</div>
+                    <div class="cash-banner-title">신년 한정 코스튬</div>
+                    <div class="cash-banner-subtitle">50% 할인 진행중</div>
+                    <div class="cash-banner-price">2,400 캐시</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- General Ranking Card -->
+        <div class="section-card">
+            <div class="section-header">
+                🏆 종합 랭킹 TOP 10
+            </div>
+            <div class="section-content">
+                <div class="ranking-scroll-container">
+                    <!-- 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Power Ranking Card -->
+        <div class="section-card">
+            <div class="section-header">
+                ⚡ 전투력 랭킹 TOP 10
+            </div>
+            <div class="section-content">
+                <div class="ranking-scroll-container">
+                    <!-- 전투력 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_profile_popup.html' %}
+    {% include '_login_popup.html' %}
+    {% include '_account_popup.html' %}
+
+    <script src="{% static 'js/common.js' %}" defer></script>
+    <script src="{% static 'js/home.js' %}" defer></script>
+</body>
+</html>
+>>>>>>> feature/chatbot

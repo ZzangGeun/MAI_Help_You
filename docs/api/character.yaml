@@ -1,0 +1,253 @@
+openapi: 3.0.3
+info:
+  title: MAI Chatbot - Character API
+  description: 메이플스토리 챗봇 프로젝트 - 캐릭터 정보 관련 API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Django Development Server
+
+paths:
+  /character_info/{character_id}/:
+    get:
+      tags:
+        - Character
+      summary: 캐릭터 정보 조회
+      description: 특정 캐릭터의 상세 정보를 조회합니다
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          description: 조회할 캐릭터 ID
+          schema:
+            type: integer
+            minimum: 1
+            example: 101
+      responses:
+        "200":
+          description: 캐릭터 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../schemas/common.yaml#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Character'
+        "404":
+          description: 캐릭터를 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/common.yaml#/components/schemas/ErrorResponse'
+
+  /character_info/search/:
+    get:
+      tags:
+        - Character
+      summary: 캐릭터 검색
+      description: 캐릭터 이름으로 검색하거나 사용자별 캐릭터 목록을 조회합니다
+      parameters:
+        - name: name
+          in: query
+          description: 검색할 캐릭터 이름
+          required: false
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 20
+            example: "용사123"
+        - name: owner_id
+          in: query
+          description: 소유자 사용자 ID
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: job
+          in: query
+          description: 직업으로 필터링
+          required: false
+          schema:
+            type: string
+            example: "히어로"
+        - name: min_level
+          in: query
+          description: 최소 레벨
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 300
+            example: 200
+        - name: max_level
+          in: query
+          description: 최대 레벨
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 300
+            example: 250
+        - $ref: '../schemas/common.yaml#/components/parameters/PageParam'
+        - $ref: '../schemas/common.yaml#/components/parameters/LimitParam'
+      responses:
+        "200":
+          description: 캐릭터 검색 결과
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../schemas/common.yaml#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          characters:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Character'
+                          pagination:
+                            $ref: '../schemas/common.yaml#/components/schemas/PaginationMeta'
+        "400":
+          description: 잘못된 검색 파라미터
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/common.yaml#/components/schemas/ErrorResponse'
+
+  /character_info/{character_id}/stats/:
+    get:
+      tags:
+        - Character
+      summary: 캐릭터 능력치 조회
+      description: 특정 캐릭터의 상세 능력치 정보를 조회합니다
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          description: 조회할 캐릭터 ID
+          schema:
+            type: integer
+            minimum: 1
+            example: 101
+      responses:
+        "200":
+          description: 캐릭터 능력치 조회 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../schemas/common.yaml#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CharacterStats'
+        "404":
+          description: 캐릭터를 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/common.yaml#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Character:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 캐릭터 고유 ID
+          example: 101
+        name:
+          type: string
+          description: 캐릭터 이름
+          example: "용사123"
+        level:
+          type: integer
+          description: 캐릭터 레벨
+          minimum: 1
+          maximum: 300
+          example: 275
+        job:
+          type: string
+          description: 직업명
+          example: "히어로"
+        world:
+          type: string
+          description: 서버명
+          example: "스카니아"
+        fame:
+          type: integer
+          description: 인기도
+          example: 12345
+        power:
+          type: integer
+          description: 전투력
+          example: 250000000
+        union_level:
+          type: integer
+          description: 유니온 레벨
+          example: 8500
+        guild:
+          type: string
+          description: 길드명
+          nullable: true
+          example: "길드이름"
+        owner_id:
+          type: integer
+          description: 소유자 사용자 ID
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          description: 생성일시
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: 최종 수정일시
+          example: "2024-01-15T10:30:00Z"
+        is_main:
+          type: boolean
+          description: 메인 캐릭터 여부
+          example: true
+
+    CharacterStats:
+      type: object
+      properties:
+        character_id:
+          type: integer
+          example: 101
+        stat_attack_power:
+          type: integer
+          description: 공격력
+          example: 150000
+        stat_magic_power:
+          type: integer
+          description: 마력
+          example: 120000
+        stat_defense:
+          type: integer
+          description: 방어력
+          example: 8000
+        stat_hp:
+          type: integer
+          description: 체력
+          example: 25000
+        stat_mp:
+          type: integer
+          description: 마나
+          example: 15000
+        combat_power:
+          type: integer
+          description: 전투력
+          example: 2500000
+        updated_at:
+          type: string
+          format: date-time
+          description: 능력치 마지막 업데이트 시간
+          example: "2024-01-15T10:30:00Z"
