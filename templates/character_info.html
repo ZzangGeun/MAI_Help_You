@@ -28,7 +28,7 @@
         <div class="nav-content">
             <a href="{% url 'main_page' %}" class="nav-item">홈</a>
             <a href="{% url 'chatbot' %}" class="nav-item">CHAT BOT</a>
-            <a href="{% url 'character_info' %}" class="nav-item active">캐릭터 검색</a>
+            <a href="{% url 'character:character_info_page' %}" class="nav-item active">캐릭터 검색</a>
             <a href="#" class="nav-item">큐브</a>
             <a href="#" class="nav-item">스타포스</a>
             <a href="#" class="nav-item">(API 연동)</a>
@@ -38,6 +38,26 @@
     <!-- Main Container -->
     <div class="main-container" style="justify-content: flex-start;">
         <main class="main-content" style="width: 100%;">
+            <!-- 캐릭터 검색 폼 -->
+            <div style="max-width: 600px; margin: 0 auto 2rem auto;">
+                <form method="GET" action="{% url 'character:character_info_page' %}" style="display: flex; gap: 1rem;">
+                    <input 
+                        type="text" 
+                        name="character_name" 
+                        placeholder="캐릭터 닉네임을 입력하세요" 
+                        value="{{ request.GET.character_name }}"
+                        style="flex: 1; padding: 0.75rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;"
+                        required
+                    >
+                    <button 
+                        type="submit" 
+                        style="padding: 0.75rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500;"
+                    >
+                        검색
+                    </button>
+                </form>
+            </div>
+
             {% if error %}
                 <h1 class="main-title">오류 발생</h1>
                 <p class="main-description" style="color: #e74c3c;">{{ error }}</p>
@@ -91,9 +111,21 @@
                             <div class="equipment-grid">
                                 {% for item in character_info.item_info %}
                                 <div class="equipment-item">
-                                    <div class="equipment-icon"><img src="{{ item.item_icon }}" alt="{{ item.item_name }}"></div>
-                                    <div class="equipment-name">{{ item.item_name }}</div>
+                                    <div class="equipment-icon">
+                                        {% if item.item_icon %}
+                                            <img src="{{ item.item_icon }}" alt="{{ item.item_name }}" onerror="this.src='https://via.placeholder.com/48?text=No+Image'">
+                                        {% else %}
+                                            <img src="https://via.placeholder.com/48?text=No+Image" alt="아이콘 없음">
+                                        {% endif %}
+                                    </div>
+                                    <div class="equipment-name" title="{{ item.item_name }}">{{ item.item_name }}</div>
                                     <div class="equipment-part">{{ item.item_part }}</div>
+                                    {% if item.starforce and item.starforce != '0' %}
+                                    <div class="equipment-starforce" style="font-size: 0.75rem; color: #ffd700;">⭐ {{ item.starforce }}</div>
+                                    {% endif %}
+                                    {% if item.potential_grade and item.potential_grade != 'none' %}
+                                    <div class="equipment-potential" style="font-size: 0.75rem; color: #9b59b6;">{{ item.potential_grade }}</div>
+                                    {% endif %}
                                 </div>
                                 {% empty %}
                                 <p>장착한 장비가 없습니다.</p>

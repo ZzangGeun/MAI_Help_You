@@ -176,26 +176,42 @@
 
 .equipment-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 16px;
 }
 
 .equipment-item {
     background-color: #f9f9f9;
-    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
     padding: 12px;
     text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.equipment-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    border-color: #e89611;
 }
 
 .equipment-icon {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 8px;
+    padding: 4px;
 }
 
 .equipment-icon img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .equipment-name {
@@ -203,12 +219,46 @@
     font-weight: 500;
     color: #444;
     word-break: keep-all;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 32px;
 }
 
 .equipment-part {
     font-size: 11px;
     color: #888;
     margin-top: 4px;
+    font-weight: 500;
+}
+
+.equipment-starforce {
+    font-size: 0.75rem;
+    color: #ffd700;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.equipment-potential {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+/* 잠재능력 등급별 색상 */
+.equipment-item:has(.equipment-potential:contains("레전드리")) .equipment-name {
+    color: #00ff00;
+}
+
+.equipment-item .equipment-potential {
+    background: #f0e6ff;
+    color: #9b59b6;
 }
 
 .raw-data-pre {
