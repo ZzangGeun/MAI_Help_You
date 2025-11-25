@@ -49,13 +49,13 @@ def get_api_data(endpoint, params=None):
 def get_notice_list():
 
     notice_event = get_api_data("/notice-event")
-    notice = get_api_data("/notice")
+    # notice = get_api_data("/notice")
     notice_cashshop = get_api_data("/notice-cashshop")
     notice_update = get_api_data("/notice-update")
 
     return {
         "notice_event" : notice_event,
-        "notice" : notice,
+        # "notice" : notice,
         "notice_cashshop" : notice_cashshop,
         "notice_update" : notice_update
     }
@@ -68,3 +68,4 @@ def get_ranking_list():
     return {
         "overall_ranking" : overall_ranking
     }
+

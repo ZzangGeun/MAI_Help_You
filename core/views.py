@@ -12,6 +12,9 @@ import time
 import logging
 import psutil
 import json
+from .get_carousel_data import transform_to_carousel_format
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,42 +22,24 @@ logger = logging.getLogger(__name__)
 # HTML 페이지 뷰들
 def main_page(request):
     notice = get_notice_list()
+    carousel_notice = transform_to_carousel_format(notice)
     ranking = get_ranking_list()
+
+    # JSON으로 변환하여 전달 (JavaScript에서 안전하게 사용 가능)
     context = {
-        **notice,
+        'events': json.dumps(carousel_notice.get('events', []), ensure_ascii=False),
+        'cashItems': json.dumps(carousel_notice.get('cashItems', []), ensure_ascii=False),
         **ranking,
         'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
     }
     
+
     return render(request, 'core/main_page.html', context)
 
 
-# 캐릭터 정보 페이지 뷰
-def character_info_view(request):
-    return render(request, "character/character_info.html")
-
-# 회원가입 페이지 뷰
-def signup_view(request):
-    return render(request, "accounts/signup.html")
-
-# 로그인 페이지 뷰
-def login_view(request):
-    return render(request, "accounts/login.html")
-
-# 챗봇 페이지 뷰
-def chatbot_view(request):
-    return render(request, "chat/chatbot_page.html")
-
-
-
-@require_http_methods(["GET"])
-def logout_api(request):
-    """
-    로그아웃 API (기본 Django 뷰)
-    GET /api/logout/
-    """
-    return JsonResponse({'message': '로그아웃이 완료되었습니다.', 'status': 'success'}, status=200)
-
+# ============================================================================
+# API Views
+# ============================================================================
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -121,6 +106,7 @@ def notice_list_api(request):
 
 
 
+
 # 추가 API 함수들
 @require_http_methods(["GET"])
 def notice_cashshop_api(request):
@@ -183,8 +169,43 @@ def notice_event_api(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+def ranking_api(request):
+    """
+    통합 랭킹 API
+    GET /api/rankings/?type=general  - 종합 랭킹
+    GET /api/rankings/?type=power    - 전투력 랭킹
+    """
+    try:
+        ranking_type = request.GET.get('type', 'general')
+        ranking_data = get_ranking_list()
+        
+        if ranking_type == 'power':
+            # 전투력 랭킹 (가정: union_level 사용)
+            data = ranking_data.get('overall_ranking', [])
+        else:
+            # 종합 랭킹 (기본값)
+            data = ranking_data.get('overall_ranking', [])
+        
+        return JsonResponse({
+            'success': True,
+            'data': data,
+            'type': ranking_type,
+            'status': 'success'
+        }, status=200)
+        
+    except Exception as e:
+        logger.error(f"랭킹 조회 오류: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'랭킹 조회 중 오류가 발생했습니다: {str(e)}',
+            'status': 'error'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
 def ranking_overall_api(request):
-    """전체 랭킹 API (기본 Django 뷰)"""
+    """전체 랭킹 API (기본 Django 뷰) - 레거시 지원"""
     try:
         ranking_data = get_ranking_list()
         

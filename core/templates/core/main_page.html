@@ -199,7 +199,7 @@
         <!-- Event Card -->
         <div class="section-card">
             <div class="section-header event-header">
-                🎯 EVENT
+                EVENT
                 <div class="nav-arrows">
                     <button class="nav-arrow">◀</button>
                     <button class="nav-arrow">▶</button>
@@ -207,10 +207,6 @@
             </div>
             <div class="section-content">
                 <div class="event-display" id="eventDisplay">
-                    <div class="event-icon">🎮</div>
-                    <div class="event-title-modern">윈터 스페셜 이벤트</div>
-                    <div class="event-description">12월 한정 특별 이벤트가 진행중입니다</div>
-                    <div class="event-date-modern">📅 2024.12.01 ~ 2024.12.31</div>
                 </div>
             </div>
         </div>
@@ -226,10 +222,6 @@
             </div>
             <div class="section-content">
                 <div class="cash-display" id="cashDisplay">
-                    <div class="cash-banner-image">🎭</div>
-                    <div class="cash-banner-title">신년 한정 코스튬</div>
-                    <div class="cash-banner-subtitle">50% 할인 진행중</div>
-                    <div class="cash-banner-price">2,400 캐시</div>
                 </div>
             </div>
         </div>
@@ -264,7 +256,16 @@
     {% include 'accounts/_signup_popup.html' %}
     {% include 'accounts/_account_popup.html' %}
 
-    <script src="{% static 'js/common.js' %}" defer></script>
-    <script src="{% static 'js/home.js' %}" defer></script>
+    <!-- 백엔드 데이터를 JavaScript로 전달 (스크립트보다 먼저 선언) -->
+    <script>
+        window.carouselBackendData = {
+            events: {{ events|safe }},
+            cashItems: {{ cashItems|safe }}
+        };
+        console.log('Backend Data Loaded:', window.carouselBackendData);
+    </script>
+
+    <script type="module" src="{% static 'js/common.js' %}"></script>
+    <script type="module" src="{% static 'js/home.js' %}"></script>
 </body>
 </html>
