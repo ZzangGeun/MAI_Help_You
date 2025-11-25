@@ -4,6 +4,10 @@ from . import views
 app_name = 'character'
 
 urlpatterns = [
+    # Pages (HTML 렌더링)
     path('', views.character_info_page, name='character_info_page'),
-    path('api/', views.character_info_view, name='character_info_api'),
+    
+    # API - Character Info (캐릭터 정보)
+    path('api/search/', views.character_info_view, name='character_search_api'),
+    # path('api/<str:ocid>/', views.character_detail_api, name='character_detail_api'),  # TODO: OCID로 상세 조회
 ]

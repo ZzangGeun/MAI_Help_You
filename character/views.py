@@ -80,7 +80,7 @@ async def character_info_page(request):
     else:
         context['message'] = '캐릭터 닉네임을 입력해주세요.'
     
-    return render(request, 'character_info.html', context)
+    return render(request, 'character/character_info.html', context)
 
 @csrf_exempt
 @require_http_methods(["GET"])

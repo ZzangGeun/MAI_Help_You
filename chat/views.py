@@ -65,7 +65,7 @@ def chat_api(request):
 
 def chatbot_page(request):
     """챗봇 페이지 렌더링 (로그인 불필요)"""
-    return render(request, 'chatbot_page.html')
+    return render(request, 'chat/chatbot_page.html')
 
 
 @login_required

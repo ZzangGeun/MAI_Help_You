@@ -26,24 +26,24 @@ def main_page(request):
         'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
     }
     
-    return render(request, 'main_page.html', context)
+    return render(request, 'core/main_page.html', context)
 
 
 # 캐릭터 정보 페이지 뷰
 def character_info_view(request):
-    return render(request, "character_info.html")
+    return render(request, "character/character_info.html")
 
 # 회원가입 페이지 뷰
 def signup_view(request):
-    return render(request, "signup.html")
+    return render(request, "accounts/signup.html")
 
 # 로그인 페이지 뷰
 def login_view(request):
-    return render(request, "login.html")
+    return render(request, "accounts/login.html")
 
 # 챗봇 페이지 뷰
 def chatbot_view(request):
-    return render(request, "chatbot_page.html")
+    return render(request, "chat/chatbot_page.html")
 
 
 
