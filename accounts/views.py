@@ -30,15 +30,15 @@ def signup_api(request):
         user_id = data.get('user_id', '').strip()
         password = data.get('password', '').strip()
         confirm_password = data.get('confirm_password', '').strip()
-
+        maple_nickname = data.get('maple_nickname', '').strip()  # 필수
         nexon_api_key = data.get('nexon_api_key', '').strip()  # 선택사항
 
         # 유효성 검사
-        if not all ([user_id, password, confirm_password]):
+        if not all ([user_id, password, confirm_password, maple_nickname]):
             return JsonResponse({'error': '필수 필드를 모두 채워주세요.'}, status=400)
         
-        if not re.match(r'^[a-zA-Z0-9_]{4,20}$', user_id):
-            return JsonResponse({'error': '아이디는 4~20자의 영문자, 숫자, 밑줄(_)만 사용할 수 있습니다.'}, status=400)
+        if not re.match(r'^[a-zA-Z0-9_]{6,20}$', user_id):
+            return JsonResponse({'error': '아이디는 6~20자의 영문자, 숫자, 밑줄(_)만 사용할 수 있습니다.'}, status=400)
         
         if len(password) < 8:
             return JsonResponse({'error': '비밀번호는 최소 8자 이상이어야 합니다.'}, status=400)
@@ -50,6 +50,9 @@ def signup_api(request):
         if User.objects.filter(username=user_id).exists():
             return JsonResponse({'error': '이미 존재하는 아이디입니다.'}, status=400)
         
+        if UserProfile.objects.filter(maple_nickname=maple_nickname).exists():
+            return JsonResponse({'error': '이미 사용 중인 메이플 닉네임입니다.'}, status=400)
+        
 
         # 사용자 생성
         user = User.objects.create_user(
@@ -60,6 +63,7 @@ def signup_api(request):
         # 5. UserProfile 생성 및 연결
         UserProfile.objects.create(
             user=user,
+            maple_nickname=maple_nickname,
             nexon_api_key=nexon_api_key if nexon_api_key else None
         )
 

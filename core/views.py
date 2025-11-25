@@ -41,7 +41,9 @@ def signup_view(request):
 def login_view(request):
     return render(request, "login.html")
 
-
+# 챗봇 페이지 뷰
+def chatbot_view(request):
+    return render(request, "chatbot_page.html")
 
 
 
@@ -57,41 +59,33 @@ def logout_api(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def chatbot_request_api(request):
-    """챗봇 요청 API (POST만 사용)"""
+    """
+    챗봇 요청 API (POST만 사용)
+    
+    레거시 API - 새로운 chat 앱의 API로 리다이렉트
+    새 API: /chat/api/chat/
+    """
     try:
         data = json.loads(request.body)
         question = data.get('question')
-        user_id = data.get('user_id')
-        nickname = data.get('nickname')
         
-        if not question:
-            return JsonResponse({
-                'error': '질문을 입력해주세요.',
-                'status': 'error'
-            }, status=400)
+        # 새로운 chat 앱의 chat_api로 요청 전달
+        from chat.views import chat_api
         
-        # 로그인 상태 확인
-        if user_id or nickname:
-            # 로그인 챗봇 기능
-            result = get_api_data("/chatbot", {
-                "question": question, 
-                "user_id": user_id, 
-                "nickname": nickname
-            })
-        else:
-            # 비로그인 챗봇 기능
-            result = get_api_data("/chatbot", {"question": question})
+        # 요청 데이터 형식 변환 (question → message)
+        new_body = json.dumps({'message': question})
+        request._body = new_body.encode('utf-8')
         
+        # 새 API 호출
+        response = chat_api(request)
+        
+        # 응답 형식 변환 (호환성 유지)
+        response_data = json.loads(response.content)
         return JsonResponse({
-            'response': result.get('response'),
-            'status': 'success'
-        }, status=200)
+            'response': response_data.get('response', ''),
+            'status': 'success' if not response_data.get('error') else 'error'
+        }, status=response.status_code)
         
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'error': '잘못된 JSON 형식입니다.',
-            'status': 'error'
-        }, status=400)
     except Exception as e:
         logger.error(f"챗봇 요청 오류: {e}")
         return JsonResponse({

@@ -13,7 +13,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="{% url 'main_page:main_page' %}" class="logo">
+            <a href="{% url 'main_page' %}" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -24,8 +24,8 @@
     <nav class="navigation">
         <div class="nav-content">
             <div class="nav-left">
-                <a href="{% url 'main_page:main_page' %}" class="nav-item">홈</a>
-                <a href="{% url 'main_page:chatbot_page' %}" class="nav-item active">CHAT BOT</a>
+                <a href="{% url 'main_page' %}" class="nav-item">홈</a>
+                <a href="{% url 'chatbot' %}" class="nav-item active">CHAT BOT</a>
                 <a href="{% url 'character:character_info_page' %}" class="nav-item">캐릭터 검색</a>
                 <a href="#cube" class="nav-item">큐브</a>
                 <a href="#starforce" class="nav-item">스타포스</a>
@@ -198,6 +198,7 @@
 
     {% include '_profile_popup.html' %}
     {% include '_login_popup.html' %}
+    {% include '_signup_popup.html' %}
     {% include '_account_popup.html' %}
 
     <script src="{% static 'js/common.js' %}" defer></script>
