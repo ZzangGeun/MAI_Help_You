@@ -1,3 +1,7 @@
+// Import required functions from common module
+import { changeEvent, changeCashItem } from './modules/carousel.js';
+import { setActiveNavItem } from './common.js';
+
 // DOM이 완전히 로드된 후 스크립트 실행
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -92,34 +96,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // 하단 섹션 카드 네비게이션
     const eventCard = document.querySelector('.bottom-section .section-card:nth-child(1)');
     eventCard?.querySelector('.nav-arrow:nth-child(1)')?.addEventListener('click', () => {
-        // changeEvent 함수는 common.js에 있다고 가정
-        if (window.changeEvent) changeEvent(-1);
+        changeEvent(-1);
     });
     eventCard?.querySelector('.nav-arrow:nth-child(2)')?.addEventListener('click', () => {
-        if (window.changeEvent) changeEvent(1);
+        changeEvent(1);
     });
 
     const cashCard = document.querySelector('.bottom-section .section-card:nth-child(2)');
     cashCard?.querySelector('.nav-arrow:nth-child(1)')?.addEventListener('click', () => {
-        // changeCashItem 함수는 common.js에 있다고 가정
-        if (window.changeCashItem) changeCashItem(-1);
+        changeCashItem(-1);
     });
     cashCard?.querySelector('.nav-arrow:nth-child(2)')?.addEventListener('click', () => {
-        if (window.changeCashItem) changeCashItem(1);
+        changeCashItem(1);
     });
 
     // ===================================================================
     // 초기화 코드
     // ===================================================================
 
-    // setActiveNavItem 함수가 common.js에 있다고 가정
-    if(window.setActiveNavItem) setActiveNavItem('홈');
+    // setActiveNavItem 함수 호출
+    setActiveNavItem('홈');
 
     // 랭킹 목록 동적 생성
     fetchAndPopulateRanking('general');
     fetchAndPopulateRanking('power');
 
-    // 캐러셀 데이터 로드
-    fetchCarouselData(); // Fetch carousel data on load
+    // 캐러셀은 common.js의 initializeCommon에서 이미 초기화됨
 
 });

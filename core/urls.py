@@ -14,7 +14,8 @@ urlpatterns = [
     path('api/notices/event/', views.notice_event_api, name='notice_event_api'),
     
     # API - Rankings (랭킹)
-    path('api/rankings/overall/', views.ranking_overall_api, name='ranking_overall_api'),
+    path('api/rankings/', views.ranking_api, name='ranking_api'),  # 통합 랭킹 API (?type=general|power)
+    path('api/rankings/overall/', views.ranking_overall_api, name='ranking_overall_api'),  # 레거시 지원
     
     # API - System (시스템)
     path('api/health/', views.health_check_api, name='health_check_api'),
