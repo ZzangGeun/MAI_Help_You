@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot - 메이플스토리 정보탐색 CHAT BOT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="{% url 'core:main_page' %}" class="logo">
+                <div class="logo-icon">MAI</div>
+                Maple Story Chatbot
+            </a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <div class="nav-left">
+                <a href="{% url 'core:main_page' %}" class="nav-item">홈</a>
+                <a href="{% url 'chat:chatbot_page' %}" class="nav-item active">CHAT BOT</a>
+                <a href="{% url 'character:character_info_page' %}" class="nav-item">캐릭터 검색</a>
+                <a href="#cube" class="nav-item">큐브</a>
+                <a href="#starforce" class="nav-item">스타포스</a>
+                <a href="#api-integration" class="nav-item">(API 연동)</a> <!-- TODO: Update with actual API integration page URL -->
+            </div>
+                            <div class="nav-right">
+                                <button class="theme-toggle-btn" id="themeToggleBtn">🌙</button>
+                                <!-- Login Button (shown when not logged in) -->                <div class="nav-login-section" id="navLoginSection">
+                    <button class="nav-login-btn">로그인</button>
+                </div>
+                <!-- User Profile (shown when logged in) -->
+                <div class="nav-user-profile hidden" id="navUserProfile">
+                    <span class="nav-user-name" id="navLoggedInUser">사용자</span>
+                    <button class="nav-profile-btn">프로필</button>
+                    <button class="nav-logout-btn">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container chatbot-layout">
+        <!-- Left Advertisement Banner -->
+        <div class="left-ad-banner">
+            <div class="side-ad-content">
+                <div class="ad-rotation">
+                    <div class="ad-item">
+                        <img src="{% static 'img/ad_placeholder_a.png' %}" alt="Advertisement A"> <!-- TODO: Replace with dynamic ad image -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar (오른쪽에 표시되지만 클래스명은 유지) -->
+        <aside class="left-sidebar">
+
+            <!-- Character Info Display -->
+            <div class="character-info-display" id="characterInfoDisplay">
+                <div class="character-info-header">
+                    <div class="character-profile-avatar">🧙‍♂️</div>
+                    <div class="character-profile-info">
+                        <div class="character-profile-name" id="displayCharacterName">검색 결과가 여기에 표시됩니다</div>
+                        <div class="character-profile-server" id="displayServerName">-</div>
+                    </div>
+                </div>
+                
+                <div class="character-detailed-stats">
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">레벨</span>
+                        <span class="detail-stat-value" id="displayCharacterLevel">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">직업</span>
+                        <span class="detail-stat-value" id="displayCharacterJob">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">인기도</span>
+                        <span class="detail-stat-value" id="displayCharacterFame">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">전투력</span>
+                        <span class="detail-stat-value" id="displayCharacterPower">-</span>
+                    </div>
+                    <div class="detail-stat-row">
+                        <span class="detail-stat-label">유니온</span>
+                        <span class="detail-stat-value" id="displayUnionLevel">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Search Card -->
+            <div class="character-search-card">
+                    <div class="search-input-group">
+                        <input type="text" class="character-search-input" id="characterSearchInput" placeholder="캐릭터 닉네임 입력">
+                        <button class="character-search-btn">
+                            <span>검색</span>
+                        </button>
+                    </div>
+                    
+                    <div class="search-recent" id="recentSearches">
+                        <div class="search-recent-title">최근 검색</div>
+                        <div class="search-recent-list" id="recentSearchList">
+                            <span class="search-recent-item">오지환</span>
+                            <span class="search-recent-item">메이플유저</span>
+                            <span class="search-recent-item">초보자123</span>
+                        </div>
+                    </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-title">메이플스토리 정보탐색 ChatBot</div>
+            </div>
+            
+            <!-- Chat Messages Area -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Message -->
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="welcome-icon">🧚‍♀️</div>
+                    <div class="welcome-text">안녕하세요! 메이플스토리 정령이에요!</div>
+                    <div class="welcome-subtext">스킬, 사냥터, 장비, 보스 공략 등 메이플스토리에 관한 모든 것을 물어보세요.</div>
+                    
+                    <!-- Quick Suggestions -->
+                    <div class="quick-suggestions">
+                        <button class="suggestion-btn">메르세데스 4차 스킬트리</button>
+                        <button class="suggestion-btn">180렙 신궁 사냥터</button>
+                        <button class="suggestion-btn">뇌전 드랍장소</button>
+                        <button class="suggestion-btn">핑크색 치장 아이템</button>
+                        <button class="suggestion-btn">파편 원킬 공격력</button>
+                        <button class="suggestion-btn">보스 몬스터 추천</button>
+                    </div>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="message bot" id="typingIndicator" style="display: none;">
+                    <div class="message-avatar">🧚‍♀️</div>
+                    <div class="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Input Container -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea class="chat-input-main" placeholder="메이플스토리에 관해 궁금한 것을 물어보세요..." id="mainChatInput" rows="1"></textarea>
+                    <button class="chat-send-main" id="sendButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Left Sidebar (왼쪽에 표시되지만 클래스명은 유지) -->
+        <aside class="right-sidebar" id="rightSidebar">
+            <!-- Chat History (shown only when logged in) -->
+            <div class="chat-history-container hidden" id="chatHistoryContainer">
+                <div class="chat-history-header">CHAT BOT HISTORY</div>
+                <div class="chat-history-content" id="chatHistoryContent">
+                </div>
+            </div>
+            
+            
+        </aside>
+
+        <!-- Right Advertisement Banner -->
+        <div class="right-ad-banner">
+            <div class="side-ad-content">
+                <div class="ad-rotation">
+                    <div class="ad-item">
+                        <img src="{% static 'img/ad_placeholder_b.png' %}" alt="Advertisement B"> <!-- TODO: Replace with dynamic ad image -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Send Button -->
+    <div class="floating-send-btn">💬</div>
+
+    {% include 'accounts/_profile_popup.html' %}
+    {% include 'accounts/_login_popup.html' %}
+    {% include 'accounts/_signup_popup.html' %}
+    {% include 'accounts/_account_popup.html' %}
+
+    <script src="{% static 'js/common.js' %}" defer></script>
+    <script src="{% static 'js/chat.js' %}" defer></script>
+</body>
+</html>
