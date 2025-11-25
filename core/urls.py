@@ -21,6 +21,6 @@ urlpatterns = [
     path('api/health/', views.health_check_api, name='health_check_api'),
     
     # API - Legacy (하위 호환성 유지, 추후 제거 예정)
-    path('api/chatbot/', views.chatbot_request_api, name='chatbot_request_api'),  # → /chat/api/message/로 이동 권장
+    path('api/messages/', views.chatbot_request_api, name='chatbot_request_api'),  # → /chat/api/message/로 이동 권장
     path('api/character-search/', views.character_search_api, name='character_search_api'),  # → /character/api/search/로 이동 권장
 ]
