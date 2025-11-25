@@ -72,7 +72,7 @@ class MapleChatbot:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
-                toorch_dtype="auto",
+                torch_dtype="auto",
                 device_map="auto"
             )
             if self.memory_type == "buffer":
