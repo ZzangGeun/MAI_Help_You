@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/health/', views.health_check_api, name='health_check_api'),
 
     ## 네비게이션 버튼 동작 urls
+    path('api/chatbot/', views.chatbot_request_api, name='chatbot_request_api'),
     path('api/character-search/', views.character_search_api, name='character_search_api'),
 
 ]

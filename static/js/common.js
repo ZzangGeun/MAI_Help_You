@@ -364,18 +364,44 @@ function performLogin() {
     }
 }
 
-function performLogout() {
+async function performLogout() {
     showLoading('로그아웃 중...');
     
-    setTimeout(() => {
-        // Clear login state
+    try {
+        // 실제 Django API 호출
+        const response = await fetch('/accounts/api/logout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const data = await response.json();
+        
+        // 성공 여부와 관계없이 로컬 스토리지 클리어
         localStorage.removeItem('loginState');
         
         // Update UI
         updateLoginUI(null);
         hideLoading();
+        
+        if (response.ok && data.status === 'success') {
+            showNotification(data.message || '로그아웃되었습니다.', 'info');
+        } else {
+            showNotification('로그아웃되었습니다.', 'info');
+        }
+        
+        // 계정 팝업이 열려있으면 닫기
+        hideAccountPopup();
+        
+    } catch (error) {
+        console.error('Logout error:', error);
+        // 오류가 발생해도 로컬 로그아웃 처리
+        localStorage.removeItem('loginState');
+        updateLoginUI(null);
+        hideLoading();
         showNotification('로그아웃되었습니다.', 'info');
-    }, 500);
+    }
 }
 
 function updateLoginUI(loginData) {
@@ -438,6 +464,141 @@ function initializeLoginState() {
 }
 
 /**
+ * Show signup popup
+ */
+function showSignupPopup() {
+    const overlay = document.getElementById('signupPopupOverlay');
+    
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on user ID input
+        setTimeout(() => {
+            const userIdInput = document.getElementById('signupUserIdInput');
+            if (userIdInput) userIdInput.focus();
+        }, 100);
+    }
+}
+
+/**
+ * Hide signup popup
+ */
+function hideSignupPopup() {
+    const overlay = document.getElementById('signupPopupOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Clear form inputs
+        const userIdInput = document.getElementById('signupUserIdInput');
+        const passwordInput = document.getElementById('signupPasswordInput');
+        const confirmInput = document.getElementById('signupPasswordConfirmInput');
+        const mapleNicknameInput = document.getElementById('signupMapleNicknameInput');
+        const apiKeyInput = document.getElementById('signupNexonApiKeyInput');
+        
+        if (userIdInput) userIdInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+        if (confirmInput) confirmInput.value = '';
+        if (mapleNicknameInput) mapleNicknameInput.value = '';
+        if (apiKeyInput) apiKeyInput.value = '';
+    }
+}
+
+/**
+ * Perform signup
+ */
+async function performSignup() {
+    const userIdInput = document.getElementById('signupUserIdInput');
+    const passwordInput = document.getElementById('signupPasswordInput');
+    const confirmInput = document.getElementById('signupPasswordConfirmInput');
+    const mapleNicknameInput = document.getElementById('signupMapleNicknameInput');
+    const apiKeyInput = document.getElementById('signupNexonApiKeyInput');
+    
+    const user_id = userIdInput ? userIdInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+    const confirm_password = confirmInput ? confirmInput.value.trim() : '';
+    const maple_nickname = mapleNicknameInput ? mapleNicknameInput.value.trim() : '';
+    const nexon_api_key = apiKeyInput ? apiKeyInput.value.trim() : '';
+    
+    // 유효성 검사
+    if (!user_id || !password || !confirm_password || !maple_nickname) {
+        showNotification('필수 항목을 모두 입력해주세요.', 'warning');
+        return;
+    }
+    
+    if (!/^[a-zA-Z0-9_]{4,20}$/.test(user_id)) {
+        showNotification('아이디는 4~20자의 영문자, 숫자, 밑줄(_)만 사용할 수 있습니다.', 'warning');
+        return;
+    }
+    
+    if (password.length < 8) {
+        showNotification('비밀번호는 최소 8자 이상이어야 합니다.', 'warning');
+        return;
+    }
+    
+    if (password !== confirm_password) {
+        showNotification('비밀번호가 일치하지 않습니다.', 'warning');
+        return;
+    }
+    
+    if (maple_nickname.length > 12) {
+        showNotification('메이플 닉네임은 최대 12자까지 입력 가능합니다.', 'warning');
+        return;
+    }
+    
+    showLoading('회원가입 처리 중...');
+    
+    try {
+        // 실제 Django API 호출
+        const response = await fetch('/accounts/api/signup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: user_id,
+                password: password,
+                confirm_password: confirm_password,
+                maple_nickname: maple_nickname,
+                nexon_api_key: nexon_api_key
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.status === 'success') {
+            // 회원가입 성공
+            hideSignupPopup();
+            hideLoading();
+            showNotification(data.message || '회원가입이 완료되었습니다. 로그인해주세요.', 'success');
+            
+            // 로그인 팝업 열기
+            setTimeout(() => {
+                showLoginPopup();
+                // 가입한 아이디를 로그인 폼에 자동 입력
+                const loginUsernameInput = document.getElementById('popupUsernameInput');
+                if (loginUsernameInput) {
+                    loginUsernameInput.value = user_id;
+                    const loginPasswordInput = document.getElementById('popupPasswordInput');
+                    if (loginPasswordInput) loginPasswordInput.focus();
+                }
+            }, 500);
+        } else {
+            // 회원가입 실패
+            hideLoading();
+            showNotification(data.error || '회원가입에 실패했습니다.', 'error');
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        hideLoading();
+        showNotification('네트워크 오류가 발생했습니다.', 'error');
+    }
+}
+
+/**
  * Show login popup
  */
 function showLoginPopup() {
@@ -485,26 +646,42 @@ function hideLoginPopup() {
 /**
  * Popup login functionality
  */
-function performPopupLogin() {
+async function performPopupLogin() {
     const usernameInput = document.getElementById('popupUsernameInput');
     const passwordInput = document.getElementById('popupPasswordInput');
     
-    const username = usernameInput ? usernameInput.value.trim() : '';
+    const user_id = usernameInput ? usernameInput.value.trim() : '';
     const password = passwordInput ? passwordInput.value.trim() : '';
     
-    if (!username || !password) {
+    if (!user_id || !password) {
         showNotification('아이디와 비밀번호를 모두 입력해주세요.', 'warning');
         return;
     }
     
     showLoading('로그인 중...');
     
-    // Simulate login API call
-    setTimeout(() => {
-        if (username.length >= 3) {
+    try {
+        // 실제 Django API 호출
+        const response = await fetch('/accounts/api/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: user_id,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.status === 'success') {
+            // 로그인 성공
             const loginData = {
                 isLoggedIn: true,
-                username: username,
+                username: data.user.user_id,
+                email: data.user.email,
+                maple_nickname: data.user.maple_nickname,
                 loginTime: new Date().toISOString()
             };
             saveToStorage('loginState', loginData);
@@ -513,12 +690,17 @@ function performPopupLogin() {
             updateLoginUI(loginData);
             hideLoginPopup();
             hideLoading();
-            showNotification(`${username}님, 환영합니다!`, 'success');
+            showNotification(data.message || `${user_id}님, 환영합니다!`, 'success');
         } else {
+            // 로그인 실패
             hideLoading();
-            showNotification('올바른 아이디를 입력해주세요.', 'error');
+            showNotification(data.error || '로그인에 실패했습니다.', 'error');
         }
-    }, 1000);
+    } catch (error) {
+        console.error('Login error:', error);
+        hideLoading();
+        showNotification('네트워크 오류가 발생했습니다.', 'error');
+    }
 }
 
 /**
@@ -881,11 +1063,59 @@ function initializeCommon() {
 
     // Close popups with close buttons
     document.querySelector('.login-popup-close')?.addEventListener('click', hideLoginPopup);
+    document.querySelector('.signup-popup-close')?.addEventListener('click', hideSignupPopup);
     document.querySelector('.account-popup-close')?.addEventListener('click', hideAccountPopup);
     document.querySelector('.profile-popup-close')?.addEventListener('click', hideProfilePopup);
 
     // Popup actions
     document.querySelector('.login-popup-btn')?.addEventListener('click', performPopupLogin);
+    document.querySelector('.signup-popup-btn')?.addEventListener('click', performSignup);
+    
+    // 회원가입 팝업에서 로그인 팝업으로 이동
+    document.querySelector('.signup-to-login-link')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        hideSignupPopup();
+        showLoginPopup();
+    });
+    
+    // Enter key support for login popup
+    const popupUsernameInput = document.getElementById('popupUsernameInput');
+    const popupPasswordInput = document.getElementById('popupPasswordInput');
+    
+    if (popupUsernameInput) {
+        popupUsernameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (popupPasswordInput) {
+                    popupPasswordInput.focus();
+                }
+            }
+        });
+    }
+    
+    if (popupPasswordInput) {
+        popupPasswordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performPopupLogin();
+            }
+        });
+    }
+    
+    // 회원가입 링크 클릭 시 회원가입 페이지로 이동
+    document.querySelectorAll('.login-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const linkText = this.textContent.trim();
+            if (linkText === '회원가입') {
+                e.preventDefault();
+                hideLoginPopup();
+                showSignupPopup();
+            } else if (linkText === '비밀번호 찾기') {
+                e.preventDefault();
+                showNotification('비밀번호 찾기 기능은 준비 중입니다.', 'info');
+            }
+        });
+    });
     
     // Account popup buttons
     document.querySelector('#myInfoBtn')?.addEventListener('click', () => {
@@ -906,6 +1136,7 @@ function initializeCommon() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             hideLoginPopup();
+            hideSignupPopup();
             hideAccountPopup();
             hideProfilePopup();
         }
@@ -918,6 +1149,14 @@ function initializeCommon() {
             const loginModal = document.getElementById('loginPopupModal');
             if (loginModal && !loginModal.contains(e.target) && !e.target.closest('.nav-login-btn')) {
                 hideLoginPopup();
+            }
+        }
+        
+        const signupPopupOverlay = document.getElementById('signupPopupOverlay');
+        if (signupPopupOverlay && !signupPopupOverlay.classList.contains('hidden')) {
+            const signupModal = document.getElementById('signupPopupModal');
+            if (signupModal && !signupModal.contains(e.target)) {
+                hideSignupPopup();
             }
         }
 
