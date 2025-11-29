@@ -8,17 +8,14 @@ urlpatterns = [
     path('', views.main_page, name='main_page'),
     
     # API - Notices (공지사항)
-    path('api/notices/', views.notice_list_api, name='notice_list_api'),
     path('api/notices/cashshop/', views.notice_cashshop_api, name='notice_cashshop_api'),
     path('api/notices/update/', views.notice_update_api, name='notice_update_api'),
     path('api/notices/event/', views.notice_event_api, name='notice_event_api'),
-    
-    # API - Rankings (랭킹)
-    path('api/rankings/', views.ranking_api, name='ranking_api'),  # 통합 랭킹 API (?type=general|power)
-    path('api/rankings/overall/', views.ranking_overall_api, name='ranking_overall_api'),  # 레거시 지원
+    path('api/notices/json/', views.notice_json_api, name='notice_json_api'),  # JSON 파일 데이터 조회
+    path('api/rankings/json/', views.ranking_json_api, name='ranking_json_api'),  # 랭킹 JSON 파일 데이터 조회
     
     # API - System (시스템)
-    path('api/health/', views.health_check_api, name='health_check_api'),
+    # path('api/health/', views.health_check_api, name='health_check_api'),
     
     # API - Legacy (하위 호환성 유지, 추후 제거 예정)
     path('api/messages/', views.chatbot_request_api, name='chatbot_request_api'),  # → /chat/api/message/로 이동 권장

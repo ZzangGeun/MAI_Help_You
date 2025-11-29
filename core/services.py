@@ -1,71 +1,136 @@
 from django.conf import settings
 import asyncio
-import requests
-import aiohttp
 import logging
-from datetime import datetime, timedelta
+import json
 import os
-from dotenv import load_dotenv
+from datetime import timedelta
+from .api_client import get_api_data
 
-load_dotenv()
-
-BASE_URL = "https://open.api.nexon.com/maplestory/v1"
-NEXON_API_KEY = os.getenv('NEXON_API_KEY')
 logger = logging.getLogger(__name__)
 CACHE_DURATION = timedelta(hours=1)  # 캐시 유효 기간 설정 (1시간)
 
-#메인 페이지는 공지, 이벤트 목록 가져오기
-def get_api_data(endpoint, params=None):
-    headers = {'x-nxopen-api-key': NEXON_API_KEY}
-    url = f'{BASE_URL}{endpoint}'
-
-    # API 요청에 필요한 파라미터 설정
-    if params is None:
-        params = {}
-
-    # 날짜 파라미터가 필요한 엔드포인트 목록
-    date_required_endpoints = [
-        "/ranking/overall"  # 공지 관련 API는 date 파라미터를 사용하지 않습니다.
-    ]
-
-    # 해당 엔드포인트에 'date' 파라미터가 없으면 어제 날짜를 추가
-    if endpoint in date_required_endpoints and 'date' not in params:
-        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-        params['date'] = yesterday
-
-    try: 
-        response = requests.get(url, headers = headers , params=params)
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            logger.error(f'API 요청 실패: {url}, 상태 코드: {response.status_code}, 파라미터: {params}, 응답: {response.text}')
-            return None
-    
-    except requests.RequestException as e:
-        logger.error(f'API 요청 중 예외 발생: {url}, 오류: {e}')
-        return None
+# JSON 파일 저장 경로
+NOTICE_JSON_PATH = os.path.join(settings.BASE_DIR, 'character_data', 'notice_data.json')
+RANKING_JSON_PATH = os.path.join(settings.BASE_DIR, 'character_data', 'ranking_data.json')
 
 def get_notice_list():
-
+    """
+    공지사항 데이터를 Nexon API에서 가져와서 JSON 파일로 저장하고 반환합니다.
+    """
     notice_event = get_api_data("/notice-event")
-    # notice = get_api_data("/notice")
     notice_cashshop = get_api_data("/notice-cashshop")
     notice_update = get_api_data("/notice-update")
 
-    return {
-        "notice_event" : notice_event,
-        # "notice" : notice,
-        "notice_cashshop" : notice_cashshop,
-        "notice_update" : notice_update
+    notice_data = {
+        "notice_event": notice_event,
+        "notice_cashshop": notice_cashshop,
+        "notice_update": notice_update
     }
+    
+    # JSON 파일로 저장
+    save_notice_data_to_json(notice_data)
+
+    return notice_data
+
+
+def save_notice_data_to_json(notice_data):
+    """
+    공지사항 데이터를 JSON 파일로 저장합니다.
+    
+    Args:
+        notice_data (dict): 저장할 공지사항 데이터
+    """
+    try:
+        # character_data 디렉토리가 없으면 생성
+        os.makedirs(os.path.dirname(NOTICE_JSON_PATH), exist_ok=True)
+        
+        # JSON 파일로 저장 (한글 지원)
+        with open(NOTICE_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(notice_data, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"공지사항 데이터가 {NOTICE_JSON_PATH}에 저장되었습니다.")
+    except Exception as e:
+        logger.error(f"공지사항 데이터 저장 중 오류 발생: {e}")
+
+
+def load_notice_data_from_json():
+    """
+    JSON 파일에서 공지사항 데이터를 로드합니다.
+    
+    Returns:
+        dict: 로드된 공지사항 데이터, 파일이 없으면 빈 딕셔너리
+    """
+    try:
+        if os.path.exists(NOTICE_JSON_PATH):
+            with open(NOTICE_JSON_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"공지사항 데이터 로드 중 오류 발생: {e}")
+    
+    return {}
+
+
+def save_ranking_data_to_json(ranking_data):
+    """
+    랭킹 데이터를 JSON 파일로 저장합니다.
+    
+    Args:
+        ranking_data (dict): 저장할 랭킹 데이터
+    """
+    try:
+        # character_data 디렉토리가 없으면 생성
+        os.makedirs(os.path.dirname(RANKING_JSON_PATH), exist_ok=True)
+        
+        # JSON 파일로 저장 (한글 지원)
+        with open(RANKING_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(ranking_data, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"랭킹 데이터가 {RANKING_JSON_PATH}에 저장되었습니다.")
+    except Exception as e:
+        logger.error(f"랭킹 데이터 저장 중 오류 발생: {e}")
+
+
+def load_ranking_data_from_json():
+    """
+    JSON 파일에서 랭킹 데이터를 로드합니다.
+    
+    Returns:
+        dict: 로드된 랭킹 데이터, 파일이 없으면 빈 딕셔너리
+    """
+    try:
+        if os.path.exists(RANKING_JSON_PATH):
+            with open(RANKING_JSON_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"랭킹 데이터 로드 중 오류 발생: {e}")
+    
+    return {}
 
 
 def get_ranking_list():
-
+    """
+    랭킹 데이터를 Nexon API에서 가져와서 JSON 파일로 저장하고 반환합니다.
+    상위 50위까지만 저장합니다.
+    """
     overall_ranking = get_api_data("/ranking/overall")
     
-    return {
-        "overall_ranking" : overall_ranking
+    # JSON 구조: overall_ranking -> ranking 배열
+    ranking_list = []
+    if overall_ranking and isinstance(overall_ranking, dict):
+        ranking_list = overall_ranking.get('ranking', [])
+    elif isinstance(overall_ranking, list):
+        ranking_list = overall_ranking
+    
+    # 상위 50위까지만 저장
+    ranking_list = ranking_list[:50] if ranking_list else []
+    
+    ranking_data = {
+        "overall_ranking": ranking_list
     }
+    
+    # JSON 파일로 저장
+    save_ranking_data_to_json(ranking_data)
+    
+    return ranking_data
+
 

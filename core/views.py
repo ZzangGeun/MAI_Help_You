@@ -10,7 +10,6 @@ import asyncio
 import aiohttp
 import time
 import logging
-import psutil
 import json
 from .get_carousel_data import transform_to_carousel_format
 
@@ -22,18 +21,54 @@ logger = logging.getLogger(__name__)
 # HTML 페이지 뷰들
 def main_page(request):
     notice = get_notice_list()
-    carousel_notice = transform_to_carousel_format(notice)
     ranking = get_ranking_list()
+    carousel_notice = transform_to_carousel_format(notice)
+    notice_event_data = notice.get('notice_event') or {}
+    notice_update_data = notice.get('notice_update') or {}
+    notice_cashshop_data = notice.get('notice_cashshop') or {}
+    
+    # Ranking 데이터 추출
+    ranking_data = ranking.get('overall_ranking') or {}
+    
+    # overall_ranking은 {'ranking': [...]} 구조이므로 ranking 배열 추출
+    if isinstance(ranking_data, dict) and 'ranking' in ranking_data:
+        ranking_list = ranking_data['ranking']
+    elif isinstance(ranking_data, list):
+        ranking_list = ranking_data
+    else:
+        ranking_list = []
+    
+    # 5개씩 묶음으로 그룹화 (1-5위, 6-10위, 11-15위, ...)
+    grouped_rankings = []
+    for i in range(0, len(ranking_list), 5):
+        group = ranking_list[i:i+5]  # 5개씩 그룹
+        grouped_rankings.append(group)
+
+    # Extract lists from possible API response shapes
+    def extract_list(data):
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            for k in ('event_notice', 'update_notice', 'cashshop_notice', 'notices', 'data', 'results'):
+                if k in data and isinstance(data[k], list):
+                    return data[k]
+        return []
+
+    notice_events = extract_list(notice_event_data)
+    notice_updates = extract_list(notice_update_data)
+    notice_cashshops = extract_list(notice_cashshop_data)
 
     # JSON으로 변환하여 전달 (JavaScript에서 안전하게 사용 가능)
     context = {
         'events': json.dumps(carousel_notice.get('events', []), ensure_ascii=False),
         'cashItems': json.dumps(carousel_notice.get('cashItems', []), ensure_ascii=False),
-        **ranking,
-        'timestamp': int(time.time())  # 캐시 방지용 타임스탬프
+        'noticeEvents': json.dumps(notice_events or [], ensure_ascii=False),
+        'noticeUpdates': json.dumps(notice_updates or [], ensure_ascii=False),
+        'noticeCashshops': json.dumps(notice_cashshops or [], ensure_ascii=False),
+        'ranking': json.dumps(grouped_rankings or [], ensure_ascii=False),
+        'timestamp': int(time.time())  # 캐시 방지용 타임스탐프
     }
     
-
     return render(request, 'core/main_page.html', context)
 
 
@@ -81,30 +116,23 @@ def chatbot_request_api(request):
 
 
 @require_http_methods(["GET"])
-def notice_list_api(request):
-    """
-    공지사항 목록 조회 API (기본 Django 뷰)
-    GET /api/notice/
-    """
+def notice_event_api(request):
+    """이벤트 공지사항 API (기본 Django 뷰)"""
     try:
-        # 기존 함수 재사용
-        notice_data = get_notice_list()
+        from .services import get_api_data
+        notice_data = get_api_data("/notice-event")
         
         return JsonResponse({
-            'notices': notice_data.get('notices', []),
-            'total_count': len(notice_data.get('notices', [])),
+            'notices': notice_data or [],
             'status': 'success'
         }, status=200)
         
     except Exception as e:
-        logger.error(f"공지사항 조회 오류: {e}")
+        logger.error(f"이벤트 공지사항 조회 오류: {e}")
         return JsonResponse({
-            'error': f'공지사항 조회 중 오류가 발생했습니다: {str(e)}',
+            'error': f'이벤트 공지사항 조회 중 오류가 발생했습니다: {str(e)}',
             'status': 'error'
         }, status=500)
-
-
-
 
 
 # 추가 API 함수들
@@ -148,78 +176,65 @@ def notice_update_api(request):
         }, status=500)
 
 
-@require_http_methods(["GET"])
-def notice_event_api(request):
-    """이벤트 공지사항 API (기본 Django 뷰)"""
-    try:
-        from .services import get_api_data
-        notice_data = get_api_data("/notice-event")
-        
-        return JsonResponse({
-            'notices': notice_data or [],
-            'status': 'success'
-        }, status=200)
-        
-    except Exception as e:
-        logger.error(f"이벤트 공지사항 조회 오류: {e}")
-        return JsonResponse({
-            'error': f'이벤트 공지사항 조회 중 오류가 발생했습니다: {str(e)}',
-            'status': 'error'
-        }, status=500)
+# ============================================================================
+# JSON 데이터 API
+# ============================================================================
 
-@csrf_exempt
 @require_http_methods(["GET"])
-def ranking_api(request):
+def notice_json_api(request):
     """
-    통합 랭킹 API
-    GET /api/rankings/?type=general  - 종합 랭킹
-    GET /api/rankings/?type=power    - 전투력 랭킹
+    JSON 파일에서 공지사항 데이터를 로드하여 반환하는 API
+    
+    Returns:
+        JSON: {
+            "notice_event": [...],
+            "notice_update": [...],
+            "notice_cashshop": [...]
+        }
     """
     try:
-        ranking_type = request.GET.get('type', 'general')
-        ranking_data = get_ranking_list()
-        
-        if ranking_type == 'power':
-            # 전투력 랭킹 (가정: union_level 사용)
-            data = ranking_data.get('overall_ranking', [])
-        else:
-            # 종합 랭킹 (기본값)
-            data = ranking_data.get('overall_ranking', [])
+        from .services import load_notice_data_from_json
+        notice_data = load_notice_data_from_json()
         
         return JsonResponse({
-            'success': True,
-            'data': data,
-            'type': ranking_type,
+            'data': notice_data,
             'status': 'success'
         }, status=200)
         
     except Exception as e:
-        logger.error(f"랭킹 조회 오류: {e}")
+        logger.error(f"공지사항 JSON 데이터 조회 오류: {e}")
         return JsonResponse({
-            'success': False,
-            'error': f'랭킹 조회 중 오류가 발생했습니다: {str(e)}',
+            'error': f'공지사항 JSON 데이터 조회 중 오류가 발생했습니다: {str(e)}',
             'status': 'error'
         }, status=500)
 
 
-@csrf_exempt
 @require_http_methods(["GET"])
-def ranking_overall_api(request):
-    """전체 랭킹 API (기본 Django 뷰) - 레거시 지원"""
+def ranking_json_api(request):
+    """
+    JSON 파일에서 랭킹 데이터를 로드하여 반환하는 API
+    
+    Returns:
+        JSON: {
+            "overall_ranking": [...]
+        }
+    """
     try:
-        ranking_data = get_ranking_list()
+        from .services import load_ranking_data_from_json
+        ranking_data = load_ranking_data_from_json()
         
         return JsonResponse({
-            'ranking': ranking_data.get('overall_ranking', []),
+            'data': ranking_data,
             'status': 'success'
         }, status=200)
         
     except Exception as e:
-        logger.error(f"전체 랭킹 조회 오류: {e}")
+        logger.error(f"랭킹 JSON 데이터 조회 오류: {e}")
         return JsonResponse({
-            'error': f'전체 랭킹 조회 중 오류가 발생했습니다: {str(e)}',
+            'error': f'랭킹 JSON 데이터 조회 중 오류가 발생했습니다: {str(e)}',
             'status': 'error'
         }, status=500)
+
 
 
 @csrf_exempt
@@ -256,24 +271,3 @@ def character_search_api(request):
             'status': 'error'
         }, status=500)
 
-
-@require_http_methods(["GET"])
-def health_check_api(request):
-    """헬스 체크 API (기본 Django 뷰)"""
-    try:
-        import psutil
-        
-        return JsonResponse({
-            'status': 'healthy',
-            'timestamp': time.time(),
-            'cpu_usage': psutil.cpu_percent(),
-            'memory_usage': psutil.virtual_memory().percent
-        }, status=200)
-        
-    except Exception as e:
-        logger.error(f"헬스 체크 오류: {e}")
-        return JsonResponse({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': time.time()
-        }, status=500)
