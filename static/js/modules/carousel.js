@@ -33,9 +33,10 @@ let carouselIndex = { event: 0, cash: 0 };
  * Change carousel item
  */
 function changeCarousel(type, direction) {
-    const items = carouselData[type + 's'];
-    const display = document.getElementById(type + 'Display');
-    if (!display || !items) return;
+    // 'event' -> events, 'cash' -> cashItems (특이한 네이밍: cashItems)
+    const items = (type === 'cash') ? carouselData.cashItems : carouselData.events;
+    const display = document.getElementById((type === 'cash') ? 'cashDisplay' : 'eventDisplay');
+    if (!display || !items || items.length === 0) return;
     
     carouselIndex[type] += direction;
     if (carouselIndex[type] < 0) carouselIndex[type] = items.length - 1;

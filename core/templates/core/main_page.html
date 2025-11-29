@@ -196,56 +196,66 @@
 
     <!-- Modern 4-Grid Bottom Section -->
     <div class="bottom-section">
-        <!-- Event Card -->
+        <!-- Update Notice Card -->
+        <div class="section-card">
+            <div class="section-header update-header">
+                업데이트
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="notice-scroll-container" id="updateNoticeContainer">
+                    <!-- 업데이트 공지사항이 여기에 동적으로 삽입됩니다. -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Notice Card -->
         <div class="section-card">
             <div class="section-header event-header">
-                EVENT
+                이벤트
                 <div class="nav-arrows">
                     <button class="nav-arrow">◀</button>
                     <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
-                <div class="event-display" id="eventDisplay">
+                <div class="notice-scroll-container" id="eventNoticeContainer">
+                    <!-- 이벤트 공지사항이 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
 
-        <!-- Cash Shop Card -->
+        <!-- CashShop Notice Card -->
         <div class="section-card">
             <div class="section-header cash-header">
-                💎 CASH SHOP
+                캐쉬샵
                 <div class="nav-arrows">
                     <button class="nav-arrow">◀</button>
                     <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
-                <div class="cash-display" id="cashDisplay">
+                <div class="notice-scroll-container" id="cashshopNoticeContainer">
+                    <!-- 캐쉬샵 공지사항이 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
 
-        <!-- General Ranking Card -->
+        <!-- Combined Ranking Card -->
         <div class="section-card">
             <div class="section-header">
-                🏆 종합 랭킹 TOP 10
-            </div>
-            <div class="section-content">
-                <div class="ranking-scroll-container">
-                    <!-- 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                종합랭킹
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Power Ranking Card -->
-        <div class="section-card">
-            <div class="section-header">
-                ⚡ 전투력 랭킹 TOP 10
-            </div>
             <div class="section-content">
-                <div class="ranking-scroll-container">
-                    <!-- 전투력 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                <div class="ranking-scroll-container" id="rankingContainer">
+                    <!-- 종합 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
@@ -258,11 +268,18 @@
 
     <!-- 백엔드 데이터를 JavaScript로 전달 (스크립트보다 먼저 선언) -->
     <script>
-        window.carouselBackendData = {
-            events: {{ events|safe }},
-            cashItems: {{ cashItems|safe }}
+        window.noticeBackendData = {
+            events: {{ noticeEvents|safe }},
+            updates: {{ noticeUpdates|safe }},
+            cashshops: {{ noticeCashshops|safe }}
         };
-        console.log('Backend Data Loaded:', window.carouselBackendData);
+        window.rankingBackendData = {
+            ranking: {{ ranking|safe }}
+        };
+        console.log('Backend Data Loaded:', window.noticeBackendData);
+        console.log('Ranking Backend Data Loaded:', window.rankingBackendData);
+        console.log('Ranking array:', window.rankingBackendData.ranking);
+        console.log('Ranking array length:', window.rankingBackendData.ranking ? window.rankingBackendData.ranking.length : 0);
     </script>
 
     <script type="module" src="{% static 'js/common.js' %}"></script>
