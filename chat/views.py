@@ -1,85 +1,93 @@
+# chat/views.py
+
+import json
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-import json
-# from .chat_session import ChatSessionManager
-# from .models import ChatSession, ChatMessage
 
-def chatbot_page(request):
-    """
-    챗봇 페이지 렌더링
-    GET /chat/
-    """
-    return render(request, 'chatbot_page.html')
+# 동일 경로에 있는 chatbot.py 파일에서 함수/클래스 import
+from .chatbot import get_chatbot, clear_chatbot
+from .models import ChatSession 
 
-@csrf_exempt
-@require_POST
+@csrf_exempt # API 테스트를 위해 임시로 exempt (프로덕션에서는 CSRF 토큰 사용 권장)
+@require_http_methods(["POST"])
 def chat_api(request):
-    """API 엔드포인트: 채팅 메시지 처리"""
-    import logging
-    logger = logging.getLogger(__name__)
+    """
+    챗봇 대화 요청을 처리하고 응답을 반환하는 API
+    비로그인 사용자도 접근 가능 (DB 저장 안됨)
+    """
+    # 1. 사용자 식별: 로그인 시 user.id, 비로그인 시 session key
+    if request.user.is_authenticated:
+        session_id = f"user_{request.user.id}"
+        user_id = request.user.id
+    else:
+        # 비로그인 사용자는 Django 세션 키 사용
+        if not request.session.session_key:
+            request.session.create()
+        session_id = f"guest_{request.session.session_key}"
+        user_id = None
     
     try:
-        # JSON 데이터 파싱
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON in request body")
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        data = json.loads(request.body)
+        user_input = data.get('message', '').strip()
+
+        if not user_input:
+            return JsonResponse({'error': '메시지를 입력해주세요.'}, status=400)
         
-        message = data.get('message', '').strip()
-        session_id = data.get('session_id')
+        # 2. 세션별 챗봇 인스턴스 로드 또는 생성
+        chatbot = get_chatbot(
+            session_id=session_id,
+            user_id=user_id
+        )
         
-        # 입력 검증
-        if not message:
-            return JsonResponse({'error': 'No message provided'}, status=400)
+        # 3. 챗봇 응답 생성
+        result = chatbot.generate_response(user_input)
         
-        if len(message) > 1000:  # 메시지 길이 제한
-            return JsonResponse({'error': 'Message too long (max 1000 characters)'}, status=400)
-        
-        # 세션 관리자 초기화
-        user = request.user if request.user.is_authenticated else None
-        session_manager = ChatSessionManager(session_id=session_id, user=user)
-        
-        try:
-            session_id = session_manager.initialize_session()
-        except Exception as session_error:
-            logger.error(f"Session initialization failed: {str(session_error)}")
-            return JsonResponse({'error': 'Failed to initialize session'}, status=500)
-        
-        # 메시지 처리
-        try:
-            response = session_manager.process_message(message)
-        except Exception as process_error:
-            logger.error(f"Message processing failed: {str(process_error)}")
-            response = "죄송합니다. 메시지 처리 중 오류가 발생했습니다."
-        
-        logger.info(f"Chat API request processed successfully for session {session_id}")
-        
+        # 4. DB에 대화 기록 저장 (로그인 사용자만)
+        if user_id and result.get('response') and not result.get('error'):
+            chatbot.save_message_to_db(user_input, result['response'])
+
+        # 5. 결과 반환
         return JsonResponse({
-            'response': response,
-            'session_id': session_id,
-            'success': True
-        })
-        
+            'response': result.get('response'),
+            'thinking_content': result.get('thinking_content'),
+            'timestamp': result.get('timestamp'),
+            'status': 'success'
+        }, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': '잘못된 JSON 형식입니다.'}, status=400)
     except Exception as e:
-        logger.error(f"Unexpected error in chat_api: {str(e)}")
-        return JsonResponse({
-            'error': 'Internal server error',
-            'success': False
-        }, status=500)
+        return JsonResponse({'error': f'챗봇 처리 오류: {e}'}, status=500)
+
+
+def chatbot_page(request):
+    """챗봇 페이지 렌더링 (로그인 불필요)"""
+    return render(request, 'chat/chatbot_page.html')
+
 
 @login_required
 def chat_sessions(request):
-    """사용자의 모든 채팅 세션 목록 조회"""
-    sessions = ChatSession.objects.filter(user=request.user).order_by('-updated_at')
-    data = [{
-        'id': session.id,
-        'created_at': session.created_at,
-        'updated_at': session.updated_at,
-        'message_count': session.messages.count()
-    } for session in sessions]
-    
-    return JsonResponse({'sessions': data})
+    """사용자의 채팅 세션 목록 조회 (로그인 필수)"""
+    try:
+        sessions = ChatSession.objects.filter(
+            user=request.user,
+            is_active=True
+        ).order_by('-updated_at')
+        
+        sessions_data = [
+            {
+                'id': session.id,
+                'created_at': session.created_at.isoformat(),
+                'updated_at': session.updated_at.isoformat(),
+                'message_count': session.messages.count()
+            }
+            for session in sessions
+        ]
+        
+        return JsonResponse({'sessions': sessions_data}, status=200)
+        
+    except Exception as e:
+        return JsonResponse({'error': f'세션 조회 오류: {e}'}, status=500)

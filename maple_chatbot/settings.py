@@ -55,7 +55,7 @@ ROOT_URLCONF = "maple_chatbot.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],
+        "DIRS": [],  # 앱별 templates 폴더 사용으로 변경
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

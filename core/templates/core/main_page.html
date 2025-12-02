@@ -14,7 +14,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="{% url 'main_page' %}" class="logo">
+            <a href="{% url 'core:main_page' %}" class="logo">
                 <div class="logo-icon">MAI</div>
                 Maple Story Chatbot
             </a>
@@ -25,8 +25,8 @@
     <nav class="navigation">
         <div class="nav-content">
             <div class="nav-left">
-                <a href="{% url 'main_page' %}" class="nav-item active">홈</a>
-                <a href="{% url 'chatbot' %}" class="nav-item">CHAT BOT</a>
+                <a href="{% url 'core:main_page' %}" class="nav-item active">홈</a>
+                <a href="{% url 'chat:chatbot_page' %}" class="nav-item">CHAT BOT</a>
                 <a href="{% url 'character:character_info_page' %}" class="nav-item">캐릭터 검색</a>
                 <a href="#cube" class="nav-item">큐브</a>
                 <a href="#starforce" class="nav-item">스타포스</a>
@@ -196,75 +196,93 @@
 
     <!-- Modern 4-Grid Bottom Section -->
     <div class="bottom-section">
-        <!-- Event Card -->
+        <!-- Update Notice Card -->
+        <div class="section-card">
+            <div class="section-header update-header">
+                업데이트
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="notice-scroll-container" id="updateNoticeContainer">
+                    <!-- 업데이트 공지사항이 여기에 동적으로 삽입됩니다. -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Notice Card -->
         <div class="section-card">
             <div class="section-header event-header">
-                🎯 EVENT
+                이벤트
                 <div class="nav-arrows">
                     <button class="nav-arrow">◀</button>
                     <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
-                <div class="event-display" id="eventDisplay">
-                    <div class="event-icon">🎮</div>
-                    <div class="event-title-modern">윈터 스페셜 이벤트</div>
-                    <div class="event-description">12월 한정 특별 이벤트가 진행중입니다</div>
-                    <div class="event-date-modern">📅 2024.12.01 ~ 2024.12.31</div>
+                <div class="notice-scroll-container" id="eventNoticeContainer">
+                    <!-- 이벤트 공지사항이 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
 
-        <!-- Cash Shop Card -->
+        <!-- CashShop Notice Card -->
         <div class="section-card">
             <div class="section-header cash-header">
-                💎 CASH SHOP
+                캐쉬샵
                 <div class="nav-arrows">
                     <button class="nav-arrow">◀</button>
                     <button class="nav-arrow">▶</button>
                 </div>
             </div>
             <div class="section-content">
-                <div class="cash-display" id="cashDisplay">
-                    <div class="cash-banner-image">🎭</div>
-                    <div class="cash-banner-title">신년 한정 코스튬</div>
-                    <div class="cash-banner-subtitle">50% 할인 진행중</div>
-                    <div class="cash-banner-price">2,400 캐시</div>
+                <div class="notice-scroll-container" id="cashshopNoticeContainer">
+                    <!-- 캐쉬샵 공지사항이 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
 
-        <!-- General Ranking Card -->
+        <!-- Combined Ranking Card -->
         <div class="section-card">
             <div class="section-header">
-                🏆 종합 랭킹 TOP 10
-            </div>
-            <div class="section-content">
-                <div class="ranking-scroll-container">
-                    <!-- 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                종합랭킹
+                <div class="nav-arrows">
+                    <button class="nav-arrow">◀</button>
+                    <button class="nav-arrow">▶</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Power Ranking Card -->
-        <div class="section-card">
-            <div class="section-header">
-                ⚡ 전투력 랭킹 TOP 10
-            </div>
             <div class="section-content">
-                <div class="ranking-scroll-container">
-                    <!-- 전투력 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
+                <div class="ranking-scroll-container" id="rankingContainer">
+                    <!-- 종합 랭킹 정보가 여기에 동적으로 삽입됩니다. -->
                 </div>
             </div>
         </div>
     </div>
 
-    {% include '_profile_popup.html' %}
-    {% include '_login_popup.html' %}
-    {% include '_signup_popup.html' %}
-    {% include '_account_popup.html' %}
+    {% include 'accounts/_profile_popup.html' %}
+    {% include 'accounts/_login_popup.html' %}
+    {% include 'accounts/_signup_popup.html' %}
+    {% include 'accounts/_account_popup.html' %}
 
-    <script src="{% static 'js/common.js' %}" defer></script>
-    <script src="{% static 'js/home.js' %}" defer></script>
+    <!-- 백엔드 데이터를 JavaScript로 전달 (스크립트보다 먼저 선언) -->
+    <script>
+        window.noticeBackendData = {
+            events: {{ noticeEvents|safe }},
+            updates: {{ noticeUpdates|safe }},
+            cashshops: {{ noticeCashshops|safe }}
+        };
+        window.rankingBackendData = {
+            ranking: {{ ranking|safe }}
+        };
+        console.log('Backend Data Loaded:', window.noticeBackendData);
+        console.log('Ranking Backend Data Loaded:', window.rankingBackendData);
+        console.log('Ranking array:', window.rankingBackendData.ranking);
+        console.log('Ranking array length:', window.rankingBackendData.ranking ? window.rankingBackendData.ranking.length : 0);
+    </script>
+
+    <script type="module" src="{% static 'js/common.js' %}"></script>
+    <script type="module" src="{% static 'js/home.js' %}"></script>
 </body>
 </html>
