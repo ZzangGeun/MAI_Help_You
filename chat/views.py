@@ -1,10 +1,18 @@
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 import json
 # from .chat_session import ChatSessionManager
 # from .models import ChatSession, ChatMessage
+
+def chatbot_page(request):
+    """
+    챗봇 페이지 렌더링
+    GET /chat/
+    """
+    return render(request, 'chatbot_page.html')
 
 @csrf_exempt
 @require_POST
