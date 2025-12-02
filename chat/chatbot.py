@@ -7,7 +7,7 @@ from datetime import datetime
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
-from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
+# from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
 from langchain_core.messages import HumanMessage, AIMessage
 
 # Django 모델 import (DB 저장용)

@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # UserProfile 모델: Django의 기본 User 모델을 확장하여 추가 정보 저장
 class UserProfile(models.Model):
     # 1:1 관계 설정: Django 기본 User와 연결
