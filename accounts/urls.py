@@ -4,12 +4,12 @@ from . import views
 app_name = 'accounts'
 
 urlpatterns = [
-    # 회원가입 API
+    # API - Authentication (인증)
     path('api/signup/', views.signup_api, name='signup_api'),
-    
-    # 로그인 API
     path('api/login/', views.login_api, name='login_api'),
-
-    # 로그아웃 API
     path('api/logout/', views.logout_api, name='logout_api'),
+    
+    # API - User Profile (사용자 프로필)
+    # path('api/profile/', views.profile_api, name='profile_api'),  # TODO: 구현 필요
+    # path('api/profile/update/', views.profile_update_api, name='profile_update_api'),  # TODO: 구현 필요
 ]

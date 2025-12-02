@@ -1,20 +1,23 @@
 from django.urls import path
 from . import views
 
-# URL 패턴 이름 변경: character_info_view -> character_info
+app_name = 'core'
+
 urlpatterns = [
-    # HTML 페이지
+    # Pages (HTML 렌더링)
     path('', views.main_page, name='main_page'),
     
-    # JSON API 엔드포인트  
-    path('api/notice/', views.notice_list_api, name='notice_list_api'),
-    path('api/notice-cashshop/', views.notice_cashshop_api, name='notice_cashshop_api'),
-    path('api/notice-update/', views.notice_update_api, name='notice_update_api'),
-    path('api/notice-event/', views.notice_event_api, name='notice_event_api'),
-    path('api/ranking-overall/', views.ranking_overall_api, name='ranking_overall_api'),
-    path('api/health/', views.health_check_api, name='health_check_api'),
-
-    ## 네비게이션 버튼 동작 urls
-    path('api/character-search/', views.character_search_api, name='character_search_api'),
-
+    # API - Notices (공지사항)
+    path('api/notices/cashshop/', views.notice_cashshop_api, name='notice_cashshop_api'),
+    path('api/notices/update/', views.notice_update_api, name='notice_update_api'),
+    path('api/notices/event/', views.notice_event_api, name='notice_event_api'),
+    path('api/notices/json/', views.notice_json_api, name='notice_json_api'),  # JSON 파일 데이터 조회
+    path('api/rankings/json/', views.ranking_json_api, name='ranking_json_api'),  # 랭킹 JSON 파일 데이터 조회
+    
+    # API - System (시스템)
+    # path('api/health/', views.health_check_api, name='health_check_api'),
+    
+    # API - Legacy (하위 호환성 유지, 추후 제거 예정)
+    path('api/messages/', views.chatbot_request_api, name='chatbot_request_api'),  # → /chat/api/message/로 이동 권장
+    path('api/character-search/', views.character_search_api, name='character_search_api'),  # → /character/api/search/로 이동 권장
 ]
