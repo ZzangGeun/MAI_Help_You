@@ -175,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < flatList.length; i += 5) {
             groupedData.push(flatList.slice(i, i + 5));
         }
-        console.log('Ranking data flattened and regrouped into', groupedData.length, 'groups');
 
         container.innerHTML = ''; // 기존 내용 비우기
         
@@ -207,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                const rankBadgeClass = item.ranking <= 3 ? `top-${item.ranking}` : 'other';
+                const rankBadgeClass = item.ranking <= 5 ? `top-${item.ranking}` : 'other';
                 html += `
                     <div class="ranking-group-item" style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
                         <div style="display: flex; align-items: center; gap: 8px;">
