@@ -8,6 +8,7 @@ load_dotenv()
 
 BASE_URL = "https://open.api.nexon.com/maplestory/v1"
 NEXON_API_KEY = os.getenv('NEXON_API_KEY')
+print(f"NEXON_API_KEY: {NEXON_API_KEY}")
 logger = logging.getLogger(__name__)
 
 
