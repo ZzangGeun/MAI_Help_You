@@ -19,6 +19,8 @@ def transform_to_carousel_format(api_data: Dict[str, Any]) -> Dict[str, List[Dic
     """
     API에서 가져온 복잡한 공지 데이터를 프론트엔드 캐러셀 형식으로 변환합니다.
     """
+    if api_data is None:
+        return {"events": [], "cashItems": []}
     
     events = []
     cash_items = []
