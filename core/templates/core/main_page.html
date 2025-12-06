@@ -276,10 +276,6 @@
         window.rankingBackendData = {
             ranking: {{ ranking|safe }}
         };
-        console.log('Backend Data Loaded:', window.noticeBackendData);
-        console.log('Ranking Backend Data Loaded:', window.rankingBackendData);
-        console.log('Ranking array:', window.rankingBackendData.ranking);
-        console.log('Ranking array length:', window.rankingBackendData.ranking ? window.rankingBackendData.ranking.length : 0);
     </script>
 
     <script type="module" src="{% static 'js/common.js' %}"></script>
