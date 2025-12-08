@@ -63,11 +63,6 @@ def chat_api(request):
         return JsonResponse({'error': f'챗봇 처리 오류: {e}'}, status=500)
 
 
-def chatbot_page(request):
-    """챗봇 페이지 렌더링 (로그인 불필요)"""
-    return render(request, 'chat/chatbot_page.html')
-
-
 @login_required
 def chat_sessions(request):
     """사용자의 채팅 세션 목록 조회 (로그인 필수)"""
