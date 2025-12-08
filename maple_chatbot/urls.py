@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import serve_react
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -17,6 +18,9 @@ urlpatterns = [
     
     # Accounts
     path('accounts/', include('accounts.urls')),
+
+    # Catch-all for React Client-side Routing
+    re_path(r'^.*$', serve_react, name='react_app'),
 ]
 
 # Serve media files in development

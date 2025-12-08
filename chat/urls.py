@@ -1,11 +1,12 @@
 from django.urls import path
 from . import views
+from core.views import serve_react
 
 app_name = 'chat'
 
 urlpatterns = [
     # Pages (HTML 렌더링)
-    path('', views.chatbot_page, name='chatbot_page'),
+    path('', serve_react, name='chatbot_page'),
     
     # API - Chat Messages (채팅 메시지)
     path('api/messages/', views.chat_api, name='chat_message_api'),
