@@ -40,6 +40,7 @@ API_ENDPOINTS = {
     "get_character_hexamatrix_info": "/character/hexamatrix",
     "get_character_hexamatrix_stat_info": "/character/hexamatrix-stat",
     "get_character_other_stat_info": "/character/other-stat",
+    "get_character_popularity_info": "/character/popularity",
 }
 
 def get_api_url(endpoint, **params):
@@ -111,10 +112,16 @@ async def all_info_extract(character_info):
         other_stat_info = await extract_other_stat(character_info.get('get_character_other_stat_info', {}))
         logger.info(f"기타 스탯 정보 추출 완료: {type(other_stat_info)}")
         
+        # 인기도 정보 처리 (basic_info에 병합)
+        basic_info = character_info.get('get_character_basic_info', {})
+        popularity_info = character_info.get('get_character_popularity_info', {})
+        if popularity_info and 'popularity' in popularity_info:
+            basic_info['character_popularity'] = popularity_info['popularity']
+        
         logger.info("=== 모든 정보 추출 완료 ===")
         
         return {
-            'basic_info': character_info.get('get_character_basic_info', {}),
+            'basic_info': basic_info,
             'stat_info': stat_info,
             'item_info': item_info,
             'ability_info': ability_info,

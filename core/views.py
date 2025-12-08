@@ -1,75 +1,22 @@
 from django.http.request import HttpRequest
-from django.shortcuts import render, redirect
-from .services import get_notice_list, get_api_data, get_ranking_list
-import requests
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
-from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
-import asyncio
-import aiohttp
-import time
 import logging
 import json
-from .get_carousel_data import transform_to_carousel_format
-
-
+import os
+from django.conf import settings
+from .services import get_api_data
 
 logger = logging.getLogger(__name__)
 
 
-# HTML 페이지 뷰들
-def main_page(request):
-    notice = get_notice_list()
-    ranking = get_ranking_list()
-    carousel_notice = transform_to_carousel_format(notice)
-    notice_event_data = notice.get('notice_event') or {}
-    notice_update_data = notice.get('notice_update') or {}
-    notice_cashshop_data = notice.get('notice_cashshop') or {}
-    
-    # Ranking 데이터 추출
-    ranking_data = ranking.get('overall_ranking') or {}
-    
-    # overall_ranking은 {'ranking': [...]} 구조이므로 ranking 배열 추출
-    if isinstance(ranking_data, dict) and 'ranking' in ranking_data:
-        ranking_list = ranking_data['ranking']
-    elif isinstance(ranking_data, list):
-        ranking_list = ranking_data
-    else:
-        ranking_list = []
-    
-    # 5개씩 묶음으로 그룹화 (1-5위, 6-10위, 11-15위, ...)
-    grouped_rankings = []
-    for i in range(0, len(ranking_list), 5):
-        group = ranking_list[i:i+5]  # 5개씩 그룹
-        grouped_rankings.append(group)
-
-    # Extract lists from possible API response shapes
-    def extract_list(data):
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            for k in ('event_notice', 'update_notice', 'cashshop_notice', 'notices', 'data', 'results'):
-                if k in data and isinstance(data[k], list):
-                    return data[k]
-        return []
-
-    notice_events = extract_list(notice_event_data)
-    notice_updates = extract_list(notice_update_data)
-    notice_cashshops = extract_list(notice_cashshop_data)
-
-    # JSON으로 변환하여 전달 (JavaScript에서 안전하게 사용 가능)
-    context = {
-        'events': json.dumps(carousel_notice.get('events', []), ensure_ascii=False),
-        'cashItems': json.dumps(carousel_notice.get('cashItems', []), ensure_ascii=False),
-        'noticeEvents': json.dumps(notice_events or [], ensure_ascii=False),
-        'noticeUpdates': json.dumps(notice_updates or [], ensure_ascii=False),
-        'noticeCashshops': json.dumps(notice_cashshops or [], ensure_ascii=False),
-        'ranking': json.dumps(grouped_rankings or [], ensure_ascii=False),
-        'timestamp': int(time.time())  # 캐시 방지용 타임스탐프
-    }
-    
-    return render(request, 'core/main_page.html', context)
+def serve_react(request):
+    try:
+        with open(os.path.join(settings.BASE_DIR, 'static', 'dist', 'index.html')) as f:
+            return HttpResponse(f.read())
+    except FileNotFoundError:
+        return HttpResponse("React build not found. Please run 'npm run build' in frontend directory.", status=501)
 
 
 # ============================================================================
@@ -119,7 +66,7 @@ def chatbot_request_api(request):
 def notice_event_api(request):
     """이벤트 공지사항 API (기본 Django 뷰)"""
     try:
-        from .services import get_api_data
+        # from .services import get_api_data
         notice_data = get_api_data("/notice-event")
         
         return JsonResponse({
@@ -140,7 +87,7 @@ def notice_event_api(request):
 def notice_cashshop_api(request):
     """캐시샵 공지사항 API (기본 Django 뷰)"""
     try:
-        from .services import get_api_data
+        # from .services import get_api_data
         notice_data = get_api_data("/notice-cashshop")
         
         return JsonResponse({
@@ -160,7 +107,7 @@ def notice_cashshop_api(request):
 def notice_update_api(request):
     """업데이트 공지사항 API (기본 Django 뷰)"""
     try:
-        from .services import get_api_data
+        # from .services import get_api_data
         notice_data = get_api_data("/notice-update")
         
         return JsonResponse({
