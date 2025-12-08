@@ -218,10 +218,10 @@ body {
     max-width: 1800px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(200px, 300px) 1fr minmax(200px, 300px); /* sidebar-right, main-content, sidebar-left */
-    grid-template-areas: "sidebar-right main-content sidebar-left";
-    gap: 20px;
-    padding: 15px 15px 0;
+    grid-template-columns: minmax(240px, 300px) 1fr minmax(240px, 300px); /* sidebar-left, main-content, sidebar-right */
+    grid-template-areas: "sidebar-left main-content sidebar-right";
+    gap: 15px; /* Reduced gap */
+    padding: 10px 15px 0; /* Reduced top padding */
     align-items: stretch;
     min-height: auto;
     height: fit-content;

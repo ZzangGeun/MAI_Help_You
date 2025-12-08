@@ -6,7 +6,7 @@ app_name = 'core'
 
 urlpatterns = [
     # Pages (HTML 렌더링)
-    path('', views.main_page, name='main_page'),
+    path('', views.serve_react, name='main_page'),
     
     # API - Home Data (통합 데이터)
     path('api/home/data/', HomeDataAPIView.as_view(), name='home_data_api'),
