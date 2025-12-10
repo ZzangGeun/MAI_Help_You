@@ -74,8 +74,12 @@ WSGI_APPLICATION = "maple_chatbot.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "maple_chatbot_db",        # 위에서 생성한 DB명
+        "USER": "mai_user",                 # PostgreSQL 사용자명
+        "PASSWORD": "ccg2558!@#",        # PostgreSQL 비밀번호
+        "HOST": "localhost",                # 또는 DB 서버 IP
+        "PORT": "5432",                     # PostgreSQL 기본 포트
     }
 }
 

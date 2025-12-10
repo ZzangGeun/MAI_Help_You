@@ -29,29 +29,33 @@ def signup_api(request):
         data = json.loads(request.body)
         user_id = data.get('user_id', '').strip()
         password = data.get('password', '').strip()
-        confirm_password = data.get('confirm_password', '').strip()
-        maple_nickname = data.get('maple_nickname', '').strip()  # 필수
-        nexon_api_key = data.get('nexon_api_key', '').strip()  # 선택사항
+        nickname = data.get('nickname', '').strip()  # 필수
+        # 기존 UserProfile 필드와 호환을 위해 내부적으로는 maple_nickname에 저장합니다
+        nexon_api_key = data.get('nexon_api_key', '').strip()  # 선택사항 (옵션)
 
         # 유효성 검사
-        if not all ([user_id, password, confirm_password, maple_nickname]):
-            return JsonResponse({'error': '필수 필드를 모두 채워주세요.'}, status=400)
-        
-        if not re.match(r'^[a-zA-Z0-9_]{6,20}$', user_id):
-            return JsonResponse({'error': '아이디는 6~20자의 영문자, 숫자, 밑줄(_)만 사용할 수 있습니다.'}, status=400)
-        
-        if len(password) < 8:
-            return JsonResponse({'error': '비밀번호는 최소 8자 이상이어야 합니다.'}, status=400)
-        
-        if password != confirm_password:
-            return JsonResponse({'error': '비밀번호와 비밀번호 확인이 일치하지 않습니다.'}, status=400)
+        # 필수 필드 체크
+        if not all([user_id, password, nickname]):
+            return JsonResponse({'error': '필수 필드를 모두 채워주세요.', 'status': 'error'}, status=400)
+
+        # user_id: 4-20자, 영문+숫자만
+        if not re.match(r'^[A-Za-z0-9]{4,20}$', user_id):
+            return JsonResponse({'error': '아이디는 4~20자의 영문자와 숫자만 사용 가능합니다.', 'status': 'error'}, status=400)
+
+        # password: 최소 8자, 영문 + 숫자 + 특수문자 포함
+        if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$', password):
+            return JsonResponse({'error': '비밀번호는 최소 8자이며 영문자, 숫자, 특수문자를 모두 포함해야 합니다.', 'status': 'error'}, status=400)
+
+        # nickname: 2-10자, 한글/영문/숫자
+        if not re.match(r'^[\uAC00-\uD7A3A-Za-z0-9]{2,10}$', nickname):
+            return JsonResponse({'error': '닉네임은 2~10자의 한글/영문/숫자만 가능합니다.', 'status': 'error'}, status=400)
         
         # 중복 검사
         if User.objects.filter(username=user_id).exists():
-            return JsonResponse({'error': '이미 존재하는 아이디입니다.'}, status=400)
-        
-        if UserProfile.objects.filter(maple_nickname=maple_nickname).exists():
-            return JsonResponse({'error': '이미 사용 중인 메이플 닉네임입니다.'}, status=400)
+            return JsonResponse({'error': '이미 존재하는 아이디입니다.', 'status': 'error'}, status=400)
+
+        if UserProfile.objects.filter(maple_nickname=nickname).exists():
+            return JsonResponse({'error': '이미 사용 중인 닉네임입니다.', 'status': 'error'}, status=400)
         
 
         # 사용자 생성
@@ -63,7 +67,7 @@ def signup_api(request):
         # 5. UserProfile 생성 및 연결
         UserProfile.objects.create(
             user=user,
-            maple_nickname=maple_nickname,
+            maple_nickname=nickname,
             nexon_api_key=nexon_api_key if nexon_api_key else None
         )
 
@@ -73,6 +77,7 @@ def signup_api(request):
             'message': '회원가입이 완료되었습니다.',
             'user': {
                 'user_id': user.username,
+                'nickname': nickname,
             },
             'status': 'success'
         }, status=201)
@@ -99,7 +104,7 @@ def login_api(request):
         password = data.get('password', '').strip()
 
         if not user_id or not password:
-            return JsonResponse({'error': '아이디와 비밀번호를 모두 입력해주세요.'}, status=400)
+            return JsonResponse({'error': '아이디와 비밀번호를 모두 입력해주세요.', 'status': 'error'}, status=400)
 
         # 2. 사용자 인증 (Authenticate)
         # DB에 저장된 암호화된 비밀번호와 입력된 비밀번호를 비교하여 User 객체를 반환하거나 None 반환
@@ -109,36 +114,22 @@ def login_api(request):
             # 3. 인증 성공: 세션 생성 및 유지 (Login)
             # request 객체에 사용자 정보를 담아 세션을 시작합니다.
             login(request, user)
-            
-            # 4. UserProfile에서 메이플 닉네임 가져오기
-            try:
-                profile = get_object_or_404(UserProfile, user=user)
-                maple_nickname = profile.maple_nickname
-            except:
-                # UserProfile이 없을 경우 (예외 처리)
-                maple_nickname = None 
-
             logger.info(f"로그인 성공: {user_id}")
 
             return JsonResponse({
-                'message': f'{user_id}님, 환영합니다!',
-                'user': {
-                    'user_id': user.username,
-                    'email': user.email,
-                    'maple_nickname': maple_nickname,
-                },
+                'message': '로그인에 성공했습니다.',
                 'status': 'success'
             }, status=200)
             
         else:
             # 5. 인증 실패
-            return JsonResponse({'error': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=401)
+            return JsonResponse({'error': '아이디 또는 비밀번호가 올바르지 않습니다.', 'status': 'error'}, status=401)
 
     except json.JSONDecodeError:
         return JsonResponse({'error': '잘못된 JSON 형식입니다.'}, status=400)
     except Exception as e:
         logger.error(f"로그인 오류: {e}")
-        return JsonResponse({'error': '로그인 중 서버 오류가 발생했습니다.'}, status=500)
+        return JsonResponse({'error': '로그인 중 서버 오류가 발생했습니다.', 'status': 'error'}, status=500)
 
     
 
@@ -151,7 +142,7 @@ def logout_api(request):
     """
     try:
         if not request.user.is_authenticated:
-            return JsonResponse({'error': '로그인 상태가 아닙니다.'}, status=401)
+            return JsonResponse({'error': '로그인 상태가 아닙니다.', 'status': 'error'}, status=401)
         
         user_id = request.user.username
         
@@ -167,4 +158,4 @@ def logout_api(request):
     
     except Exception as e:
         logger.error(f"로그아웃 오류: {e}")
-        return JsonResponse({'error': '로그아웃 중 서버 오류가 발생했습니다.'}, status=500)
+        return JsonResponse({'error': '로그아웃 중 서버 오류가 발생했습니다.', 'status': 'error'}, status=500)

@@ -7,17 +7,20 @@ import json
 import os
 from django.conf import settings
 from .services import get_api_data
+from pathlib import Path
+
 
 logger = logging.getLogger(__name__)
 
 
 def serve_react(request):
+    index_path = Path(settings.BASE_DIR) / 'static' / 'dist' / 'index.html'
     try:
-        with open(os.path.join(settings.BASE_DIR, 'static', 'dist', 'index.html')) as f:
-            return HttpResponse(f.read())
+        with index_path.open('rb') as f:
+            content = f.read()
+        return HttpResponse(content, content_type='text/html; charset=utf-8')
     except FileNotFoundError:
         return HttpResponse("React build not found. Please run 'npm run build' in frontend directory.", status=501)
-
 
 # ============================================================================
 # API Views
