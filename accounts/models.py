@@ -14,18 +14,28 @@ class UserProfile(models.Model):
         related_name='profile'
     )
     
-    maple_nickname = models.CharField(
-        max_length=12,  # 메이플스토리 닉네임 최대 길이
-        unique=True,  # 중복 방지
-        verbose_name='메이플 닉네임'
-    )
-    
     nexon_api_key = models.CharField(
         max_length=255,
-        blank=True,  # 선택사항
+        blank=True,
         null=True,
         verbose_name='넥슨 API 키',
-        help_text='넥슨 오픈 API 키 (선택사항)'
+        help_text='넥슨 오픈 API 키'
+    )
+
+    maple_nickname = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='메이플 닉네임',
+        help_text='메이플 닉네임'
+    )
+
+    character_ocid = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='캐릭터 OCID',
+        help_text='캐릭터 OCID'
     )
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
@@ -36,5 +46,5 @@ class UserProfile(models.Model):
         verbose_name_plural = '사용자 프로필들'
     
     def __str__(self):
-        return f"{self.user.username} - {self.maple_nickname}"
+        return f"{self.user.username}'s Profile"
 

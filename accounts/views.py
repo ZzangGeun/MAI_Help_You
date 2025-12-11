@@ -17,26 +17,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
+# character 앱에서 정보 추출 함수 가져오기
+from character.get_character_info import get_character_data, process_signup_with_key
+import asyncio
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def signup_api(request):
     """
-    회원가입 API (Django 표준 User & UserProfile 사용)
+    회원가입 API
     POST /accounts/api/signup/
+    Request Body: {
+        "user_id": "...",
+        "password": "...",
+        "nexon_api_key": "..."    # 선택 (입력 시 자동 캐릭터 연동)
+    }
     """
     try:
-        # 데이터 파싱, 정리
+        # 데이터 파싱
         data = json.loads(request.body)
         user_id = data.get('user_id', '').strip()
         password = data.get('password', '').strip()
-        nickname = data.get('nickname', '').strip()  # 필수
-        # 기존 UserProfile 필드와 호환을 위해 내부적으로는 maple_nickname에 저장합니다
-        nexon_api_key = data.get('nexon_api_key', '').strip()  # 선택사항 (옵션)
+        # character_name은 입력받지 않아도 됨 (API Key로 자동 탐색)
+        nexon_api_key = data.get('nexon_api_key', '').strip()
 
         # 유효성 검사
-        # 필수 필드 체크
-        if not all([user_id, password, nickname]):
-            return JsonResponse({'error': '필수 필드를 모두 채워주세요.', 'status': 'error'}, status=400)
+        if not all([user_id, password]):
+            return JsonResponse({'error': '필수 필드(아이디, 비밀번호)를 채워주세요.', 'status': 'error'}, status=400)
 
         # user_id: 4-20자, 영문+숫자만
         if not re.match(r'^[A-Za-z0-9]{4,20}$', user_id):
@@ -45,39 +54,53 @@ def signup_api(request):
         # password: 최소 8자, 영문 + 숫자 + 특수문자 포함
         if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$', password):
             return JsonResponse({'error': '비밀번호는 최소 8자이며 영문자, 숫자, 특수문자를 모두 포함해야 합니다.', 'status': 'error'}, status=400)
-
-        # nickname: 2-10자, 한글/영문/숫자
-        if not re.match(r'^[\uAC00-\uD7A3A-Za-z0-9]{2,10}$', nickname):
-            return JsonResponse({'error': '닉네임은 2~10자의 한글/영문/숫자만 가능합니다.', 'status': 'error'}, status=400)
-        
-        # 중복 검사
+            
+        # 중복 검사 (아이디만)
         if User.objects.filter(username=user_id).exists():
             return JsonResponse({'error': '이미 존재하는 아이디입니다.', 'status': 'error'}, status=400)
 
-        if UserProfile.objects.filter(maple_nickname=nickname).exists():
-            return JsonResponse({'error': '이미 사용 중인 닉네임입니다.', 'status': 'error'}, status=400)
+        detected_character_name = None
         
+        # API Key가 있는 경우 캐릭터 자동 연동 시도
+        if nexon_api_key:
+            try:
+                detected_character_name, detected_character_ocid = asyncio.run(process_signup_with_key(nexon_api_key))
+                
+                if not detected_character_name:
+                    logger.warning(f"API Key({nexon_api_key})로 캐릭터를 찾을 수 없습니다. (연동 실패)")
+                    return JsonResponse({'error': f'유효하지 않은 API Key이거나 계정에 캐릭터가 없습니다. (Key: {nexon_api_key[:5]}...)', 'status': 'error'}, status=400)
+                    
+            except Exception as e:
+                logger.error(f"캐릭터 자동 연동 중 오류: {e}")
+                return JsonResponse({'error': '캐릭터 정보를 가져오는 중 오류가 발생했습니다.', 'status': 'error'}, status=400)
 
-        # 사용자 생성
+        # 사용자 생성   
         user = User.objects.create_user(
             username=user_id, 
             password=password, 
         )
         
-        # 5. UserProfile 생성 및 연결
+        # UserProfile 생성
         UserProfile.objects.create(
             user=user,
-            maple_nickname=nickname,
-            nexon_api_key=nexon_api_key if nexon_api_key else None
+            nexon_api_key=nexon_api_key if nexon_api_key else None,
+            maple_nickname=detected_character_name if detected_character_name else None,
+            character_ocid=detected_character_ocid if detected_character_ocid else None
         )
-
-        logger.info(f"새 사용자 생성: {user_id}")
+        
+        message = '회원가입이 완료되었습니다.'
+        if detected_character_name:
+            message += f" (캐릭터 연동: {detected_character_name})"
+            logger.info(f"새 사용자 생성: {user_id} (자동 연동: {detected_character_name})")
+        else:
+            logger.info(f"새 사용자 생성: {user_id} (캐릭터 연동 없음)")
 
         return JsonResponse({
-            'message': '회원가입이 완료되었습니다.',
+            'message': message,
             'user': {
                 'user_id': user.username,
-                'nickname': nickname,
+                'linked_character': detected_character_name,
+                'character_ocid': detected_character_ocid
             },
             'status': 'success'
         }, status=201)
@@ -87,7 +110,9 @@ def signup_api(request):
     
     except Exception as e:
         logger.error(f"회원가입 오류: {e}")
-        return JsonResponse({'error': '회원가입 중 서버 오류가 발생했습니다.', 'status': 'error'}, status=500)
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': f'회원가입 중 서버 오류가 발생했습니다: {str(e)}', 'status': 'error'}, status=500)
     
 @csrf_exempt
 @require_http_methods(["POST"])
