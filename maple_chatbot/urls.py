@@ -13,11 +13,11 @@ urlpatterns = [
     # Character
     path('character/', include('character.urls')),
     
-    # Chatbot
-    path('chat/', include('chat.urls')),
-    
     # Accounts
     path('accounts/', include('accounts.urls')),
+    
+    # MAI Chat (AI Chatbot)
+    path('mai_chat/', include('mai_chat.urls')),
 
     # Catch-all for React Client-side Routing
     re_path(r'^.*$', serve_react, name='react_app'),

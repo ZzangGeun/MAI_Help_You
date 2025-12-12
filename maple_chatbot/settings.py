@@ -29,8 +29,8 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "core",
     "accounts",
-    "chat",
     "character",
+    "mai_chat",
 ]
 
 THIRD_PARTY_APPS = [
