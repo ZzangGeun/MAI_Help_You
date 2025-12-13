@@ -24,8 +24,8 @@ def load_model():
     global model, tokenizer
     tokenizer = AutoTokenizer.from_pretrained(BASE_DIR, trust_remote_code=True, local_files_only=True)
     model = AutoModelForCausalLM.from_pretrained(BASE_DIR,
-                                                torch_dtype="auto",
-                                                device_map="auto" if torch.cuda.is_available() else None, 
+                                                torch_dtype=torch.float16,
+                                                device_map="cuda", 
                                                 trust_remote_code=True, 
                                                 local_files_only=True)
     return model is not None and tokenizer is not None
@@ -47,8 +47,8 @@ def ask_question(question):
             outputs = model.generate(
                 input_ids = inputs["input_ids"],
                 attention_mask = inputs["attention_mask"],
-                max_length = 1024,
-                temperature = 1,
+                max_length = 256,
+                temperature = 0.8,
                 top_p = 0.9,
                 top_k = 50,
                 do_sample = True,
