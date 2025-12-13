@@ -12,6 +12,7 @@ LangChain을 활용한 대화 관리, 메모리, 프롬프트 템플릿 기능 �
 """
 
 import logging
+import uuid
 from typing import Optional, Dict, Any
 from langchain.llms.base import LLM
 from langchain.chains import ConversationChain
@@ -19,6 +20,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 from .ai_service import get_ai_response
+
+from .models import ChatSession
 
 # 로깅 설정
 logger = logging.getLogger(__name__)
@@ -66,7 +69,7 @@ class MapleStoryLLM(LLM):
     def _llm_type(self) -> str:
         return "maplestory_ai"
 
-    def _call(self, prompt: str) -> str:
+    def _call(self, prompt: str, stop: Optional[list] = None, run_manager: Optional[Any] = None) -> str:
         """
         Args :
             prompt: 사용자 또는 체인으로부터 받은 프롬프트
@@ -103,7 +106,7 @@ class MapleStoryLLM(LLM):
 
 # TODO: 프롬프트 템플릿 작성
 MAPLESTORY_PROMPT_TEMPLATE = """
-당신은 메이플스토리 세계관에 존재하는 f{돌의정령} NPC입니다.
+당신은 메이플스토리 세계관에 존재하는 돌의정령 NPC입니다.
 돌의정령은 메이플스토리의 모든 정보를 알고 있으며, 사용자에게 메이플스토리의 모든 정보를 제공할 수 있습니다.
 돌의정령의 말투는 ~해야 한담, ~이담, ~했담 등 'ㅁ' 받침을 사용한 어미를 사용해야합니다.
 
@@ -157,9 +160,12 @@ def get_conversation_chain(session_id: str, load_history: bool = True) -> Conver
         return _conversation_chains[session_id]
 
     llm = MapleStoryLLM()
+    # 메모리를 먼저 생성해야 함
+    memory = ConversationBufferMemory(memory_key="history", input_key="input")
+    
     if load_history:
         _load_history_from_db(session_id, memory)
-    memory = ConversationBufferMemory(memory_key="history", input_key="input")
+        
     prompt = PromptTemplate(input_variables=["history", "input"], template=MAPLESTORY_PROMPT_TEMPLATE)
     chain = ConversationChain(llm=llm, memory=memory, prompt=prompt)
     _conversation_chains[session_id] = chain
@@ -200,15 +206,20 @@ def _load_history_from_db(session_id: str, memory: ConversationBufferMemory) -> 
     # 4. 메시지 로드 및 메모리에 추가
     
     try:
-        session_uuid = uuid.UUID(session_id)
+        # session_id가 이미 UUID 객체라면 그대로 사용, 문자열이라면 변환
+        if isinstance(session_id, uuid.UUID):
+            session_uuid = session_id
+        else:
+            session_uuid = uuid.UUID(str(session_id))
+            
         session = ChatSession.objects.get(session_id=session_uuid)
         messages = session.messages.all().order_by('created_at')
         for msg in messages:
             memory.save_context({"input": msg.user_message}, {"output": msg.ai_response})
     except ValueError:
-        logger.error("Invalid session ID")
+        logger.error(f"Invalid session ID: {session_id}")
     except ChatSession.DoesNotExist:
-        logger.error("Session not found")
+        logger.error(f"Session not found: {session_id}")
 
 
 # ============================================================================

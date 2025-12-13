@@ -14,6 +14,8 @@ Django 뷰에서 LangChain을 사용하는 방법 학습
 import json
 import uuid
 import logging
+import time
+from datetime import datetime
 from typing import Dict, Any
 
 from django.http import JsonResponse, HttpRequest
@@ -77,7 +79,12 @@ def get_sessions_view(request: HttpRequest) -> JsonResponse:
     # TODO: 구현하세요
     try:
         if request.user.is_authenticated:
-            sessions = ChatSession.objects.filter(user=request.user)
+            # UserProfile이 존재하는지 확인 (related_name='profile')
+            if hasattr(request.user, 'profile'):
+                sessions = ChatSession.objects.filter(user=request.user.profile)
+            else:
+                # 인증은 되었으나 프로필이 없는 경우 (거의 없겠지만 방어코드)
+                sessions = ChatSession.objects.none()
         else:
             sessions = ChatSession.objects.none()
 
@@ -97,27 +104,6 @@ def get_sessions_view(request: HttpRequest) -> JsonResponse:
         logger.error(f"세션 조회 중 오류 발생: {e}")
         return JsonResponse({'error': '세션 조회 중 오류가 발생했습니다.'}, status=500)
 
-
-# ============================================================================
-# TODO 2: 세션 생성 뷰
-# ============================================================================
-# 목표: 새로운 채팅 세션을 생성하는 API
-#
-# 엔드포인트: POST /mai_chat/api/chat/sessions/create/
-#
-# 구현해야 할 내용:
-# 1. ChatSession.objects.create() 호출
-#    - user: request.user (인증된 경우) 또는 None
-# 2. 생성된 세션 정보 반환
-#    - id, created_at, last_message=None, message_count=0
-# 3. JsonResponse로 반환: {"data": {세션 정보}}
-# 4. status=201 (Created)
-# 5. 에러 처리 및 로깅
-#
-# 힌트:
-# - @csrf_exempt 데코레이터 필요
-# - logger.info()로 세션 생성 로깅
-# ============================================================================
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -139,7 +125,11 @@ def create_session_view(request: HttpRequest) -> JsonResponse:
     """
     # TODO: 구현하세요
     try:
-        session = ChatSession.objects.create(user=request.user)
+        user_profile = None
+        if request.user.is_authenticated and hasattr(request.user, 'profile'):
+            user_profile = request.user.profile
+            
+        session = ChatSession.objects.create(user=user_profile)
         logger.info(f"새로운 세션 생성: {session.session_id}")
         return JsonResponse({
             'data': {
@@ -203,8 +193,8 @@ def get_messages_view(request: HttpRequest, session_id: str) -> JsonResponse:
     """
     # TODO: 구현하세요
     try:
-        session_uuid = uuid.UUID(session_id)
-        session = ChatSession.objects.get(session_id=session_uuid)
+        # session_id는 이미 UUID 객체입니다 (urls.py에서 <uuid:session_id> 사용)
+        session = ChatSession.objects.get(session_id=session_id)
         messages = session.messages.all().order_by('created_at')
         message_list = []
         for msg in messages:
@@ -295,11 +285,22 @@ def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
     # 7. 응답 반환
     
     try:
-        session_uuid = uuid.UUID(session_id)
-        session = ChatSession.objects.get(session_id=session_uuid)
+        # JSON 파싱 추가 (누락되었던 부분)
+        try:
+            data = json.loads(request.body)
+            content = data.get('content', '').strip()
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            
+        if not content:
+            return JsonResponse({'error': 'Content is required'}, status=400)
+
+        # session_id는 이미 UUID 객체입니다 (urls.py에서 <uuid:session_id> 사용)
+        session = ChatSession.objects.get(session_id=session_id)
 
         start_time = time.time()
-        ai_response = chat_with_memory(session_id, content)
+        # session_id는 UUID 객체이므로 문자열로 변환하여 전달
+        ai_response = chat_with_memory(str(session_id), content)
         response_time = int((time.time() - start_time) * 1000)
 
         ChatMessage.objects.create(
@@ -333,8 +334,9 @@ def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
         
         
         
+ 
 
-
+ 
 # ============================================================================
 # TODO 5: 세션 삭제 뷰
 # ============================================================================
@@ -369,11 +371,12 @@ def delete_session_view(request: HttpRequest, session_id: str) -> JsonResponse:
     """
     # TODO: 구현하세요
     try:
-        session_uuid = uuid.UUID(session_id)
-        session = ChatSession.objects.get(session_id=session_uuid)
+        # session_id는 이미 UUID 객체입니다 (urls.py에서 <uuid:session_id> 사용)
+        session = ChatSession.objects.get(session_id=session_id)
         session.delete()
-        clear_session_memory(session_id)
-        return JsonResponse({'status': 'deleted', 'session_id': session_id})
+        # LangChain 서비스에는 문자열로 전달
+        clear_session_memory(str(session_id))
+        return JsonResponse({'status': 'deleted', 'session_id': str(session_id)})
     except ValueError:
         return JsonResponse({'error': 'Invalid session ID'}, status=400)
     except ChatSession.DoesNotExist:

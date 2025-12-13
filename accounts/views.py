@@ -199,8 +199,8 @@ def user_info_api(request):
     """
     if request.user.is_authenticated:
         try:
-            # UserProfile 정보 가져오기 (없으면 None)
-            profile = getattr(request.user, 'userprofile', None)
+            # UserProfile 정보 가져오기 (related_name='profile')
+            profile = getattr(request.user, 'profile', None)
             
             user_data = {
                 'user_id': request.user.username,
