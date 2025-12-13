@@ -94,3 +94,5 @@ local/
 character_data/
 
 .agent/
+
+mai_chat/test_chatbot_flow.py
