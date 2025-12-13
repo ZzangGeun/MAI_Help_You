@@ -26,11 +26,11 @@ class ChatSession(models.Model):
         verbose_name="세션 ID"
     )
     user = models.ForeignKey(
-        User,
+        'accounts.UserProfile',
         on_delete=models.CASCADE,
+        related_name="chat_sessions",
         null=True,
         blank=True,
-        related_name="chat_sessions",
         verbose_name="사용자"
     )
     created_at = models.DateTimeField(
@@ -49,9 +49,8 @@ class ChatSession(models.Model):
         ordering = ["-updated_at"]
     
     def __str__(self) -> str:
-        user_str = self.user.username if self.user else "익명"
+        user_str = self.user.user.username if self.user else "익명"
         return f"{user_str} - {self.session_id}"
-
 
 class ChatMessage(models.Model):
     """

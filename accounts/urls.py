@@ -11,4 +11,5 @@ urlpatterns = [
     path('api/signup/', views.signup_api, name='signup_api'),
     path('api/login/', views.login_api, name='login_api'),
     path('api/logout/', views.logout_api, name='logout_api'),
+    path('api/user/', views.user_info_api, name='user_info_api'),
 ]

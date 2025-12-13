@@ -125,21 +125,25 @@ def login_api(request):
         # 1. 요청 데이터 파싱 (JSON 형식으로 변경해야 함)
         # 회원가입과 마찬가지로, 프론트엔드는 JSON을 보낼 가능성이 높습니다.
         data = json.loads(request.body)
-        user_id = data.get('user_id', '').strip()
+        username = data.get('username', '').strip()
+        # 호환성을 위해 user_id도 체크 (혹시 모를 구버전 클라이언트 대비)
+        if not username:
+            username = data.get('user_id', '').strip()
+            
         password = data.get('password', '').strip()
 
-        if not user_id or not password:
+        if not username or not password:
             return JsonResponse({'error': '아이디와 비밀번호를 모두 입력해주세요.', 'status': 'error'}, status=400)
 
         # 2. 사용자 인증 (Authenticate)
         # DB에 저장된 암호화된 비밀번호와 입력된 비밀번호를 비교하여 User 객체를 반환하거나 None 반환
-        user = authenticate(request, username=user_id, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             # 3. 인증 성공: 세션 생성 및 유지 (Login)
             # request 객체에 사용자 정보를 담아 세션을 시작합니다.
             login(request, user)
-            logger.info(f"로그인 성공: {user_id}")
+            logger.info(f"로그인 성공: {username}")
 
             return JsonResponse({
                 'message': '로그인에 성공했습니다.',
@@ -184,3 +188,30 @@ def logout_api(request):
     except Exception as e:
         logger.error(f"로그아웃 오류: {e}")
         return JsonResponse({'error': '로그아웃 중 서버 오류가 발생했습니다.', 'status': 'error'}, status=500)
+
+
+@require_http_methods(["GET"])
+def user_info_api(request):
+    """
+    현재 로그인한 사용자 정보 조회 API
+    GET /accounts/api/user/
+    AuthContext에서 로그인 상태 확인용으로 사용
+    """
+    if request.user.is_authenticated:
+        try:
+            # UserProfile 정보 가져오기 (없으면 None)
+            profile = getattr(request.user, 'userprofile', None)
+            
+            user_data = {
+                'user_id': request.user.username,
+                'maple_nickname': profile.maple_nickname if profile else None,
+                'character_ocid': profile.character_ocid if profile else None,
+            }
+            
+            return JsonResponse({'data': user_data, 'status': 'success'})
+            
+        except Exception as e:
+            logger.error(f"사용자 정보 조회 오류: {e}")
+            return JsonResponse({'error': '사용자 정보를 불러오는 중 오류가 발생했습니다.'}, status=500)
+    else:
+        return JsonResponse({'error': '로그인 상태가 아닙니다.', 'status': 'error'}, status=401)
