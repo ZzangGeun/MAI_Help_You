@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__)
 model = None
 tokenizer = None
 
-# 모델 경로
+from pathlib import Path
 
-# 리눅스
-# BASE_DIR = "/home/ccg700/바탕화면/programming/MAI_Help_You/fine_tuned_model/merged_qwen"
-# 윈도우
-BASE_DIR = "C:/Users/ccg70/OneDrive/desktop/programming/MAI_Help_You/fine_tuned_model/merged_qwen"
+# 모델 경로 (동적 설정)
+# 현재 파일: services/ai_models/fastapi_model/model.py
+# 프로젝트 루트: MAI_Help_You (4단계 상위)
+BASE_DIR = Path(__file__).resolve().parents[3] / "fine_tuned_model" / "merged_qwen"
+
 
 def load_model():
     global model, tokenizer

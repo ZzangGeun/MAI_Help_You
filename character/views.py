@@ -1,14 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-import json
-import os
-from django.conf import settings
-from .get_character_info import *
-from .extract import *
-from django.core.cache import cache
 import logging
-import asyncio
+from services.nexon_service import get_character_data
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +26,7 @@ async def character_info_view(request):
         
         logger.info(f"캐릭터 정보 조회 요청: {character_name}")
         
-        # 캐릭터 정보 조회
+        # 캐릭터 정보 조회 (Service Layer)
         character_info = await get_character_data(character_name.strip())
         
         if not character_info:
@@ -55,5 +49,4 @@ async def character_info_view(request):
             'error': '서버 오류가 발생했습니다.',
             'status': 'error'
         }, status=500)
-    
 

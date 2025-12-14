@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 # character 앱에서 정보 추출 함수 가져오기
-from character.get_character_info import get_character_data, process_signup_with_key
+from services.nexon_service import process_signup_with_key
 import asyncio
 
 @csrf_exempt

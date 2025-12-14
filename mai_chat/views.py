@@ -197,20 +197,4 @@ def delete_session_view(request: HttpRequest, session_id: str) -> JsonResponse:
         return JsonResponse({'error': '세션 삭제 중 오류가 발생했습니다.'}, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def chat_view(request: HttpRequest) -> JsonResponse:
-    """레거시: POST /api/chat/ 엔드포인트"""
-    return JsonResponse({"error": "Not implemented"}, status=501)
 
-
-@require_http_methods(["GET"])
-def chat_history_view(request: HttpRequest, session_id: str) -> JsonResponse:
-    """레거시: GET /api/chat/history/<session_id>/ 엔드포인트"""
-#        return JsonResponse({"error": "Invalid JSON"}, status=400)
-#
-# 5. LangChain 통합의 핵심:
-#    ai_response = chat_with_memory(session_id, user_input)
-#    → 이 한 줄이 대화 메모리를 자동으로 관리합니다!
-#
-# ============================================================================
