@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: '/static/dist/',
+  // 개발 서버에서는 '/', 빌드 시에는 '/static/dist/' 사용
+  base: command === 'serve' ? '/' : '/static/dist/',
   server: {
     proxy: {
       '/api': {
@@ -40,4 +41,4 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: true,
   }
-})
+}))

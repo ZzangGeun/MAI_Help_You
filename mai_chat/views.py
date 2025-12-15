@@ -98,13 +98,13 @@ def get_messages_view(request: HttpRequest, session_id: str) -> JsonResponse:
         for msg in messages:
             if msg.user_message:
                 message_list.append({
-                    'is_user': True,
+                    'role': 'user',
                     'content': msg.user_message,
                     'created_at': msg.created_at.isoformat()
                 })
             if msg.ai_response:
                 message_list.append({
-                    'is_user': False,
+                    'role': 'assistant',
                     'content': msg.ai_response,
                     'created_at': msg.created_at.isoformat()
                 })
@@ -150,12 +150,12 @@ def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
         return JsonResponse({
             'data': {
                 'user_message': {
-                    'is_user': True,
+                    'role': 'user',
                     'content': content,
                     'created_at': datetime.now().isoformat()
                 },
                 'ai_message': {
-                    'is_user': False,
+                    'role': 'assistant',
                     'content': ai_response,
                     'created_at': datetime.now().isoformat()
                 }
@@ -198,3 +198,9 @@ def delete_session_view(request: HttpRequest, session_id: str) -> JsonResponse:
 
 
 
+def chatbot_view(request: HttpRequest):
+    """
+    채팅봇 페이지를 렌더링합니다.
+    GET /chat/
+    """
+    return render(request, 'chatbot.html')

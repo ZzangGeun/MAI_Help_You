@@ -30,6 +30,40 @@ const ChatPage = () => {
   // 1. 초기 세션 로드 및 생성
   useEffect(() => {
     const initializeChat = async () => {
+      // 세션 선택 함수 (내부 정의)
+      const loadSession = async (sessionId) => {
+        setCurrentSessionId(sessionId);
+        setIsLoading(true);
+        try {
+          const response = await chatApi.getMessages(sessionId);
+          const formattedMessages = response.data.data.map(msg => ({
+            role: msg.role,  // 백엔드가 이제 role을 직접 반환
+            content: msg.content
+          }));
+          setMessages(formattedMessages);
+        } catch (error) {
+          console.error("Failed to load messages:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      // 새 채팅 생성 함수 (내부 정의)
+      const createNewChat = async () => {
+        try {
+          const response = await chatApi.createSession();
+          const newSession = response.data.data;
+          setSessions(prev => [newSession, ...prev]);
+          setCurrentSessionId(newSession.id);
+          setMessages([]);
+        } catch (error) {
+          console.error("Failed to create session:", error);
+          // 세션 생성 실패 시에도 임시 ID로 채팅 가능하도록 설정
+          const tempSessionId = 'temp-' + Date.now();
+          setCurrentSessionId(tempSessionId);
+        }
+      };
+
       try {
         let sessionList = [];
 
@@ -37,7 +71,7 @@ const ChatPage = () => {
         if (isLoggedIn) {
           try {
             const response = await chatApi.getSessions();
-            sessionList = response.data;
+            sessionList = response.data.data;
           } catch (error) {
             console.error("Failed to load sessions:", error);
           }
@@ -46,13 +80,16 @@ const ChatPage = () => {
         setSessions(sessionList);
 
         if (sessionList.length > 0) {
-          selectSession(sessionList[0].id);
+          await loadSession(sessionList[0].id);
         } else {
           // 세션이 없거나 비로그인 상태면 새 채팅 시작
-          handleNewChat();
+          await createNewChat();
         }
       } catch (error) {
         console.error("Chat initialization failed:", error);
+        // 초기화 실패 시에도 임시 세션 ID 설정
+        const tempSessionId = 'temp-' + Date.now();
+        setCurrentSessionId(tempSessionId);
       } finally {
         setIsInitializing(false);
       }
@@ -72,8 +109,8 @@ const ChatPage = () => {
     setIsLoading(true);
     try {
       const response = await chatApi.getMessages(sessionId);
-      const formattedMessages = response.data.map(msg => ({
-        role: msg.is_user ? 'user' : 'assistant',
+      const formattedMessages = response.data.data.map(msg => ({
+        role: msg.role,  // 백엔드가 이제 role을 직접 반환
         content: msg.content
       }));
       setMessages(formattedMessages);
@@ -88,7 +125,7 @@ const ChatPage = () => {
   const handleNewChat = async () => {
     try {
       const response = await chatApi.createSession();
-      const newSession = response.data;
+      const newSession = response.data.data;
       setSessions(prev => [newSession, ...prev]);
       setCurrentSessionId(newSession.id);
       setMessages([]);
@@ -97,7 +134,6 @@ const ChatPage = () => {
       // 세션 생성 실패 시에도 임시 ID로 채팅 가능하도록 설정
       const tempSessionId = 'temp-' + Date.now();
       setCurrentSessionId(tempSessionId);
-      alert('세션 생성에 실패했습니다. Django 서버가 실행 중인지 확인해주세요.\n\n필요한 서버:\n- Django: python manage.py runserver (포트 8000)\n- React: npm run dev (포트 5173)');
     }
   };
 
@@ -115,7 +151,7 @@ const ChatPage = () => {
       const response = await chatApi.sendMessage(currentSessionId, input);
       const aiMessage = {
         role: 'assistant',
-        content: response.data.ai_message.content
+        content: response.data.data.ai_message.content
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {

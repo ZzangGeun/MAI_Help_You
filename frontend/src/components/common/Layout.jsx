@@ -4,15 +4,49 @@ import Navigation from './Navigation';
 import LoginPopup from '../auth/LoginPopup';
 import '../../styles/common.css';
 
-const Layout = ({ children }) => {
-  return (
-    <>
-      <Header />
-      <Navigation />
-      {children}
-      <LoginPopup />
-    </>
-  );
-};
+const Layout=( {
+    children, leftSidebar, rightSidebar, layoutClass
+  }
+
+)=> {
+
+  // 사이드바가 있는 경우 커스텀 레이아웃 사용
+  if (leftSidebar || rightSidebar) {
+    return (<> <Header /> <Navigation /> <div className= {
+        layoutClass || 'default-layout'
+      }
+
+      > {
+        leftSidebar && <aside className="layout-sidebar-left"> {
+          leftSidebar
+        }
+
+        </aside>
+      }
+
+      <main className="layout-main-content"> {
+        children
+      }
+
+      </main> {
+        rightSidebar && <aside className="layout-sidebar-right"> {
+          rightSidebar
+        }
+
+        </aside>
+      }
+
+      </div> <LoginPopup /> </>);
+  }
+
+  // 기본 레이아웃 (사이드바 없음)
+  return (<> <Header /> <Navigation /> {
+      children
+    }
+
+    <LoginPopup /> </>);
+}
+
+;
 
 export default Layout;

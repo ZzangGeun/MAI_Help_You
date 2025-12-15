@@ -14,7 +14,7 @@ const Navigation = () => {
       <div className="nav-content">
         <div className="nav-left">
           <Link to="/" className={`nav-item ${isActive('/')}`}>홈</Link>
-          <Link to="/chat" className={`nav-item ${isActive('/chat')}`}>CHAT BOT</Link>
+          <Link to="/chat" className={`nav-item ${isActive('/chat')}`}>챗봇</Link>
           <Link to="/character" className={`nav-item ${isActive('/character')}`}>캐릭터 검색</Link>
           <a href="#cube" className="nav-item">큐브</a>
           <a href="#starforce" className="nav-item">스타포스</a>
