@@ -18,7 +18,7 @@ from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 
 from .models import ChatSession, ChatMessage
-from .langchain_service import chat_with_memory, clear_session_memory
+from .langchain_service import chat_with_memory_async, clear_session_memory
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def get_messages_view(request: HttpRequest, session_id: str) -> JsonResponse:
 
 @csrf_exempt
 @require_http_methods(["POST"])
-def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
+async def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
     """
     세션에 메시지를 전송하고 AI 응답을 받습니다.
     POST /api/chat/sessions/<session_id>/send/
@@ -132,15 +132,23 @@ def send_message_view(request: HttpRequest, session_id: str) -> JsonResponse:
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
 
-        # session_id는 이미 UUID 객체입니다 (urls.py에서 <uuid:session_id> 사용)
-        session = ChatSession.objects.get(session_id=session_id)
+        # 비동기 ORM 사용 (Django 4.1+)
+        # session_id는 UUID 객체이거나 문자열일 수 있음. URL mapping이 UUID면 UUID.
+        try:
+            if isinstance(session_id, str):
+                s_uuid = uuid.UUID(session_id)
+            else:
+                s_uuid = session_id
+            session = await ChatSession.objects.aget(session_id=s_uuid)
+        except ValueError:
+             return JsonResponse({'error': 'Invalid session ID'}, status=400)
 
         start_time = time.time()
-        # session_id는 UUID 객체이므로 문자열로 변환하여 전달
-        ai_response = chat_with_memory(str(session_id), content)
+        # AI 응답 비동기 요청
+        ai_response = await chat_with_memory_async(str(session.session_id), content)
         response_time = int((time.time() - start_time) * 1000)
 
-        ChatMessage.objects.create(
+        await ChatMessage.objects.acreate(
             session=session,
             user_message=content,
             ai_response=ai_response,

@@ -11,8 +11,10 @@ from . import views
 app_name = 'mai_chat'
 
 urlpatterns = [
+    # 채팅방 페이지
     path('chat/', views.chatbot_view, name='chatbot'),
-    # 세션 관련
+    
+    # API Endpoints
     path('api/chat/sessions/', views.get_sessions_view, name='get_sessions'),
     path('api/chat/sessions/create/', views.create_session_view, name='create_session'),
     path('api/chat/sessions/<uuid:session_id>/messages/', views.get_messages_view, name='get_messages'),

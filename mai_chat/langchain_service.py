@@ -1,152 +1,194 @@
 # -*- coding: utf-8 -*-
 """
-LangChain Service Module
+LangChain Service Module (Refactored for LangGraph & Django)
 
-LangChain을 활용한 대화 관리, 메모리, 프롬프트 템플릿 기능을 제공합니다.
+LangGraph의 StateGraph를 활용하여 대화 흐름과 상태를 관리합니다.
+Django ORM 기반의 커스텀 비동기 체크포인터를 통해 데이터 영속성을 보장하며,
+BaseChatModel을 상속받은 커스텀 모델로 구조화된 메시지 처리를 수행합니다.
 """
 
 import logging
 import uuid
-from typing import Optional, Dict, Any
-from langchain.llms.base import LLM
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import PromptTemplate
+from typing import Optional, List, Any, Dict
 
-from .ai_service import get_ai_response
+import httpx
+from asgiref.sync import sync_to_async
 
-from .models import ChatSession
+# LangChain & LangGraph Imports
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import (
+    BaseMessage, HumanMessage, AIMessage, SystemMessage, 
+    get_buffer_string
+)
+from langchain_core.outputs import ChatResult, ChatGeneration
+from langchain_core.runnables import RunnableConfig
+
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.checkpoint.base import (
+    BaseCheckpointSaver, 
+    Checkpoint, 
+    CheckpointMetadata, 
+    CheckpointTuple,
+    ChannelVersions
+)
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+from typing_extensions import TypedDict, Annotated
+
+# Models Import (실제 환경에 맞게 경로 수정 필요)
+# from.models import LangGraphCheckpoint 
+# 레거시 ChatSession 모델을 대체하거나 병행 사용할 새로운 모델이 필요함.
+from .models import LangGraphCheckpoint 
 
 logger = logging.getLogger(__name__)
 
-# 세션별 대화 체인을 캐싱하는 딕셔너리
-# key: session_id (str), value: ConversationChain
-_conversation_chains: Dict[str, ConversationChain] = {}
+# --- 1. Custom Chat Model ---
+class MapleStoryChatModel(BaseChatModel):
+    api_url: str = "http://localhost:8001/ai/respond"
+    timeout: float = 180.0
 
-
-class MapleStoryLLM(LLM):
-    """
-    services/ai_models의 모델을 LangChain LLM으로 래핑한 클래스
-    """
-    
-    model_config = {"extra": "forbid"}
-    
     @property
     def _llm_type(self) -> str:
-        return "maplestory_ai"
+        return "maplestory_ai_client"
 
-    def _call(self, prompt: str, stop: Optional[list] = None, run_manager: Optional[Any] = None) -> str:
-        """
-        Args :
-            prompt: 사용자 또는 체인으로부터 받은 프롬프트
+    def _format_messages(self, messages: List) -> str:
+        # 시스템 메시지 처리: 맨 앞에 있는 경우 캐릭터 설정으로 인식 가능
+        # 여기서는 get_buffer_string을 사용하여 텍스트로 변환
+        return get_buffer_string(messages, human_prefix="User", ai_prefix="Dol-ui-jeongnyeong")
 
-        Returns:
-            str: AI 응답
-        """
+    async def _agenerate(
+        self, messages: List, stop: Optional[List[str]] = None, **kwargs: Any
+    ) -> ChatResult:
+        prompt_str = self._format_messages(messages)
+        headers = {"Content-Type": "application/json"}
+        payload = {"prompt": prompt_str}
+
         try:
-            result = get_ai_response(prompt)
-            # get_ai_response now returns a dict with 'response' and 'metrics'
-            if isinstance(result, dict):
-                logger.debug(f"AI Metrics: {result.get('metrics')}")
-                return result['response']
-            return result
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.api_url, json=payload, headers=headers, timeout=self.timeout
+                )
+                response.raise_for_status()
+                content = response.json().get("response", "")
+                return ChatResult(generations=[ChatGeneration(message=AIMessage(content=content))])
         except Exception as e:
-            logger.error(f"AI 응답 생성 실패: {str(e)}", exc_info=True)
+            logger.error(f"Async AI Call Error: {e}", exc_info=True)
             raise
 
+    def _generate(self, messages: List, stop: Optional[List[str]] = None, **kwargs: Any) -> ChatResult:
+        raise NotImplementedError("Sync invoke is not supported in this async-first implementation.")
+
+# --- 2. Django Async Checkpointer ---
+class DjangoAsyncCheckpointSaver(BaseCheckpointSaver):
+    def __init__(self):
+        super().__init__(serde=JsonPlusSerializer())
+
+    async def aget_tuple(self, config: RunnableConfig) -> Optional:
+        thread_id = config["configurable"]["thread_id"]
         
+        def _get_latest():
+            # LangGraphCheckpoint 모델이 존재한다고 가정
+            return LangGraphCheckpoint.objects.filter(thread_id=thread_id).order_by("-created_at").first()
 
-# 메이플스토리 특화 프롬프트 템플릿
-MAPLESTORY_PROMPT_TEMPLATE = """
-당신은 메이플스토리 세계관에 존재하는 돌의정령 NPC입니다.
-돌의정령은 메이플스토리의 모든 정보를 알고 있으며, 사용자에게 메이플스토리의 모든 정보를 제공할 수 있습니다.
-돌의정령의 말투는 ~해야 한담, ~이담, ~했담 등 'ㅁ' 받침을 사용한 어미를 사용해야합니다.
-
-이전 대화 내용: {history}
-
-현재 사용자 입력: {input}
-"""
-
-
-def get_conversation_chain(session_id: str, load_history: bool = True) -> ConversationChain:
-    """
-    세션별 대화 체인을 가져오거나 생성합니다.
-    """
-    if session_id in _conversation_chains:
-        return _conversation_chains[session_id]
-
-    llm = MapleStoryLLM()
-    # 메모리를 먼저 생성해야 함
-    memory = ConversationBufferMemory(memory_key="history", input_key="input")
-    
-    if load_history:
-        _load_history_from_db(session_id, memory)
-        
-    prompt = PromptTemplate(input_variables=["history", "input"], template=MAPLESTORY_PROMPT_TEMPLATE)
-    chain = ConversationChain(llm=llm, memory=memory, prompt=prompt)
-    _conversation_chains[session_id] = chain
-    return chain
-
-
-def _load_history_from_db(session_id: str, memory: ConversationBufferMemory) -> None:
-    """
-    DB에서 대화 히스토리를 로드하여 메모리에 추가합니다.
-    """
-    try:
-        # session_id가 이미 UUID 객체라면 그대로 사용, 문자열이라면 변환
-        if isinstance(session_id, uuid.UUID):
-            session_uuid = session_id
-        else:
-            session_uuid = uuid.UUID(str(session_id))
+        record = await sync_to_async(_get_latest, thread_sensitive=True)()
+        if not record: 
+            return None
             
-        session = ChatSession.objects.get(session_id=session_uuid)
-        messages = session.messages.all().order_by('created_at')
-        for msg in messages:
-            memory.save_context({"input": msg.user_message}, {"output": msg.ai_response})
-    except ValueError:
-        logger.error(f"Invalid session ID: {session_id}")
-    except ChatSession.DoesNotExist:
-        logger.error(f"Session not found: {session_id}")
+        return CheckpointTuple(
+            config,
+            self.serde.loads(record.checkpoint_data),
+            self.serde.loads(record.metadata),
+            (record.parent_checkpoint_id,) if record.parent_checkpoint_id else None
+        )
 
+    async def aput(self, config, checkpoint, metadata, new_versions):
+        thread_id = config["configurable"]["thread_id"]
+        checkpoint_id = checkpoint["id"]
+        parent_id = config["configurable"].get("checkpoint_id")
+        
+        blob = self.serde.dumps(checkpoint)
+        meta_blob = self.serde.dumps(metadata)
+        
+        def _save():
+            LangGraphCheckpoint.objects.create(
+                thread_id=thread_id,
+                checkpoint_id=checkpoint_id,
+                parent_checkpoint_id=parent_id,
+                checkpoint_data=blob,
+                metadata=meta_blob
+            )
+            
+        await sync_to_async(_save, thread_sensitive=True)()
+        return {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
 
-def chat_with_memory(session_id: str, user_input: str) -> str:
+    async def alist(self, config, **kwargs): return # 간소화
+    async def aput_writes(self, config, writes, task_id, task_path=""): pass # 간소화
+
+# --- 3. Graph Construction ---
+class AgentState(TypedDict):
+    messages: [Annotated, add_messages]
+
+maplestory_model = MapleStoryChatModel()
+
+async def npc_node(state: AgentState):
+    return {"messages": [await maplestory_model.ainvoke(state["messages"])]}
+
+builder = StateGraph(AgentState)
+builder.add_node("npc", npc_node)
+builder.add_edge(START, "npc")
+builder.add_edge("npc", END)
+
+# 체크포인터 인스턴스 (전역 혹은 DI)
+_checkpointer = DjangoAsyncCheckpointSaver()
+graph_app = builder.compile(checkpointer=_checkpointer)
+
+# --- 4. Public API ---
+async def chat_with_memory_async(session_id: str, user_input: str) -> str:
     """
-    대화 메모리를 유지하면서 AI 응답을 생성합니다.
+    LangGraph 기반의 비동기 채팅 처리 함수.
     """
-    try:
-        if not user_input.strip():
-            raise ValueError("Input cannot be empty")
-        chain = get_conversation_chain(session_id)
-        response = chain.predict(input=user_input.strip())
-        return response
-    except ValueError as e:
-        logger.error(f"Invalid input: {str(e)}")
-        raise
-    except Exception as e:
-        logger.error(f"AI 응답 생성 중 오류 발생: {str(e)}", exc_info=True)
-        raise
+    if not user_input.strip():
+        raise ValueError("Input cannot be empty")
 
+    config = {"configurable": {"thread_id": session_id}}
+    
+    # 1. 현재 상태 조회
+    current_state = await graph_app.aget_state(config)
+    
+    # 2. 새로운 메시지 목록 준비
+    new_messages = []
+    
+    # 3. 상태가 비어있다면(첫 대화), 시스템 메시지 추가
+    # current_state.values가 비어있으면 초기 상태
+    if not current_state.values:
+        logger.info(f"Initializing new session: {session_id}")
+        system_prompt = (
+            "당신은 메이플스토리 세계관의 돌의정령 NPC입니다.\n"
+            "캐릭터 설정:\n"
+            "- 메이플스토리의 모든 정보를 알고 있는 지식이 풍부한 정령\n"
+            "- 사용자의 질문에 친절하고 정확하게 답변\n"
+            "- 말투: ~한담, ~이담, ~했담 등 'ㅁ' 받침 어미 사용"
+        )
+        new_messages.append(SystemMessage(content=system_prompt))
+    
+    # 4. 사용자 메시지 추가
+    new_messages.append(HumanMessage(content=user_input.strip()))
+
+    # 5. 그래프 실행 (새로운 메시지만 전달)
+    # LangGraph는 add_messages 리듀서를 통해 기존 히스토리에 자동 병합함
+    final_state = await graph_app.ainvoke({"messages": new_messages}, config=config)
+    
+    # 6. 마지막 AI 메시지 추출
+    last_msg = final_state["messages"][-1]
+    return last_msg.content if isinstance(last_msg, AIMessage) else ""
 
 def clear_session_memory(session_id: str) -> None:
     """
-    특정 세션의 메모리를 캐시에서 제거합니다.
+    세션 메모리 삭제 (Django DB 레코드 삭제)
     """
+    # 동기 컨텍스트에서 호출되므로 바로 ORM 사용 가능 (또는 sync_to_async 고려)
     try:
-        if session_id in _conversation_chains:
-            del _conversation_chains[session_id]
-            logger.info(f"Session memory cleared for session ID: {session_id}")
+        LangGraphCheckpoint.objects.filter(thread_id=session_id).delete()
+        logger.info(f"Cleared checkpoints for session: {session_id}")
     except Exception as e:
-        logger.error(f"세션 메모리 삭제 중 오류 발생: {str(e)}", exc_info=True)
-
-
-def get_memory_messages(session_id: str) -> list:
-    """
-    세션의 메모리에 저장된 메시지를 반환합니다.
-    """
-    try:
-        if session_id in _conversation_chains:
-            return _conversation_chains[session_id].memory.chat_memory.messages
-        return []
-    except Exception as e:
-        logger.error(f"메모리 메시지 조회 중 오류 발생: {str(e)}", exc_info=True)
-        return []
+        logger.error(f"Failed to clear memory: {e}")

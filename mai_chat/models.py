@@ -93,3 +93,50 @@ class ChatMessage(models.Model):
         # 질문이 길 경우 50자로 제한하여 표시
         question_preview = self.user_message[:50] + "..." if len(self.user_message) > 50 else self.user_message
         return f"{self.session.session_id} - {question_preview}"
+
+
+class LangGraphCheckpoint(models.Model):
+    """
+    LangGraph 체크포인트 저장 모델
+    
+    LangGraph의 상태(State)를 영속적으로 저장하여 세션을 유지합니다.
+    """
+    
+    thread_id = models.CharField(
+        max_length=255,
+        verbose_name="스레드 ID (세션 ID)"
+    )
+    checkpoint_id = models.CharField(
+        max_length=255,
+        verbose_name="체크포인트 ID"
+    )
+    parent_checkpoint_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="부모 체크포인트 ID"
+    )
+    # BinaryField를 사용하여 JSON 직렬화된 데이터를 안전하게 저장
+    checkpoint_data = models.BinaryField(
+        verbose_name="체크포인트 데이터"
+    )
+    metadata = models.BinaryField(
+        verbose_name="메타데이터"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="생성 시각"
+    )
+    
+    class Meta:
+        db_table = "mai_chat_checkpoint"
+        verbose_name = "LangGraph 체크포인트"
+        verbose_name_plural = "LangGraph 체크포인트"
+        ordering = ["-created_at"]
+        # thread_id 별로 조회 최적화
+        indexes = [
+            models.Index(fields=["thread_id", "-created_at"]),
+        ]
+    
+    def __str__(self) -> str:
+        return f"{self.thread_id} - {self.checkpoint_id}"
