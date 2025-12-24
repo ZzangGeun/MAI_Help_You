@@ -7,6 +7,7 @@ import requests
 from datetime import datetime, timedelta
 from .api_client import get_api_data
 from bs4 import BeautifulSoup
+import time
 
 logger = logging.getLogger(__name__)
 CACHE_DURATION = timedelta(hours=1)  # 캐시 유효 기간 설정 (1시간)
@@ -14,22 +15,8 @@ CACHE_DURATION = timedelta(hours=1)  # 캐시 유효 기간 설정 (1시간)
 # JSON 파일 저장 경로
 NOTICE_JSON_PATH = os.path.join(settings.BASE_DIR, 'character_data', 'notice_data.json')
 RANKING_JSON_PATH = os.path.join(settings.BASE_DIR, 'character_data', 'ranking_data.json')
+RAG_NOTICE_JSON_PATH = os.path.join(settings.BASE_DIR, 'rag_documents', 'notices', 'notice_data_rag.json')
 
-def get_og_image(url):
-    """
-    URL에서 og:image 메타 태그를 찾아 이미지 URL을 반환합니다.
-    """
-    try:
-        if not url: return None
-        response = requests.get(url, timeout=3) # 타임아웃 3초
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            og_image = soup.find("meta", property="og:image")
-            if og_image:
-                return og_image["content"]
-    except Exception as e:
-        logger.error(f"이미지 크롤링 실패 ({url}): {e}")
-    return None
 
 def get_notice_list():
     """
@@ -49,27 +36,13 @@ def get_notice_list():
             logger.warning(f"캐시 확인 중 오류: {e}")
 
     # API 호출
+    notice_general = get_api_data("/notice")
     notice_event = get_api_data("/notice-event")
     notice_cashshop = get_api_data("/notice-cashshop")
     notice_update = get_api_data("/notice-update")
 
-    # 이미지 크롤링 (상위 1개만)
-    def inject_image(data, key):
-        if data and isinstance(data, dict) and key in data:
-            items = data[key]
-            if isinstance(items, list) and len(items) > 0:
-                first_item = items[0]
-                if 'url' in first_item:
-                    logger.info(f"이미지 크롤링 시도: {first_item['title']}")
-                    img_url = get_og_image(first_item['url'])
-                    if img_url:
-                        first_item['image_url'] = img_url
-                        logger.info(f"이미지 크롤링 성공: {img_url}")
-
-    inject_image(notice_event, 'event_notice')
-    inject_image(notice_cashshop, 'cashshop_notice')
-
     notice_data = {
+        "notice_general": notice_general,
         "notice_event": notice_event,
         "notice_cashshop": notice_cashshop,
         "notice_update": notice_update
@@ -180,5 +153,114 @@ def get_ranking_list():
     save_ranking_data_to_json(ranking_data)
     
     return ranking_data
+
+
+def get_notice_detail(endpoint: str, notice_id: int) -> str:
+    """
+    Nexon API의 /detail 엔드포인트를 호출하여 공지사항 본문 내용을 가져옵니다.
+    """
+    try:
+        # endpoint 예: /notice/detail, /notice-event/detail 등
+        detail_data = get_api_data(endpoint, params={"notice_id": notice_id})
+        if detail_data:
+            # 넥슨 API에 따라 'contents' 또는 'content' 필드에 내용이 있음
+            raw_content = detail_data.get("contents") or detail_data.get("content")
+            
+            if raw_content:
+                # HTML 태그 제거
+                soup = BeautifulSoup(raw_content, 'html.parser')
+                content = soup.get_text(separator='\n').strip()
+                return content
+            else:
+                logger.warning(f"상세 데이터에 내용 필드가 없습니다: {detail_data.keys()}")
+                print(f"⚠️ 상세 데이터에 'contents' 또는 'content' 필드가 없습니다. (ID: {notice_id})")
+        else:
+            logger.warning(f"상세 데이터를 가져오지 못했습니다. (ID: {notice_id})")
+            print(f"❌ 상세 데이터를 가져오지 못했습니다. (ID: {notice_id})")
+    except Exception as e:
+        logger.error(f"공지사항 상세 내용 가져오기 실패 ({endpoint}, {notice_id}): {e}")
+        print(f"🔥 상세 내용 가져오기 예외 발생: {e}")
+    return ""
+
+
+def sync_notices_to_rag() -> bool:
+    """
+    최신 공지사항/이벤트를 가져와서 RAG용 JSON 파일로 저장합니다.
+    넥슨 API의 상세 페이지 엔드포인트를 활용합니다.
+    """
+    print("🚀 RAG용 공지사항 동기화 시작...")
+    logger.info("RAG용 공지사항 동기화 시작")
+    
+    notice_data = get_notice_list()
+    if not notice_data:
+        print("❌ 공지사항 데이터가 없습니다.")
+        logger.warning("가져올 공지사항 데이터가 없습니다.")
+        return False
+    
+    rag_docs = []
+    
+    # 처리할 카테고리 정의 (리스트 엔드포인트 키 : 상세 엔드포인트 경로 : 아이템 리스트 키)
+    categories = [
+        ('notice_general', '/notice/detail', 'notice'),
+        ('notice_event', '/notice-event/detail', 'event_notice'),
+        ('notice_cashshop', '/notice-cashshop/detail', 'cashshop_notice'),
+        ('notice_update', '/notice-update/detail', 'update_notice')
+    ]
+    
+    for cat_key, detail_endpoint, item_key in categories:
+        items = notice_data.get(cat_key, {}).get(item_key, [])
+        # 최신 20개만 처리하여 API 호출 제한 방지
+        items = items[:20]
+        print(f"📦 {cat_key} 카테고리 처리 중... ({len(items)}건)")
+        
+        for item in items:
+            title = item.get('title', '제목 없음')
+            notice_id = item.get('notice_id')
+            url = item.get('url', '')
+            date_str = item.get('date', '')
+            
+            if not notice_id:
+                print(f"⚠️ notice_id 누락: {title}")
+                continue
+
+            print(f"📝 문서화 중: {title[:30]}...")
+            
+            # API를 통한 본문 추출
+            content = get_notice_detail(detail_endpoint, notice_id)
+            
+            # API 호출 간 지연 (429 에러 방지)
+            time.sleep(0.5)
+            
+            # RAG 형식으로 구성
+            doc = {
+                "title": f"[{cat_key.replace('notice_', '')}] {title}",
+                "content": content if content else f"본문 내용을 가져올 수 없습니다. 링크를 확인하세요: {url}",
+                "content_type": "notice",
+                "source": url,
+                "metadata": {
+                    "category": cat_key,
+                    "date": date_str,
+                    "notice_id": notice_id,
+                    "original_title": title
+                }
+            }
+            rag_docs.append(doc)
+    
+    # JSON 저장
+    try:
+        abs_path = os.path.abspath(RAG_NOTICE_JSON_PATH)
+        print(f"💾 파일 저장 시도: {abs_path}")
+        
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        with open(abs_path, 'w', encoding='utf-8') as f:
+            json.dump(rag_docs, f, ensure_ascii=False, indent=2)
+        
+        print(f"✅ 동기화 완료! 총 {len(rag_docs)}건이 저장되었습니다.")
+        logger.info(f"RAG용 공지사항 데이터가 {abs_path}에 저장되었습니다. (총 {len(rag_docs)}건)")
+        return True
+    except Exception as e:
+        print(f"🔥 파일 저장 중 오류 발생: {e}")
+        logger.error(f"RAG용 공지사항 저장 중 오류 발생: {e}")
+        return False
 
 

@@ -40,7 +40,13 @@ from typing_extensions import TypedDict, Annotated
 # 레거시 ChatSession 모델을 대체하거나 병행 사용할 새로운 모델이 필요함.
 from .models import LangGraphCheckpoint 
 
+# RAG 모듈 Import
+from .rag.rag_service import RAGService
+
 logger = logging.getLogger(__name__)
+
+# RAG 서비스 초기화 (전역 싱글톤)
+_rag_service = RAGService(top_k=3, similarity_threshold=0.5)
 
 # --- 1. Custom Chat Model ---
 class MapleStoryChatModel(BaseChatModel):
@@ -131,7 +137,48 @@ class AgentState(TypedDict):
 maplestory_model = MapleStoryChatModel()
 
 async def npc_node(state: AgentState):
-    return {"messages": [await maplestory_model.ainvoke(state["messages"])]}
+    """
+    RAG 기반 NPC 노드
+    
+    사용자의 마지막 메시지를 분석하여 관련 문서를 검색하고,
+    검색된 컨텍스트를 활용하여 LLM 응답을 생성합니다.
+    """
+    messages = state["messages"]
+    
+    # 마지막 사용자 메시지 추출
+    last_user_message = None
+    for msg in reversed(messages):
+        if isinstance(msg, HumanMessage):
+            last_user_message = msg.content
+            break
+    
+    # RAG 검색 수행 (관련 문서 검색)
+    if last_user_message:
+        try:
+            context, retrieved_docs = await _rag_service.retrieve_context_async(last_user_message)
+            
+            if context:
+                # 검색된 컨텍스트를 시스템 메시지로 추가
+                logger.info(f"RAG 검색 완료: {len(retrieved_docs)}개 문서 발견")
+                
+                # 시스템 메시지에 컨텍스트 추가
+                rag_system_message = SystemMessage(content=context)
+                
+                # 기존 메시지에 RAG 컨텍스트를 추가하여 LLM 호출
+                enhanced_messages = list(messages)
+                # 시스템 메시지를 맨 앞 또는 적절한 위치에 삽입
+                # 여기서는 마지막 사용자 메시지 바로 앞에 삽입
+                enhanced_messages.insert(-1, rag_system_message)
+                
+                return {"messages": [await maplestory_model.ainvoke(enhanced_messages)]}
+            else:
+                logger.info("RAG 검색 결과 없음 - 기본 응답 생성")
+        except Exception as e:
+            logger.error(f"RAG 검색 실패: {e}", exc_info=True)
+            # RAG 실패 시에도 기본 응답 생성
+    
+    # RAG 없이 기본 응답 생성
+    return {"messages": [await maplestory_model.ainvoke(messages)]}
 
 builder = StateGraph(AgentState)
 builder.add_node("npc", npc_node)
