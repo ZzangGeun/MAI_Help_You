@@ -3,12 +3,13 @@
 RAG Django 모델
 
 문서와 청크를 저장하는 Django 모델입니다.
-벡터 임베딩은 ChromaDB가 관리하므로 별도 모델이 없습니다.
+벡터 임베딩은 pgvector VectorField로 직접 저장됩니다.
 """
 
 import uuid
 from django.db import models
 from django.utils import timezone
+from pgvector.django import VectorField
 
 
 class Document(models.Model):
@@ -81,7 +82,7 @@ class DocumentChunk(models.Model):
     
     원본 문서를 검색 최적화를 위해 작은 단위로 분할한 청크입니다.
     각 청크는 독립적으로 임베딩되고 검색됩니다.
-    벡터 임베딩은 ChromaDB에 저장됩니다.
+    벡터 임베딩은 pgvector VectorField에 저장됩니다.
     """
     
     id = models.UUIDField(
@@ -106,8 +107,9 @@ class DocumentChunk(models.Model):
     metadata = models.JSONField(
         default=dict,
         blank=True,
-        verbose_name="청크 메타데이터"
+        verbose_name="청크 메타데이터",
     )
+    embedding = VectorField(dimensions=768, null=True, blank=True, verbose_name="청크 임베딩")
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="생성 시각"

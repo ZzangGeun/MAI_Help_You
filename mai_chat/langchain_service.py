@@ -51,7 +51,7 @@ _rag_service = RAGService(top_k=3, similarity_threshold=0.5)
 # --- 1. Custom Chat Model ---
 class MapleStoryChatModel(BaseChatModel):
     api_url: str = "http://localhost:8001/ai/respond"
-    timeout: float = 180.0
+    timeout: float = 600.0  # 10분으로 증가 (대형 모델 추론 대응)
 
     @property
     def _llm_type(self) -> str:

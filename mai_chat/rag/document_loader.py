@@ -18,63 +18,45 @@ from .vectorstore import VectorStore
 logger = logging.getLogger(__name__)
 
 
-class TextSplitter:
+class CharacterTextSplitter:
     """
-    텍스트를 청크로 분할하는 클래스
-    
-    LangChain의 RecursiveCharacterTextSplitter와 유사한 로직을 구현합니다.
+    텍스트를 문자 수 기준으로 분할하는 클래스
     """
     
     def __init__(
         self,
         chunk_size: int = 500,
         chunk_overlap: int = 50,
-        separators: Optional[List[str]] = None
+        separator: str = "\n"
     ):
-        """
-        TextSplitter 초기화
-        
-        Args:
-            chunk_size: 청크당 최대 문자 수
-            chunk_overlap: 청크 간 중복 문자 수 (문맥 유지를 위해)
-            separators: 분할 기준 구분자 리스트 (우선순위 순)
-        """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.separators = separators or ["\n\n", "\n", ". ", " ", ""]
+        self.separator = separator
     
     def split_text(self, text: str) -> List[str]:
-        """
-        텍스트를 청크로 분할합니다.
-        
-        Args:
-            text: 분할할 원본 텍스트
-            
-        Returns:
-            List[str]: 분할된 청크 리스트
-        """
         if not text:
             return []
         
+        splits = text.split(self.separator)
         chunks = []
-        current_chunk = ""
+        current_chunk = []
+        current_length = 0
         
-        # 간단한 구현: chunk_size 단위로 분할
-        # 실제로는 더 정교한 로직이 필요할 수 있음
-        sentences = text.split('\n')
-        
-        for sentence in sentences:
-            if len(current_chunk) + len(sentence) < self.chunk_size:
-                current_chunk += sentence + '\n'
-            else:
-                if current_chunk:
-                    chunks.append(current_chunk.strip())
-                current_chunk = sentence + '\n'
-        
+        for split in splits:
+            split_len = len(split)
+            if current_length + split_len > self.chunk_size and current_chunk:
+                chunks.append(self.separator.join(current_chunk))
+                # 겹침(overlap) 처리는 여기서는 단순화하여 다음 청크로 넘어감
+                current_chunk = []
+                current_length = 0
+            
+            current_chunk.append(split)
+            current_length += split_len + len(self.separator)
+            
         if current_chunk:
-            chunks.append(current_chunk.strip())
-        
-        return chunks
+            chunks.append(self.separator.join(current_chunk))
+            
+        return [c.strip() for c in chunks if c.strip()]
 
 
 def load_document_from_text(
@@ -105,7 +87,6 @@ def load_document_from_text(
     if not title or not content:
         raise ValueError("제목과 내용은 필수입니다")
     
-    # 트랜잭션으로 묶어서 원자성 보장
     with transaction.atomic():
         # 1. 문서 생성
         document = Document.objects.create(
@@ -118,41 +99,26 @@ def load_document_from_text(
         logger.info(f"문서 생성: {title} (ID: {document.id})")
         
         # 2. 텍스트 분할
-        splitter = TextSplitter(chunk_size=chunk_size)
+        splitter = CharacterTextSplitter(chunk_size=chunk_size)
         chunks_text = splitter.split_text(content)
         
         if not chunks_text:
             logger.warning(f"문서 '{title}'에서 청크를 생성하지 못했습니다")
             return document
         
-        # 3. 청크 객체 생성
-        chunk_objects = []
-        for idx, chunk_content in enumerate(chunks_text):
-            chunk = DocumentChunk.objects.create(
+        # 3. 청크 객체 생성 및 임베딩 할당
+        embeddings = generate_embeddings_batch(chunks_text)
+        
+        for idx, (chunk_content, embedding) in enumerate(zip(chunks_text, embeddings)):
+            DocumentChunk.objects.create(
                 document=document,
                 content=chunk_content,
                 chunk_index=idx,
+                embedding=embedding,
                 metadata={}
             )
-            chunk_objects.append(chunk)
         
-        logger.info(f"청크 생성: {len(chunk_objects)}개")
-    
-    # 4. 임베딩 생성 (배치 처리) - 트랜잭션 외부에서 처리
-    try:
-        embeddings = generate_embeddings_batch(chunks_text)
-        
-        # 5. ChromaDB에 임베딩 저장
-        vector_store = VectorStore()
-        for chunk, embedding in zip(chunk_objects, embeddings):
-            vector_store.save_embedding(chunk, embedding)
-        
-        logger.info(f"ChromaDB에 임베딩 저장 완료: {len(embeddings)}개")
-        
-    except Exception as e:
-        logger.error(f"임베딩 생성/저장 실패: {e}", exc_info=True)
-        # 임베딩 실패해도 문서와 청크는 유지
-        # 나중에 재시도 가능
+        logger.info(f"청크 및 임베딩 저장 완료: {len(chunks_text)}개")
     
     return document
 

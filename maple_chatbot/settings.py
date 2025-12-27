@@ -31,10 +31,12 @@ LOCAL_APPS = [
     "accounts",
     "character",
     "mai_chat",
+    "mai_chat.rag",
 ]
 
 THIRD_PARTY_APPS = [
     'corsheaders',
+    'pgvector.django',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS

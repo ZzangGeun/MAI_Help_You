@@ -100,3 +100,5 @@ mai_chat/test_chatbot_flow.py
 frontend/node_modules
 
 rag_documents/
+
+rag_results/

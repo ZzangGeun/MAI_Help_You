@@ -41,7 +41,7 @@ async def get_ai_response_async(prompt: str) -> str:
     with torch.no_grad():
         output = _model.generate(
             **inputs,
-            max_length=512,
+            max_new_tokens=1024,  # 입력 길이와 무관하게 생성할 토큰 수만 제한
             do_sample=True,
             top_p=0.9,
             top_k=50,

@@ -9,7 +9,6 @@ import logging
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
-from .vectorstore import VectorStore
 from .models import DocumentChunk
 
 logger = logging.getLogger(__name__)
@@ -52,118 +51,57 @@ class DocumentRetriever:
         similarity_threshold: float = 0.5,
         content_type_filter: Optional[str] = None
     ):
-        """
-        DocumentRetriever 초기화
-        
-        Args:
-            top_k: 반환할 최대 문서 개수
-            similarity_threshold: 최소 유사도 점수 (0~1, 높을수록 엄격)
-            content_type_filter: 문서 타입 필터 (예: 'guide', 'notice')
-        """
         self.top_k = top_k
         self.similarity_threshold = similarity_threshold
         self.content_type_filter = content_type_filter
-        self.vector_store = VectorStore()
     
     def retrieve(self, query: str) -> List[RetrievedDocument]:
-        """
-        쿼리에 대한 관련 문서를 검색합니다.
-        
-        Args:
-            query: 사용자 질문 또는 검색어
-            
-        Returns:
-            List[RetrievedDocument]: 검색된 문서 리스트 (유사도 순)
-        """
         if not query or not query.strip():
             logger.warning("빈 쿼리로 검색 시도")
             return []
         
-        # 벡터 저장소에서 유사 청크 검색
-        # distance_threshold는 코사인 거리이므로 (1 - similarity_threshold)로 변환
-        distance_threshold = 1.0 - self.similarity_threshold
+        from .embeddings import generate_embedding
+        from pgvector.django import CosineDistance
         
         try:
-            results = self.vector_store.search_similar_chunks(
-                query_text=query,
-                top_k=self.top_k,
-                content_type=self.content_type_filter,
-                distance_threshold=distance_threshold
-            )
+            query_vector = generate_embedding(query)
+            
+            # distance_threshold는 코사인 거리이므로 (1 - similarity_threshold)로 변환
+            distance_threshold = 1.0 - self.similarity_threshold
+            
+            qs = DocumentChunk.objects.filter(embedding__isnull=False)
+            if self.content_type_filter:
+                qs = qs.filter(document__content_type=self.content_type_filter)
+            
+            # pgvector CosineDistance는 0(완전 일치) ~ 2(완전 반대) 사이의 값을 가짐
+            # similarity = 1 - distance (단위 벡터 기준)
+            qs = qs.annotate(distance=CosineDistance('embedding', query_vector))
+            qs = qs.filter(distance__lte=distance_threshold).order_by('distance')[:self.top_k]
+            
+            retrieved_docs = []
+            for chunk in qs:
+                similarity_score = 1.0 - chunk.distance
+                doc = RetrievedDocument(
+                    content=chunk.content,
+                    title=chunk.document.title,
+                    source=chunk.document.source,
+                    content_type=chunk.document.content_type,
+                    similarity_score=similarity_score,
+                    chunk_index=chunk.chunk_index,
+                    metadata=chunk.metadata
+                )
+                retrieved_docs.append(doc)
+            
+            logger.info(f"검색 완료: {len(retrieved_docs)}개 문서 반환 (쿼리: '{query[:30]}...')")
+            return retrieved_docs
+            
         except Exception as e:
             logger.error(f"문서 검색 실패: {e}", exc_info=True)
             return []
-        
-        if not results:
-            logger.info(f"검색 결과 없음: '{query[:50]}...'")
-            return []
-        
-        # RetrievedDocument 객체로 변환
-        retrieved_docs = []
-        for chunk, similarity_score in results:
-            doc = RetrievedDocument(
-                content=chunk.content,
-                title=chunk.document.title,
-                source=chunk.document.source,
-                content_type=chunk.document.content_type,
-                similarity_score=similarity_score,
-                chunk_index=chunk.chunk_index,
-                metadata=chunk.metadata
-            )
-            retrieved_docs.append(doc)
-        
-        logger.info(f"검색 완료: {len(retrieved_docs)}개 문서 반환 (쿼리: '{query[:30]}...')")
-        
-        return retrieved_docs
     
     async def retrieve_async(self, query: str) -> List[RetrievedDocument]:
-        """
-        비동기 버전의 문서 검색
-        
-        Args:
-            query: 사용자 질문 또는 검색어
-            
-        Returns:
-            List[RetrievedDocument]: 검색된 문서 리스트 (유사도 순)
-        """
-        if not query or not query.strip():
-            logger.warning("빈 쿼리로 검색 시도")
-            return []
-        
-        distance_threshold = 1.0 - self.similarity_threshold
-        
-        try:
-            results = await self.vector_store.search_similar_chunks_async(
-                query_text=query,
-                top_k=self.top_k,
-                content_type=self.content_type_filter,
-                distance_threshold=distance_threshold
-            )
-        except Exception as e:
-            logger.error(f"문서 검색 실패: {e}", exc_info=True)
-            return []
-        
-        if not results:
-            logger.info(f"검색 결과 없음: '{query[:50]}...'")
-            return []
-        
-        # RetrievedDocument 객체로 변환
-        retrieved_docs = []
-        for chunk, similarity_score in results:
-            doc = RetrievedDocument(
-                content=chunk.content,
-                title=chunk.document.title,
-                source=chunk.document.source,
-                content_type=chunk.document.content_type,
-                similarity_score=similarity_score,
-                chunk_index=chunk.chunk_index,
-                metadata=chunk.metadata
-            )
-            retrieved_docs.append(doc)
-        
-        logger.info(f"검색 완료: {len(retrieved_docs)}개 문서 반환 (쿼리: '{query[:30]}...')")
-        
-        return retrieved_docs
+        from asgiref.sync import sync_to_async
+        return await sync_to_async(self.retrieve)(query)
     
     def format_context_for_llm(self, documents: List[RetrievedDocument]) -> str:
         """
