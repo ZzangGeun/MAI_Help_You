@@ -12,7 +12,7 @@ app_name = 'mai_chat'
 
 urlpatterns = [
     # 채팅방 페이지
-    path('chat/', views.chatbot_view, name='chatbot'),
+    path('chat/', views.chat_page, name='chatbot'),
     
     # API Endpoints
     path('api/chat/sessions/', views.get_sessions_view, name='get_sessions'),

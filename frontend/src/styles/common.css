@@ -3,23 +3,23 @@
    공통 스타일 시트
 ============================================================================= */
 
-/* CSS Variables - Theme Colors */
+/* CSS Variables - Theme Colors (MapleStory Orange Theme) */
 :root {
-    --primary-color: #ffb7c5;
-    --primary-dark: #ff9eb5;
-    --accent-color: #ffc0cb;
-    --accent-dark: #ff91a4;
-    --text-primary: #000000;
-    --text-secondary: #5E5E5E;
-    --text-muted: #666666;
-    --border-light: #ffeef1;
-    --border-gray: #e0e0e0;
-    --background-light: #fdf8f9;
-    --background-gradient: linear-gradient(135deg, #fef7f8 0%, #fdeef1 100%);
-    --header-gradient: linear-gradient(135deg, #ffb7c5 0%, #ff9eb5 100%);
-    --nav-gradient: linear-gradient(135deg, #ffe4e9 0%, #ffd6de 100%);
-    --shadow-light: 0 2px 10px rgba(0,0,0,0.2);
-    --shadow-medium: 0 4px 15px rgba(0,0,0,0.1);
+    --primary-color: #ff9800;
+    --primary-dark: #f57c00;
+    --accent-color: #ffb74d;
+    --accent-dark: #ff8c00;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted: #888888;
+    --border-light: #f0e6dc;
+    --border-gray: #d0d0d0;
+    --background-light: #fffaf5;
+    --background-gradient: linear-gradient(135deg, #fffaf5 0%, #fff5eb 100%);
+    --header-gradient: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    --nav-gradient: linear-gradient(135deg, #fff8f0 0%, #fff5eb 100%);
+    --shadow-light: 0 2px 10px rgba(255, 152, 0, 0.15);
+    --shadow-medium: 0 4px 15px rgba(255, 152, 0, 0.1);
     --border-radius-small: 8px;
     --border-radius-medium: 12px;
     --border-radius-large: 15px;
@@ -53,7 +53,8 @@ body {
 .header {
     background: var(--header-gradient);
     padding: 10px 0;
-    box-shadow: var(--shadow-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .header-content {
@@ -69,7 +70,7 @@ body {
     display: flex;
     align-items: center;
     color: white;
-    font-size: 24px; /* Increased header logo font size */
+    font-size: 24px;
     font-weight: bold;
     text-decoration: none;
     transition: var(--transition-fast);
@@ -91,7 +92,7 @@ body {
     justify-content: center;
     color: var(--primary-color);
     font-weight: bold;
-    font-size: 16px; /* Increased navigation font size */
+    font-size: 16px;
 }
 
 /* Header Search Box */
@@ -132,7 +133,7 @@ body {
 .navigation {
     background: var(--nav-gradient);
     padding: 0;
-    border-bottom: 1px solid #d4a574;
+    border-bottom: 1px solid var(--border-light);
     height: 44px;
     overflow: hidden;
     flex-shrink: 0;
@@ -169,7 +170,7 @@ body {
 }
 
 .nav-item {
-    color: #8b4513;
+    color: var(--text-secondary);
     text-decoration: none;
     font-weight: 500;
     padding: 6px 16px;
@@ -196,7 +197,7 @@ body {
 }
 
 .nav-item:hover, .nav-item.active {
-    background: rgba(232, 150, 17, 0.2);
+    background: rgba(255, 152, 0, 0.1);
     color: var(--primary-color);
 }
 
@@ -206,7 +207,7 @@ body {
 
 .user-info {
     margin-left: auto;
-    color: #8b4513;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.2;
     display: flex;
@@ -448,88 +449,88 @@ body {
 
 /* Character Info Display */
 .character-info-display {
-    background: linear-gradient(145deg, #fff0f5, #ffe4e1); /* Softer, cuter background */
-    border-radius: 20px; /* More rounded corners */
-    box-shadow: 0 8px 20px rgba(255, 182, 193, 0.3); /* Playful pink shadow */
+    background: linear-gradient(145deg, #fffaf5, #fff5eb);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.15);
     margin-bottom: 20px;
-    padding: 20px; /* Increased padding */
-    border: 1px solid #ffc0cb; /* Soft pink border */
+    padding: 20px;
+    border: 1px solid #f0e6dc;
 }
 
 .character-info-header {
     display: flex;
     align-items: center;
-    gap: 15px; /* Increased gap */
-    margin-bottom: 18px; /* Increased margin */
-    padding-bottom: 15px; /* Increased padding */
-    border-bottom: 2px dashed #ffc0cb; /* Dashed border for cuter look */
+    gap: 15px;
+    margin-bottom: 18px;
+    padding-bottom: 15px;
+    border-bottom: 2px dashed #f0e6dc;
 }
 
 .character-profile-avatar {
-    width: 60px; /* Larger avatar */
+    width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #ffe4e1 0%, #ffc0cb 100%); /* Cuter gradient */
-    border: 3px solid #ff69b4; /* Brighter pink border */
-    border-radius: 50%; /* Perfectly round */
+    background: linear-gradient(135deg, #fff5eb 0%, #ffe0c0 100%);
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px; /* Larger icon */
+    font-size: 32px;
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.2); /* Subtle pink shadow */
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
 }
 
 .character-profile-name {
-    font-weight: 800; /* Bolder name */
-    font-size: 18px; /* Larger name */
-    color: #ff69b4; /* Hot pink color */
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--primary-dark);
     margin-bottom: 4px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle text shadow */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
 }
 
 .character-profile-server {
-    font-size: 12px; /* Slightly larger server text */
-    color: #888; /* Softer gray */
-    background: #fff0f5; /* Lighter background */
+    font-size: 12px;
+    color: #666;
+    background: #fff8f0;
     padding: 4px 10px;
-    border-radius: 15px; /* More rounded pill shape */
+    border-radius: 15px;
     display: inline-block;
-    border: 1px solid #ffd1dc; /* Soft border */
+    border: 1px solid #f0e6dc;
 }
 
 .character-detailed-stats {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Increased gap */
+    gap: 10px;
 }
 
 .detail-stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px; /* Increased padding */
-    background: #fffaf0; /* Very light, warm background */
-    border-radius: 10px; /* More rounded */
-    border: 1px solid #ffe0e6; /* Soft border */
-    transition: all 0.2s ease; /* Smooth transition for hover */
+    padding: 10px 12px;
+    background: #fffaf5;
+    border-radius: 10px;
+    border: 1px solid #f0e6dc;
+    transition: all 0.2s ease;
 }
 
 .detail-stat-row:hover {
-    background: #ffebee; /* Slightly darker on hover */
-    transform: translateY(-2px); /* Lift effect on hover */
-    box-shadow: 0 4px 10px rgba(255, 192, 203, 0.2); /* Subtle shadow on hover */
+    background: #fff5eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.1);
 }
 
 .detail-stat-label {
-    font-size: 14px; /* Slightly larger label */
-    color: #666; /* Softer color */
-    font-weight: 600; /* Bolder label */
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
 }
 
 .detail-stat-value {
-    font-size: 15px; /* Slightly larger value */
-    color: #333; /* Darker for contrast */
-    font-weight: 700; /* Bolder value */
+    font-size: 15px;
+    color: #333;
+    font-weight: 700;
 }
 
 .search-input-group {

@@ -12,8 +12,8 @@ import time
 logger = logging.getLogger(__name__)
 CACHE_DURATION = timedelta(hours=1)  # 캐시 유효 기간 설정 (1시간)
 
-RAG_NOTICE_JSON_PATH = os.path.join(settings.BASE_DIR, 'rag_documents', 'notices', 'notice_data_rag.json')
-RAG_RANKING_JSON_PATH = os.path.join(settings.BASE_DIR, 'rag_documents', 'rankings', 'ranking_data_rag.json')
+NOTICE_JSON_PATH = os.path.join(settings.BASE_DIR, 'rag_documents', 'notices', 'notice_data_rag.json')
+RANKING_JSON_PATH = os.path.join(settings.BASE_DIR, 'rag_documents', 'rankings', 'ranking_data_rag.json')
 
 def get_notice_list():
     """
@@ -21,9 +21,9 @@ def get_notice_list():
     JSON 파일이 있고 최신이면(1시간 이내) API 호출 없이 파일 내용을 반환합니다.
     """
     # 캐시 확인
-    if os.path.exists(RAG_NOTICE_JSON_PATH):
+    if os.path.exists(NOTICE_JSON_PATH):
         try:
-            modified_time = datetime.fromtimestamp(os.path.getmtime(RAG_NOTICE_JSON_PATH))
+            modified_time = datetime.fromtimestamp(os.path.getmtime(NOTICE_JSON_PATH))
             if datetime.now() - modified_time < CACHE_DURATION:
                 data = load_notice_data_from_json()
                 if data:
@@ -245,7 +245,7 @@ def sync_notices_to_rag() -> bool:
     
     # JSON 저장
     try:
-        abs_path = os.path.abspath(RAG_NOTICE_JSON_PATH)
+        abs_path = os.path.abspath(NOTICE_JSON_PATH)
         print(f"💾 파일 저장 시도: {abs_path}")
         
         os.makedirs(os.path.dirname(abs_path), exist_ok=True)

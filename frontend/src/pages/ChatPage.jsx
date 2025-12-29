@@ -17,6 +17,8 @@ const ChatPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [isInitializing, setIsInitializing] = useState(true);
+  // Thinking 표시 상태 관리 (메시지 인덱스별로 확장 여부 저장)
+  const [expandedThinking, setExpandedThinking] = useState({});
 
   const messagesEndRef = useRef(null);
 
@@ -38,7 +40,8 @@ const ChatPage = () => {
           const response = await chatApi.getMessages(sessionId);
           const formattedMessages = response.data.data.map(msg => ({
             role: msg.role,  // 백엔드가 이제 role을 직접 반환
-            content: msg.content
+            content: msg.content,
+            thinking: msg.thinking || ''  // thinking 필드 추가
           }));
           setMessages(formattedMessages);
         } catch (error) {
@@ -111,9 +114,11 @@ const ChatPage = () => {
       const response = await chatApi.getMessages(sessionId);
       const formattedMessages = response.data.data.map(msg => ({
         role: msg.role,  // 백엔드가 이제 role을 직접 반환
-        content: msg.content
+        content: msg.content,
+        thinking: msg.thinking || ''  // thinking 필드 추가
       }));
       setMessages(formattedMessages);
+      setExpandedThinking({});  // 세션 변경 시 thinking 상태 초기화
     } catch (error) {
       console.error("Failed to load messages:", error);
     } finally {
@@ -151,7 +156,8 @@ const ChatPage = () => {
       const response = await chatApi.sendMessage(currentSessionId, input);
       const aiMessage = {
         role: 'assistant',
-        content: response.data.data.ai_message.content
+        content: response.data.data.ai_message.content,
+        thinking: response.data.data.ai_message.thinking || ''  // thinking 필드 추가
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
@@ -306,6 +312,32 @@ const ChatPage = () => {
             </div>
             <div className="message-content">
               {msg.content}
+              {/* AI 메시지이고 thinking이 있을 경우 토글 표시 */}
+              {msg.role === 'assistant' && msg.thinking && (
+                <div className="thinking-container">
+                  <button
+                    className="thinking-toggle"
+                    onClick={() => setExpandedThinking(prev => ({
+                      ...prev,
+                      [idx]: !prev[idx]
+                    }))}
+                  >
+                    <span className={`thinking-toggle-icon ${expandedThinking[idx] ? 'expanded' : ''}`}>
+                      🧠
+                    </span>
+                    {expandedThinking[idx] ? '사고 과정 숨기기' : '사고 과정 보기'}
+                  </button>
+                  {expandedThinking[idx] && (
+                    <div className="thinking-content">
+                      <div className="thinking-label">
+                        <span className="thinking-label-icon">💭</span>
+                        AI의 추론 과정
+                      </div>
+                      {msg.thinking}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}

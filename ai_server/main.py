@@ -1,0 +1,76 @@
+# ai_server/main.py
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
+import logging
+import re
+from langchain_core.messages import HumanMessage
+
+# [핵심] 우리가 만든 그래프 가져오기
+from bot_graph import app_graph
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("AI_Server")
+
+app = FastAPI(title="MapleStory AI Server (LangGraph)")
+
+# 요청 데이터 모델 (session_id 추가됨!)
+class QueryRequest(BaseModel):
+    session_id: str
+    message: str
+
+def parse_thinking_response(text: str):
+    """
+    Qwen Thinking 모델의 출력에서 <think>...</think> 부분을 발라냅니다.
+    """
+    # 1. <think> 태그가 있는 경우 (정석적인 경우)
+    if "<think>" in text and "</think>" in text:
+        think_match = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
+        thinking_process = think_match.group(1).strip() if think_match else ""
+        final_answer = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+        return thinking_process, final_answer
+    
+    # 2. 모델이 실수로 태그를 안 닫은 경우 (흔한 오류)
+    elif "<think>" in text:
+        parts = text.split("<think>")
+        return "태그 파싱 에러", text.replace("<think>", "").strip()
+
+    # 3. 태그가 아예 없는 경우 (생각 없이 바로 답함)
+    else:
+        return "", text.strip()
+
+@app.post("/generate")
+async def generate_response(request: QueryRequest):
+    try:
+        logger.info(f"요청 수신 (Session: {request.session_id}): {request.message}")
+        
+        # 1. LangGraph 설정 (thread_id = session_id)
+        config = {"configurable": {"thread_id": request.session_id}}
+        
+        # 2. 그래프 실행
+        # 사용자의 질문을 HumanMessage 형태로 주입
+        input_message = HumanMessage(content=request.message)
+        
+        # ainvoke를 사용하면 비동기로 실행 가능
+        # state의 "messages" 중 가장 마지막 것(AI 답변)을 가져옴
+        output = await app_graph.ainvoke(
+            {"messages": [input_message]}, 
+            config=config
+        )
+        
+        # 3. 결과 파싱
+        ai_full_response = output["messages"][-1].content
+        thinking, answer = parse_thinking_response(ai_full_response)
+        
+        return {
+            "response": answer,
+            "thinking": thinking
+        }
+        
+    except Exception as e:
+        logger.error(f"에러 발생: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001)
