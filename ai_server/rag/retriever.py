@@ -10,13 +10,20 @@ from typing import List, Dict, Any
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
 
-from .vectorstore import get_vectorstore
+try:
+    from .vectorstore import get_vectorstore
+except ImportError:
+    # 스크립트로 직접 실행 시 경로 문제 해결
+    import sys
+    import os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))) # ai_server/rag/../.. -> root
+    from ai_server.rag.vectorstore import get_vectorstore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class Retriever:
-    def __init__(self, k=3):
+    def __init__(self, k=5):
         """
         검색기 초기화
         """
@@ -39,6 +46,12 @@ class Retriever:
             # 실제 검색 수행
             docs = self.retriever.invoke(query)
             logger.info(f"검색 결과: {len(docs)} 문서")
+            for i, doc in enumerate(docs):
+                logger.info(f"  [Doc {i+1}] Source: {doc.metadata.get('source', 'unknown')} | Content: {doc.page_content[:50]}...")
+            
+            if not docs:
+                logger.warning(f"검색된 문서가 없습니다! Query: {query}")
+                
             return docs
         except Exception as e:
             logger.error(f"문서 검색 실패: {e}")
@@ -51,7 +64,7 @@ class Retriever:
 if __name__ == "__main__":
     # 테스트하고 싶은 질문을 여기에 적으세요
     # 예: 데이터에 있는 보스 이름이나 스킬 이름을 넣어보세요
-    test_query = "크리스마스 이벤트는 언제까지?" 
+    test_query = "메이플스토리 크리스마스 이벤트를 알려줘" 
     
     retriever_instance = Retriever()
     results = retriever_instance.retrieve(test_query)

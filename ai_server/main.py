@@ -1,10 +1,12 @@
 # ai_server/main.py
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import uvicorn
 import logging
 import re
+import json
 from langchain_core.messages import HumanMessage
 
 # [핵심] 우리가 만든 그래프 가져오기
@@ -70,6 +72,57 @@ async def generate_response(request: QueryRequest):
         
     except Exception as e:
         logger.error(f"에러 발생: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/stream")
+async def stream_response(request: QueryRequest):
+    """
+    스트리밍 답변 생성 엔드포인트
+    SSE(Server-Sent Events) 형식으로 데이터를 전송합니다.
+    """
+    try:
+        logger.info(f"스트리밍 요청 수신 (Session: {request.session_id}): {request.message}")
+        
+        config = {"configurable": {"thread_id": request.session_id}}
+        input_message = HumanMessage(content=request.message)
+
+        async def event_generator():
+            try:
+                # astream_events를 사용하여 생성 과정을 실시간으로 스트리밍
+                # version="v2"는 LangChain 최신 표준 (권장)
+                async for event in app_graph.astream_events(
+                    {"messages": [input_message]}, 
+                    config=config,
+                    version="v2" 
+                ):
+                    event_type = event["event"]
+                    
+                    # LLM이 텍스트를 생성하는 이벤트 (on_chat_model_stream)
+                    if event_type == "on_chat_model_stream":
+                        # 메타데이터에서 현재 실행 중인 노드 이름을 확인
+                        node_name = event.get("metadata", {}).get("langgraph_node", "")
+                        
+                        # "generate_node" 또는 "generate_chat" 노드에서 나온 출력만 전송
+                        # (route_question, rewrite_query 등의 중간 과정 토큰은 숨김)
+                        if node_name in ["generate_node", "generate_chat", "generate_chat_node"]:
+                            chunk = event["data"]["chunk"]
+                            if chunk.content:
+                                # SSE 포맷: data: JSON\n\n
+                                payload = {"type": "token", "content": chunk.content}
+                                yield f"data: {json.dumps(payload)}\n\n"
+                            
+            except Exception as e:
+                logger.error(f"스트리밍 중 에러: {e}")
+                payload = {"type": "error", "content": str(e)}
+                yield f"data: {json.dumps(payload)}\n\n"
+            
+            # 종료 신호
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+    except Exception as e:
+        logger.error(f"스트리밍 시작 실패: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

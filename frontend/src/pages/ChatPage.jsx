@@ -79,13 +79,14 @@ const ChatPage = () => {
             console.error("Failed to load sessions:", error);
           }
         }
+        // 비로그인 상태면 sessionList는 빈 배열 유지 -> 위 로직에 의해 createNewChat() 호출됨
 
         setSessions(sessionList);
 
-        if (sessionList.length > 0) {
+        if (isLoggedIn && sessionList.length > 0) {
           await loadSession(sessionList[0].id);
         } else {
-          // 세션이 없거나 비로그인 상태면 새 채팅 시작
+          // 세션이 없거나 비로그인 상태면 무조건 새 채팅 시작 (이전 세션 복구 안 함)
           await createNewChat();
         }
       } catch (error) {
@@ -147,28 +148,62 @@ const ChatPage = () => {
     e.preventDefault();
     if (!input.trim() || isLoading || !currentSessionId) return;
 
-    const userMessage = { role: 'user', content: input };
+    const userMessageText = input;
+    const userMessage = { role: 'user', content: userMessageText };
+
+    // 1. 사용자 메시지 즉시 표시
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
-    try {
-      const response = await chatApi.sendMessage(currentSessionId, input);
-      const aiMessage = {
-        role: 'assistant',
-        content: response.data.data.ai_message.content,
-        thinking: response.data.data.ai_message.thinking || ''  // thinking 필드 추가
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("Send error:", error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: "오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
+    // 2. AI 메시지 플레이스홀더 추가
+    setMessages(prev => [...prev, { role: 'assistant', content: '', thinking: '' }]);
+
+    let accumulatedContent = '';
+
+    // 3. 스트리밍 요청
+    await chatApi.streamMessage(
+      currentSessionId,
+      userMessageText,
+      (chunk) => {
+        if (chunk.type === 'token') {
+          accumulatedContent += chunk.content;
+
+          // 마지막 메시지(AI) 업데이트
+          setMessages(prev => {
+            const newMessages = [...prev];
+            const lastIdx = newMessages.length - 1;
+            if (newMessages[lastIdx].role === 'assistant') {
+              newMessages[lastIdx] = {
+                ...newMessages[lastIdx],
+                content: accumulatedContent
+              };
+            }
+            return newMessages;
+          });
+        } else if (chunk.type === 'error') {
+          console.error("Stream error:", chunk.content);
+        }
+      },
+      () => {
+        // onDone
+        setIsLoading(false);
+      },
+      (error) => {
+        // onError
+        console.error("Send error:", error);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIdx = newMessages.length - 1;
+          newMessages[lastIdx] = {
+            ...newMessages[lastIdx],
+            content: newMessages[lastIdx].content + "\n[오류가 발생했습니다]"
+          };
+          return newMessages;
+        });
+        setIsLoading(false);
+      }
+    );
   };
 
   // --- Left Sidebar (Chat Specific) ---
@@ -242,28 +277,40 @@ const ChatPage = () => {
           >
             + 새 채팅
           </button>
-          {sessions.map(session => (
-            <div
-              key={session.id}
-              className="history-item"
-              onClick={() => selectSession(session.id)}
-              style={{
-                cursor: 'pointer',
-                opacity: session.id === currentSessionId ? 1 : 0.7
-              }}
-            >
-              <div className="history-date">
-                {new Date(session.created_at).toLocaleDateString()}
-                {session.id === currentSessionId && ' (현재)'}
-              </div>
-              <div className="history-text">
-                {session.last_message ?
-                  (session.last_message.length > 20 ? session.last_message.substring(0, 20) + '...' : session.last_message)
-                  : `채팅 #${session.id}`
-                }
-              </div>
+
+          {!isLoggedIn ? (
+            <div className="guest-history-placeholder" style={{ textAlign: 'center', marginTop: '20px', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>로그인하면 대화 기록을<br />저장하고 볼 수 있습니다.</p>
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: '0.85rem', padding: '5px 15px' }}
+                onClick={() => navigate('/login')}
+              >
+                로그인하기
+              </button>
             </div>
-          ))}
+          ) : (
+            sessions.map(session => (
+              <div
+                key={session.id}
+                className="history-item"
+                onClick={() => selectSession(session.id)}
+                style={{
+                  cursor: 'pointer',
+                  opacity: session.id === currentSessionId ? 1 : 0.7
+                }}
+              >
+                <div className="history-date">
+                  {new Date(session.created_at).toLocaleDateString()}
+                  {session.id === currentSessionId && ' (현재)'}
+                </div>
+                <div className="history-text">
+                  {/* 제목(첫 대화 요약) 사용 */}
+                  {session.title || `채팅 #${session.id.substring(0, 8)}`}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </>

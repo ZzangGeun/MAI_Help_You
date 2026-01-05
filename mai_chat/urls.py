@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/chat/sessions/create/', views.create_session_view, name='create_session'),
     path('api/chat/sessions/<uuid:session_id>/messages/', views.get_messages_view, name='get_messages'),
     path('api/chat/sessions/<uuid:session_id>/send/', views.send_message_view, name='send_message'),
+    path('api/chat/sessions/<uuid:session_id>/stream/', views.stream_message_view, name='stream_message'),
     path('api/chat/sessions/<uuid:session_id>/delete/', views.delete_session_view, name='delete_session'),
 ]
 

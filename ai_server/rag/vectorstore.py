@@ -15,8 +15,16 @@ import dotenv
 dotenv.load_dotenv()
 
 #기존 모듈
-from .embeddings import QwenEmbeddings
-from .document_loader import DocumentLoader
+#기존 모듈
+try:
+    from .embeddings import QwenEmbeddings
+    from .document_loader import DocumentLoader
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+    from ai_server.rag.embeddings import QwenEmbeddings
+    from ai_server.rag.document_loader import DocumentLoader
 
 logger = logging.getLogger(__name__)
 
