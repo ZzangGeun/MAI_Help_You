@@ -31,3 +31,5 @@ chromadb==0.4.22
 langchain-community==0.0.13
 sentence-transformers==2.2.2
 tiktoken==0.5.2
+langchain
+rank_bm25

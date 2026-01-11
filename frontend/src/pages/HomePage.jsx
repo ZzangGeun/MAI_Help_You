@@ -4,6 +4,7 @@ import Layout from '../components/common/Layout';
 import * as homeApi from '../api/home';
 import NoticeRoller from '../components/home/NoticeRoller';
 import ImageRoller from '../components/home/ImageRoller';
+import AdSense from '../components/common/AdSense';
 
 import { useAuth } from '../context/AuthContext';
 import '../styles/home.css';
@@ -206,18 +207,8 @@ const HomePage = () => {
 
                 {/* Right Sidebar */}
                 <aside className="sidebar-right">
-                    <div className="sidebar-ad-long">
-                        <div className="ad-header">SPONSORED</div>
-                        <div className="ad-content" style={{ flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                            <div className="ad-image" style={{ fontSize: '80px', marginBottom: '20px' }}>🚀</div>
-                            <div className="ad-text" style={{ textAlign: 'center' }}>
-                                <div className="ad-title" style={{ fontSize: '24px', marginBottom: '10px' }}>메이플스토리 M</div>
-                                <div className="ad-description" style={{ fontSize: '16px', opacity: 0.9 }}>
-                                    언제 어디서나 즐기는<br />메이플스토리!
-                                </div>
-                            </div>
-                        </div>
-                        <div className="ad-button">설치하기 →</div>
+                    <div className="sidebar-ad-container" style={{ width: '100%', height: '100%', minHeight: '350px', background: '#f8f9fa', borderRadius: '15px', overflow: 'hidden' }}>
+                        <AdSense slot="YOUR_SIDEBAR_SLOT_ID" style={{ display: 'block', width: '100%', height: '100%' }} />
                     </div>
                 </aside>
             </div>

@@ -73,7 +73,31 @@ def rewrite_query(state: GraphState):
 def retrieve_node(state: GraphState):
     query = state["query"]
     docs = retriever_instance.retriever.invoke(query)
-    context_text = "\n\n".join([doc.page_content for doc in docs])
+    
+    # 문서 내용 + 메타데이터를 포함한 구조화된 컨텍스트 생성
+    context_parts = []
+    for i, doc in enumerate(docs, 1):
+        metadata = doc.metadata
+        title = metadata.get('title', '제목 없음')
+        source = metadata.get('source', '출처 정보 없음')
+        category = metadata.get('category', '기타')
+        
+        # URL 추출 (notice_url 또는 thumbnail_url 등)
+        url = metadata.get('notice_url') or metadata.get('thumbnail_url') or metadata.get('url', '')
+        
+        context_part = f"""## [문서 {i}] {title}
+- **카테고리**: {category}
+- **출처**: {source}
+{f"- **참고 링크**: {url}" if url else ""}
+
+**내용**:
+{doc.page_content}
+
+---
+"""
+        context_parts.append(context_part)
+    
+    context_text = "\n".join(context_parts)
     
     logger.info(f"Gemini Retrieval: Found {len(docs)} docs for query '{query}'")
     if docs:

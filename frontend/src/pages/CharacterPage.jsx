@@ -229,7 +229,7 @@ const CharacterPage = () => {
     const basicInfo = characterData?.basic_info;
 
     return (
-        <Layout>
+        <Layout layoutClass="narrow-layout">
             <div className="main-content">
                 {/* 검색 헤더 */}
                 <div style={{ marginBottom: '24px' }}>

@@ -16,6 +16,7 @@ const Navigation = () => {
           <Link to="/" className={`nav-item ${isActive('/')}`}>메인</Link>
           <Link to="/chat" className={`nav-item ${isActive('/chat')}`}>챗봇</Link>
           <Link to="/character" className={`nav-item ${isActive('/character')}`}>캐릭터 검색</Link>
+          <Link to="/community" className={`nav-item ${isActive('/community')}`}>커뮤니티</Link>
         </div>
         
         <div className="nav-right">

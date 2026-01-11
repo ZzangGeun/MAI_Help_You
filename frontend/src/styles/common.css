@@ -216,22 +216,29 @@ body {
 
 /* Common Layout - 반응형 그리드 */
 .main-container {
-    max-width: 1800px;
+    max-width: 1800px; /* 메인 페이지 기본 레이아웃 */
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(240px, 300px) 1fr minmax(240px, 300px); /* sidebar-left, main-content, sidebar-right */
+    grid-template-columns: minmax(240px, 300px) 1fr minmax(240px, 300px);
     grid-template-areas: "sidebar-left main-content sidebar-right";
-    gap: 15px; /* Reduced gap */
-    padding: 10px 15px 0; /* Reduced top padding */
+    gap: 15px;
+    padding: 10px 15px 0;
     align-items: stretch;
     min-height: auto;
     height: fit-content;
 }
 
-/* Chatbot Page Layout - matches main_page */
+/* Narrow Layout - 챗봇, 캐릭터, 커뮤니티 페이지용 */
+.main-container.narrow-layout {
+    max-width: 1400px; /* 좋은 UX를 위한 좌우 폭 제한 */
+    grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px);
+    gap: 20px;
+}
+
+/* Chatbot Page Layout */
 .main-container.chatbot-layout {
-    max-width: 1800px;
-    grid-template-columns: minmax(200px, 300px) 1fr minmax(200px, 300px); /* sidebar-left, main-content, sidebar-right */
+    max-width: 1400px;
+    grid-template-columns: minmax(200px, 250px) 1fr minmax(200px, 250px);
     grid-template-areas: "sidebar-left main-content sidebar-right";
     gap: 20px;
     padding: 15px 15px 0;
@@ -263,6 +270,13 @@ body {
     padding: 20px;
     box-shadow: var(--shadow-medium);
     height: 100%;
+}
+
+/* narrow-layout에서만 메인 콘텐츠 최대 너비 제한 */
+.narrow-layout .main-content,
+.chatbot-layout .main-content {
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 /* Chat Main Area */

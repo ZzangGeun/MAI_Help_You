@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/common/Layout';
 import * as chatApi from '../api/chat';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import '../styles/chat.css';
 
 const ChatPage = () => {
@@ -358,7 +360,9 @@ const ChatPage = () => {
               {msg.role === 'user' ? '👤' : '🧚‍♀️'}
             </div>
             <div className="message-content">
-              {msg.content}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {msg.content}
+              </ReactMarkdown>
               {/* AI 메시지이고 thinking이 있을 경우 토글 표시 */}
               {msg.role === 'assistant' && msg.thinking && (
                 <div className="thinking-container">
@@ -380,7 +384,9 @@ const ChatPage = () => {
                         <span className="thinking-label-icon">💭</span>
                         AI의 추론 과정
                       </div>
-                      {msg.thinking}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.thinking}
+                      </ReactMarkdown>
                     </div>
                   )}
                 </div>
